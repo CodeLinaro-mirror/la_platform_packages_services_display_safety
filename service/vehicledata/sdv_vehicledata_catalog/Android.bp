@@ -1,0 +1,24 @@
+// Device library that defines the sample vehicle messages catalog.
+rust_protobuf {
+    name: "liboem_harry_vehicle_messages_catalog",
+    crate_name: "oem_harry_vehicle_messages_catalog",
+    protos: [
+        "*.proto",
+        ":sdv_vsidl_protos",
+    ],
+    source_stem: "oem_harry_vehicle_messages_catalog_source",
+    proto_flags: [
+        "-I external/protobuf/src",
+        "-I system/software_defined_vehicle/core_services/vsidl/protos/",
+    ],
+    host_supported: true,
+    vendor: true,
+}
+
+filegroup {
+    name: "vsidl_harry_catalog_protos",
+    srcs: [
+        "*.proto",
+        "*.vsidl",
+    ],
+}

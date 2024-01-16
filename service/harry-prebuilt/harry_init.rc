@@ -1,0 +1,36 @@
+service harry /vendor/bin/harry
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
+service har_sdv_service /vendor/bin/har_sdv_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
+service fake_vehicledata_publisher_service /vendor/bin/fake_vehicledata_publisher_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
+# Executing HAR and the data publisher at the earliest possible time.
+on property:sys.boot_completed=1
+    # Start fake camera
+    exec_background u:r:su:s0 -- /vendor/bin/ffmpeg -nostdin -stream_loop -1 -re -i /vendor/etc/harry/camera/camera_emulation.mp4 -f v4l2 -vcodec rawvideo -pix_fmt bgra -vf scale=640:360 /dev/video10
+    # Initialize data folder. This is no-op after the first run.
+    # TODO: Fix path here
+    #exec u:r:su:s0 -- /system/bin/sh /vendor/etc/com.google.display_safety.har.init_data_folder.sh
+    # Start the mock data sender service
+    start fake_vehicledata_publisher_service
+    # start the HAR application
+    start harry
+
+# The proxy service needs HAR running to avoid an initial connection failure and a reconnect attempt.
+on property:vendor.harplatform.grpc.started=true
+    start har_sdv_service

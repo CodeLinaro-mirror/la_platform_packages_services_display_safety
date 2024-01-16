@@ -1,0 +1,8 @@
+{
+    "cameras": [
+        {
+          "id": "/dev/video10",
+          "pos": "rear"
+        }
+      ]
+}

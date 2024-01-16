@@ -1,0 +1,20 @@
+# proto-file: //system/software_defined_vehicle/core_services/vsidl/protos/syntax/vsidl.proto
+# proto-message: VsidlEntry
+
+package: "har.vehicledata"
+
+sdv_service_bundle {
+    name: "HarryVehicleDataPublisher"
+    publisher: "TirePressure"
+    publisher: "TellTaleStatus"
+    publisher: "CurrentGear"
+    publisher: "VehicleSpeed"
+}
+
+sdv_service_bundle {
+    name: "HarryVehicleDataSubscriber"
+    subscriber: "TirePressure"
+    subscriber: "TellTaleStatus"
+    subscriber: "CurrentGear"
+    subscriber: "VehicleSpeed"
+}

@@ -1,0 +1,37 @@
+// Copyright 2023 Google LLC
+
+syntax = "proto3";
+package har.vehicledata;
+
+service VehicleDataService {
+  // Starts receiving vehicle data from the caller. Must get and return a stream.
+  // TODO: try removing the stream response.
+  rpc ReceiveVehicleData(stream VehicleDataFragment) returns (stream VehicleDataStreamResponse) {}
+}
+
+message VehicleDataFragment {
+  string name = 1;
+  oneof data {
+    VehicleDataPointBool dataBool = 2;
+    VehicleDataPointI32 dataI32 = 3;
+    VehicleDataPointU32 dataU32 = 4;
+    VehicleDataPointF32 dataF32 = 5;
+    VehicleDataPointF64 dataF64 = 6;
+    VehicleDataPointU8 dataU8 = 7;
+    VehicleDataPointString dataString = 8;
+    VehicleDataPointBinary dataBinary = 9;
+  }
+}
+
+message VehicleDataPointBool { bool dataBool = 1; }
+message VehicleDataPointI32 { int32 dataI32 = 1; }
+message VehicleDataPointU32 { uint32 dataU32 = 1; }
+message VehicleDataPointF32 { float dataF32 = 1; }
+message VehicleDataPointF64 { double dataF64 = 1; }
+message VehicleDataPointU8 { uint32 dataU8 = 1; }
+message VehicleDataPointString { string dataString = 1; }
+message VehicleDataPointBinary { bytes dataBinary = 1; }
+
+message VehicleDataStreamResponse {
+  string message = 1;
+}

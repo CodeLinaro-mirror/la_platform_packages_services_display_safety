@@ -1,0 +1,14 @@
+{
+    "devices": [
+        {
+            "name": "default",
+            "card": 0,
+            "device": 0,
+            "channels": 2,
+            "rate": 48000,
+            "period_size": 3072,
+            "period_count": 2,
+            "format": "S16_LE"
+        }
+    ]
+}
