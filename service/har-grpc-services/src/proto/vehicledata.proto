@@ -5,32 +5,32 @@ package har.vehicledata;
 
 service VehicleDataService {
   // Starts receiving vehicle data from the caller. Must get and return a stream.
-  // TODO: try removing the stream response.
-  rpc ReceiveVehicleData(stream VehicleDataFragment) returns (stream VehicleDataStreamResponse) {}
+  // TODO: try removing the stream response, for now it is enough to only have one.
+  rpc ReceiveVehicleData(stream VehicleData) returns (stream VehicleDataStreamResponse) {}
 }
 
-message VehicleDataFragment {
+message VehicleData {
   string name = 1;
   oneof data {
-    VehicleDataPointBool dataBool = 2;
-    VehicleDataPointI32 dataI32 = 3;
-    VehicleDataPointU32 dataU32 = 4;
-    VehicleDataPointF32 dataF32 = 5;
-    VehicleDataPointF64 dataF64 = 6;
-    VehicleDataPointU8 dataU8 = 7;
-    VehicleDataPointString dataString = 8;
-    VehicleDataPointBinary dataBinary = 9;
+    VehicleDataBool dataBool = 2;
+    VehicleDataI32 dataI32 = 3;
+    VehicleDataU32 dataU32 = 4;
+    VehicleDataF32 dataF32 = 5;
+    VehicleDataF64 dataF64 = 6;
+    VehicleDataU8 dataU8 = 7;
+    VehicleDataString dataString = 8;
+    VehicleDataBinary dataBinary = 9;
   }
 }
 
-message VehicleDataPointBool { bool dataBool = 1; }
-message VehicleDataPointI32 { int32 dataI32 = 1; }
-message VehicleDataPointU32 { uint32 dataU32 = 1; }
-message VehicleDataPointF32 { float dataF32 = 1; }
-message VehicleDataPointF64 { double dataF64 = 1; }
-message VehicleDataPointU8 { uint32 dataU8 = 1; }
-message VehicleDataPointString { string dataString = 1; }
-message VehicleDataPointBinary { bytes dataBinary = 1; }
+message VehicleDataBool { bool dataBool = 1; }
+message VehicleDataI32 { int32 dataI32 = 1; }
+message VehicleDataU32 { uint32 dataU32 = 1; }
+message VehicleDataF32 { float dataF32 = 1; }
+message VehicleDataF64 { double dataF64 = 1; }
+message VehicleDataU8 { uint32 dataU8 = 1; }
+message VehicleDataString { string dataString = 1; }
+message VehicleDataBinary { bytes dataBinary = 1; }
 
 message VehicleDataStreamResponse {
   string message = 1;

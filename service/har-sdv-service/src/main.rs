@@ -14,7 +14,7 @@ use sdvgenerated::topics::subscriber;
 
 use grpcio::ClientDuplexSender;
 use grpcio::{ChannelBuilder, EnvBuilder};
-use har_grpc_services::vehicledata::VehicleDataFragment;
+use har_grpc_services::vehicledata::VehicleData;
 use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -85,7 +85,7 @@ fn send_data_blocking<T>(sender: Arc<Mutex<ClientDuplexSender<T>>>, data: T) {
 }
 
 fn create_sdv_data_service(
-    vehicle_data_sender: Arc<Mutex<ClientDuplexSender<VehicleDataFragment>>>,
+    vehicle_data_sender: Arc<Mutex<ClientDuplexSender<VehicleData>>>,
     data_mapper: Arc<SdvToHarMapper<impl TopicMapper + Sync + Send + 'static>>,
 ) -> HarryVehicleDataSubscriber {
     // Vehicle speed callback

@@ -12,7 +12,7 @@ pub trait TopicMapper {
     fn map_topic(&self, topic: String) -> String;
 }
 
-/// Maps SDV topic-message pairs into VehicleDataFragments
+/// Maps SDV topic-message pairs into VehicleDatas
 pub struct SdvToHarMapper<Mapper: TopicMapper> {
     mapper: Mapper,
 }
@@ -31,71 +31,71 @@ impl<Mapper: TopicMapper> SdvToHarMapper<Mapper> {
         Self { mapper }
     }
 
-    pub fn map_bool(&self, topic: String, message: bool) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_bool(&self, topic: String, message: bool) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointBool::new();
+        let mut data = VehicleDataBool::new();
         data.dataBool = message;
         result.set_dataBool(data);
         result
     }
 
-    pub fn map_i32(&self, topic: String, message: i32) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_i32(&self, topic: String, message: i32) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointI32::new();
+        let mut data = VehicleDataI32::new();
         data.dataI32 = message;
         result.set_dataI32(data);
         result
     }
 
-    pub fn map_u32(&self, topic: String, message: u32) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_u32(&self, topic: String, message: u32) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointU32::new();
+        let mut data = VehicleDataU32::new();
         data.dataU32 = message;
         result.set_dataU32(data);
         result
     }
 
-    pub fn map_f32(&self, topic: String, message: f32) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_f32(&self, topic: String, message: f32) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointF32::new();
+        let mut data = VehicleDataF32::new();
         data.dataF32 = message;
         result.set_dataF32(data);
         result
     }
 
-    pub fn map_f64(&self, topic: String, message: f64) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_f64(&self, topic: String, message: f64) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointF64::new();
+        let mut data = VehicleDataF64::new();
         data.dataF64 = message;
         result.set_dataF64(data);
         result
     }
 
-    pub fn map_u8(&self, topic: String, message: u8) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_u8(&self, topic: String, message: u8) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointU8::new();
+        let mut data = VehicleDataU8::new();
         data.dataU8 = message as _;
         result.set_dataU8(data);
         result
     }
 
-    pub fn map_string(&self, topic: String, message: String) -> VehicleDataFragment {
-        let mut result = VehicleDataFragment::new();
+    pub fn map_string(&self, topic: String, message: String) -> VehicleData {
+        let mut result = VehicleData::new();
         result.name = self.mapper.map_topic(topic);
 
-        let mut data = VehicleDataPointString::new();
+        let mut data = VehicleDataString::new();
         data.dataString = message;
         result.set_dataString(data);
         result
