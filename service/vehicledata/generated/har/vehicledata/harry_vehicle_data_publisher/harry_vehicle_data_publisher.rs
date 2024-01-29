@@ -45,10 +45,10 @@ impl HarryVehicleDataPublisher {
             subscription_thread_handle: None,
             subscriptions: Arc::new(Mutex::new(Subscriptions {})),
             callbacks: Arc::new(callbacks),
-            tell_tale_status_publisher: DataTunnelPublisher::new(),
-            current_gear_publisher: DataTunnelPublisher::new(),
-            tire_pressure_publisher: DataTunnelPublisher::new(),
-            vehicle_speed_publisher: DataTunnelPublisher::new(),
+            tell_tale_status_publisher: DataTunnelPublisher::new(5),
+            current_gear_publisher: DataTunnelPublisher::new(5),
+            tire_pressure_publisher: DataTunnelPublisher::new(2),
+            vehicle_speed_publisher: DataTunnelPublisher::new(5),
         }
     }
 
