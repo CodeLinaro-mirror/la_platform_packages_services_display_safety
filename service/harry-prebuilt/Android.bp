@@ -20,7 +20,7 @@ cc_prebuilt_binary {
         },
     },
     shared_libs: [
-        "libgbm", "liblog",
+        "libGLESv2", "libgbm", "liblog"
     ],
     // Copied by the mk file.
     init_rc: ["harry_init.rc"],
