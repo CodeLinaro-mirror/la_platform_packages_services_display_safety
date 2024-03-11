@@ -1,4 +1,4 @@
-// The prebuilt binary package rendering harry and using libharrysys.
+// The prebuilt binary package using DRM for rendering.
 cc_prebuilt_binary {
     // TODO: Rename this to harry-sdv or similar to allow a different
     // variant with different dependencies for non-SDV systems.
@@ -25,6 +25,34 @@ cc_prebuilt_binary {
     // Copied by the mk file.
     init_rc: ["harry_init.rc"],
     vendor: true,
+}
+
+// The prebuilt binary package using libhar_graphics for rendering.
+cc_prebuilt_binary {
+    // TODO: Rename this to harry-sdv or similar to allow a different
+    // variant with different dependencies for non-SDV systems.
+    name: "harry_har_graphics",
+    owner: "google",
+
+    arch: {
+        arm: {
+            enabled: false,
+        },
+        arm64: {
+            srcs: ["arm64/harry_har_graphics"],
+        },
+        x86: {
+            enabled: false,
+        },
+        x86_64: {
+            srcs: ["x86_64/harry_har_graphics"],
+        },
+    },
+    shared_libs: [
+        "libhar_graphics"
+    ],
+    // Copied by the mk file.
+    init_rc: ["harry_init.rc"],
 }
 
 // Defaults for resource file modules
