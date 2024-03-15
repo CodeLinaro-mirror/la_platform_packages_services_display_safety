@@ -1,10 +1,11 @@
 {
+  "document_id": "GLJJrR1JI4HVEjL1qB40zq",
   "displays": [
     {
       "id": 1,
-      "document_id": "GLJJrR1JI4HVEjL1qB40zq",
       "width": 1920,
-      "height": 720
+      "height": 720,
+      "root_node_id": "#Stage"
     }
   ]
 }
