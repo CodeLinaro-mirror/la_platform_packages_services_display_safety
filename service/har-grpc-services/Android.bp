@@ -1,7 +1,10 @@
 rust_protobuf {
     name: "libhar_grpc_services",
     crate_name: "har_grpc_services",
-    grpc_protos: ["src/proto/vehicledata.proto"],
+    grpc_protos: [
+        "src/proto/vehicledata.proto",
+        "src/proto/driverui.proto",
+    ],
 
     source_stem: "generated_har_grpc_services",
     vendor: true,

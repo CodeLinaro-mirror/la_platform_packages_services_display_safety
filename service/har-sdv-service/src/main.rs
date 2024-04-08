@@ -1,6 +1,6 @@
 // Copyright 2023 Google LLC
 
-//! This SDV service proxies between SDV and HAR.
+//! HAR-SDV-service connects to SDV Comms, Data tunnel and delivers events to HAR.
 
 use oem_harry_vehicle_messages_catalog::vehicle_tire::TirePressure;
 use oem_harry_vehicle_messages_catalog::vehicledata::CurrentGear;
@@ -19,22 +19,33 @@ use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use crate::grpc_proxy::DriverUiGrpcProxy;
 use crate::mapper::HashMapTopicMapper;
 use crate::mapper::SdvToHarMapper;
 use crate::mapper::TopicMapper;
 use core::time::Duration;
 use futures_util::SinkExt;
+use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceFqin::ServiceFqin;
+use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceIdentity::PublicKey::PublicKey;
 use grpcio::WriteFlags;
+use har_sdv_rpc::sdv_service_discovery::register_service;
 use log::info;
 use log::warn;
 
+mod grpc_proxy;
 mod mapper;
+
+// Defines where the GRPC server listens at.
+const DRIVERUI_RPC_SERVER_PORT: i32 = 7000;
+const DRIVERUI_RPC_SERVER_HOST: &str = "0.0.0.0";
+
+// Defines where the GRPC proxy connects to.
+const DRIVERUI_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:7001";
 
 #[tokio::main]
 async fn main() -> Result<(), ()> {
     // Allow time for Harry to start GRPC.
     // TODO: Use the property trigger once it is fixed (sepolicy missing).
-    info!("HAR SDV proxy service starting");
     tokio::time::sleep(Duration::from_secs(1)).await;
 
     sdv_log::init_logger("har_sdv_service").unwrap_or_else(|error| match &error {
@@ -45,10 +56,36 @@ async fn main() -> Result<(), ()> {
         _ => panic!("{}", error),
     });
 
-    let env = Arc::new(EnvBuilder::new().build());
+    info!("HAR SDV service starting");
 
+    let publickey = PublicKey { value: *b"HARSDVGATEWAY-7890123456_______\0" };
+
+    let fqin = ServiceFqin {
+        vm_name: "".to_string(),
+        package_name: "android.sdv.displaysafety".to_string(),
+        service_name: "driverui-service".to_string(),
+        instance_name: "default".to_string(),
+    };
+
+    let registration_result = register_service(
+        &publickey,
+        &fqin,
+        /* custom-metadata: */ "".as_bytes().to_vec(),
+        DRIVERUI_RPC_SERVER_PORT,
+    );
+    info!("SDV Service registered: {:?}", registration_result);
+
+    let env = Arc::new(EnvBuilder::new().build());
     let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
 
+    // Run the proxy between HAR and DriverUI
+    let driverui_rpc_proxy = DriverUiGrpcProxy::new(
+        format!("{}:{}", DRIVERUI_RPC_SERVER_HOST, DRIVERUI_RPC_SERVER_PORT),
+        DRIVERUI_RPC_CLIENT_ADDRESS.to_string(),
+    );
+    let proxy_server = driverui_rpc_proxy.run(env.clone());
+
+    // Start SDV Data tunnel services.
     // TODO: handle errors, use a different transport
     let ch = ChannelBuilder::new(env)
         .initial_reconnect_backoff(Duration::from_millis(10))
@@ -72,15 +109,18 @@ async fn main() -> Result<(), ()> {
             panic!("Failed to call Vehicle data api. Err: {:?}", err);
         }
     }
-    info!("HAR SDV proxy completed");
+
+    proxy_server.shutdown();
+    info!("HAR SDV service completed");
     Ok(())
 }
 
 fn send_data_blocking<T>(sender: Arc<Mutex<ClientDuplexSender<T>>>, data: T) {
-    info!("Sending");
     if let Ok(mut sender) = sender.lock() {
         let result = futures::executor::block_on(sender.send((data, WriteFlags::default())));
-        info!("Sent with result: {:?}", result);
+        if result.is_err() {
+            warn!("Error dispatching data: {:?}", result);
+        }
     }
 }
 

@@ -1,0 +1,107 @@
+// Copyright 2023 Google LLC
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.google.displaysafety.harry";
+option java_outer_classname = "HarryProto";
+
+package displaysafety.harry;
+
+// Heartbeat request.
+message HeartbeatRequest {
+  // system uptime in millis
+  uint64 uptime = 1;
+
+  // Heartbeat source
+  enum Source {
+    SOURCE_UNKNOWN = 0;
+    SOURCE_ANDROID = 1;
+    SOURCE_INSTRUMENT_CLUSTER = 2;
+  }
+  Source source = 2;
+}
+
+// Response to HeartbeatRequest.
+message HeartbeatResponse {
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_OK = 1;
+    // Error processing the data in the request.
+    STATUS_PROCESSING_ERROR = 2;
+  }
+  Status status = 1;
+}
+
+// Document switched in DriverUI.
+message DocumentSwitchedRequest {
+  string document_id = 1;
+}
+
+// Response to DocumentSwitchedRequest.
+message DocumentSwitchedResponse {
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_OK = 1;
+    // Error processing the data in the request.
+    STATUS_PROCESSING_ERROR = 2;
+  }
+  Status status = 1;
+}
+
+// Document updated in DriverUI.
+message DocumentUpdatedRequest {
+  string document_id = 1;
+
+  // The serialized document.
+  //
+  // This is in the same format that is serialized to disk by the
+  // Automotive Design for Compose SDK.
+  bytes serialized_document = 2;
+}
+
+// Response to DocumentUpdatedRequest.
+message DocumentUpdatedResponse {
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_OK = 1;
+    // Error processing the data in the request.
+    STATUS_PROCESSING_ERROR = 2;
+  }
+  Status status = 1;
+}
+
+message HarryRequest {
+  oneof oneof {
+    // Heartbeat.
+    HeartbeatRequest heartbeat_request = 1;
+
+    // Document switched in DriverUI.
+    DocumentSwitchedRequest document_switched_request = 2;
+
+    // Document updated in DriverUI.
+    DocumentUpdatedRequest document_updated_request = 3;
+  }
+}
+
+message HarryResponse {
+  oneof oneof {
+    // Heartbeat.
+    HeartbeatResponse heartbeat_response = 1;
+
+    // Document switched in DriverUI.
+    DocumentSwitchedResponse document_switched_response = 2;
+
+    // Document updated in DriverUI.
+    DocumentUpdatedResponse document_updated_response = 3;
+  }
+}
+
+service HarryService {
+  rpc Handle(HarryRequest) returns (HarryResponse) {}
+}
+
+service HarryGrpcService {
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
+  rpc DocumentSwitched(DocumentSwitchedRequest) returns (DocumentSwitchedResponse) {}
+  rpc DocumentUpdated(DocumentUpdatedRequest) returns (DocumentUpdatedResponse) {}
+}
