@@ -1,0 +1,23 @@
+// Copyright 2024 Google LLC
+
+// TODO(335314414): Remove this file and use vehicledata/sdv_vehicledata_catalog/vehicle_tire.proto
+
+syntax = "proto3";
+
+package har.vehicledata;
+
+enum Location {
+  FRONT_LEFT = 0;
+  FRONT_RIGHT = 1;
+  REAR_LEFT = 2;
+  REAR_RIGHT = 3;
+  FIFTH_WHEEL = 4;
+}
+
+message TirePressure {
+  uint32 pressure = 1;
+}
+
+message TireTemperature {
+  uint32 temperature = 1;
+}

@@ -1,0 +1,61 @@
+// Copyright 2023 Google LLC
+
+// TODO(335314414): Remove this file and use vehicledata/sdv_vehicledata_catalog/vehicledata.proto
+
+syntax = "proto3";
+
+package har.vehicledata;
+
+enum VehicleSpeedTopic {
+    VEHICLE_SPEED = 0;
+    MAX_SPEED = 1;
+    SPEEDLIMIT = 2;
+}
+
+message VehicleSpeed {
+    uint32 speed = 1;
+}
+
+// Alert type telltales
+enum Telltale {
+    OIL_PRESSURE = 0;
+    ENGINE_TEMP = 1;
+    CHECK_ENGINE = 2;
+    CHARGING_FAILURE = 3;
+    SEATBELT_DRIVER = 4;
+    SEATBELT_PASSENGER = 5;
+    LOW_TIRE_PRESSURE = 6;
+    AIRBAG = 7;
+    ABS = 8;
+    BRAKE = 9;
+    TRACTION = 10;
+    FOG_LIGHTS = 11;
+    PARK_LIGHTS = 12;
+    HIBEAM = 13;
+    LOWBEAM = 14;
+    TURN_SIGNAL_LEFT = 15;
+    TURN_SIGNAL_RIGHT = 16;
+    ADAS = 17;
+    MAX_SPEED_DISPLAYED = 18;
+    SPEED_LIMIT_DISPLAYED = 20;
+    EMERGENCY_LIGHT = 22;
+}
+
+message TellTaleStatus {
+  bool alert = 1;
+}
+
+enum Gear {
+    P = 0;
+    R = 1;
+    N = 2;
+    D = 3;
+}
+
+enum CurrentGearTopic {
+   GEAR = 0;
+}
+
+message CurrentGear {
+    Gear gear = 1;
+}

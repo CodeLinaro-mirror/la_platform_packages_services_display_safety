@@ -1,0 +1,52 @@
+// Copyright 2024 Google LLC
+
+syntax = "proto3";
+
+package har.vehicledata.grpc;
+
+import "vehicledata.proto";
+import "vehicle_tire.proto";
+
+// Contains the respose code for a PublishRequest.
+enum PublishVehicleDataResponseStatus {
+    STATUS_UNKNOWN = 0;
+    STATUS_OK = 1;
+    STATUS_SDV_ERROR = 2;
+    STATUS_NOT_DELIVERED = 3;
+    STATUS_PROTOCOL_ERROR = 4;
+}
+
+message PublishVehicleDataResponse {
+    PublishVehicleDataResponseStatus status = 1;
+}
+
+message PublishVehicleSpeedRequest {
+    VehicleSpeedTopic topic = 1;
+    VehicleSpeed speed = 2;
+}
+
+message PublishTelltaleStatusRequest {
+    Telltale topic = 1;
+    TellTaleStatus status = 2;
+}
+
+message PublishCurrentGearRequest {
+    CurrentGearTopic topic = 1;
+    CurrentGear gear = 2;
+}
+
+message PublishTirePressureRequest {
+    Location topic = 1;
+    TirePressure pressure = 2;
+}
+
+service SdvVehicleDataGrpc {
+  // Publishes a vehicle speed update.
+  rpc PublishVehicleSpeed(PublishVehicleSpeedRequest) returns (PublishVehicleDataResponse) {}
+  // Publishes a telltale status update.
+  rpc PublishTelltaleStatus(PublishTelltaleStatusRequest) returns (PublishVehicleDataResponse) {}
+  // Publishes a current gear update.
+  rpc PublishCurrentGear(PublishCurrentGearRequest) returns (PublishVehicleDataResponse) {}
+  // Publishes a tire pressure update.
+  rpc PublishTirePressure(PublishTirePressureRequest) returns (PublishVehicleDataResponse) {}
+}

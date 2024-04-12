@@ -1,0 +1,48 @@
+filegroup {
+    name: "harry_vehicle_data_grpc_protos",
+    srcs: [
+        "proto/vehicledata_grpc_service.proto",
+    ],
+}
+
+rust_protobuf {
+    name: "libharry_vehicle_data_grpc",
+    crate_name: "harry_vehicle_data_grpc",
+    grpc_protos: [
+        ":harry_vehicle_data_grpc_protos",
+    ],
+    // TODO(335314414): Use the proto files from the sdv_vehicledata_catalog
+    protos: [
+        "proto/vehicle_tire.proto",
+        "proto/vehicledata.proto",
+    ],
+    proto_flags: [
+        "-I vendor/google/display_safety/service/vehicledata/vehicledata_publisher_service/proto",
+    ],
+    source_stem: "harry_vehicle_data_grpc_source",
+    vendor: true,
+}
+
+rust_binary {
+    name: "vehicledata_publisher_service",
+    crate_name: "vehicledata_publisher_service",
+    srcs: [
+        "src/main.rs",
+    ],
+    prefer_rlib: true,
+
+    rustlibs: [
+        "libsdv_log_rust",
+        "liblog_rust",
+        "liboem_harry_vehicle_messages_catalog",
+        "libprotobuf",
+        "librand",
+        "libsdvgenerated_harry_vehicle_data_publisher",
+        "libsdv_middleware_pubsub",
+        "libfutures",
+        "libharry_vehicle_data_grpc",
+        "libgrpcio",
+        "libthiserror",
+    ],
+    vendor: true,
+}
