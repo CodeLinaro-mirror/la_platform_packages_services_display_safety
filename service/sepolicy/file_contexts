@@ -6,6 +6,7 @@
 # Defines file types and their permissions
 /vendor/bin/harry                                                       u:object_r:vendor_harplatform_exec:s0
 /vendor/bin/har_sdv_service                                             u:object_r:vendor_harplatform_exec:s0
+/vendor/bin/vehicledata_publisher_service                               u:object_r:vendor_harplatform_exec:s0
 /vendor/bin/fake_vehicledata_publisher_service                          u:object_r:vendor_harplatform_exec:s0
 /vendor/etc/harry/init_data_folder.sh                                   u:object_r:vendor_harplatform_exec:s0
 /vendor/etc/harry/com.google.display_safety.har.init_data_folder.sh     u:object_r:vendor_harplatform_exec:s0
