@@ -111,6 +111,20 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "harry_res_audio_chime_welcome_mono",
+    src: "data/chimes/welcome_to_harry.mono.48000.wav",
+    defaults: ["harry_res_defaults"],
+    sub_dir: "harry/chimes",
+}
+
+prebuilt_etc {
+    name: "harry_res_audio_chime_wilhelm_mono",
+    src: "data/chimes/wilhelm_scream.mono.48000.wav",
+    defaults: ["harry_res_defaults"],
+    sub_dir: "harry/chimes",
+}
+
+prebuilt_etc {
     name: "harry_res_camera_config",
     src: "data/harry-camera-config-android.json",
     defaults: ["harry_res_defaults"],
