@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote
+    name="aae-design-compose-partners"
+    fetch="https://aae-design-compose-partners.googlesource.com/" />
+
+  <remote
+    name="github"
+    fetch="https://github.com/" />
+
+  <project
+    name="display-safety"
+    path="vendor/google/display_safety/service/pdk/display-safety"
+    remote="aae-design-compose-partners"
+    revision="9000365191bcca25f486dcf85a4d4e2a2ecf5bf8" />
+
+  <project
+    name="bdero/impeller-cmake.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/crates/impeller-rs/impeller-cmake"
+    remote="github"
+    revision="cb40c8be9f8caa3f78b104bc4aa02a3453ce45fb" />
+
+  <project
+    name="tinyalsa/tinyalsa.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/crates/tinyalsa-rs/tinyalsa"
+    remote="github"
+    revision="f78ed25aced2dfea743867b8205a787bfb091340" />
+
+  <project
+    name="google/automotive-design-compose.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/submodules/automotive-design-compose"
+    remote="github"
+    revision="3d8f2e9f5e39ff32476e6d3ee3e576e9e612b339" />
+
+  <project
+    name="mity/acutest.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/acutest"
+    remote="github"
+    revision="cce300734bfe5c3879b0449ac283a872633e615c" />
+
+  <project
+    name="meekrosoft/fff.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/fff"
+    remote="github"
+    revision="5111c61e1ef7848e3afd3550044a8cf4405f4199" />
+
+  <project
+    name="third-party/ring"
+    path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/ring"
+    remote="aae-design-compose-partners"
+    revision="baceba6d9ad550074637a13acb7b74eec6f567cd" />
+
+</manifest>
