@@ -20,10 +20,8 @@ cc_prebuilt_binary {
         },
     },
     shared_libs: [
-        "libGLESv2", "libgbm", "liblog"
+        "libGLESv2", "libgbm", "liblog", "libEGL"
     ],
-    // Copied by the mk file.
-    init_rc: ["harry_init.rc"],
     vendor: true,
 }
 
@@ -51,15 +49,12 @@ cc_prebuilt_binary {
     shared_libs: [
         "libhar_graphics"
     ],
-    // Copied by the mk file.
-    init_rc: ["harry_init.rc"],
 }
 
 // Defaults for resource file modules
 prebuilt_defaults {
     name: "harry_res_defaults",
-    filename_from_src: true,
-    sub_dir: "harry",
+    relative_install_path: "harry",
     vendor: true,
 }
 
@@ -68,181 +63,80 @@ prebuilt_etc {
     name: "harry_res_config",
     src: "data/harry-config.json",
     defaults: ["harry_res_defaults"],
+    filename_from_src: true,
 }
 
 prebuilt_etc {
     name: "harry_res_audio_config",
     src: "data/harry-audio-device-config.json",
     defaults: ["harry_res_defaults"],
+    filename_from_src: true,
 }
 
 prebuilt_etc {
     name: "harry_res_chimes_config",
     src: "data/harry-chimes-config.json",
     defaults: ["harry_res_defaults"],
+    filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "harry_res_audio_chime_tick",
-    src: "data/chimes/tick.48000.wav",
+    name: "harry_res_audio_chimes",
+    srcs: [
+        "data/chimes/tick.48000.wav",
+        "data/chimes/tock.48000.wav",
+        "data/chimes/welcome_to_harry.48000.wav",
+        "data/chimes/wilhelm_scream.48000.wav",
+        "data/chimes/welcome_to_harry.mono.48000.wav",
+        "data/chimes/wilhelm_scream.mono.48000.wav",
+    ],
     defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chime_tock",
-    src: "data/chimes/tock.48000.wav",
-    defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chime_welcome",
-    src: "data/chimes/welcome_to_harry.48000.wav",
-    defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chime_wilhelm",
-    src: "data/chimes/wilhelm_scream.48000.wav",
-    defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chime_welcome_mono",
-    src: "data/chimes/welcome_to_harry.mono.48000.wav",
-    defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chime_wilhelm_mono",
-    src: "data/chimes/wilhelm_scream.mono.48000.wav",
-    defaults: ["harry_res_defaults"],
-    sub_dir: "harry/chimes",
+    relative_install_path: "harry/chimes",
 }
 
 prebuilt_etc {
     name: "harry_res_camera_config",
     src: "data/harry-camera-config-android.json",
     defaults: ["harry_res_defaults"],
+    filename_from_src: true,
 }
 
 prebuilt_etc {
     name: "harry_res_camera_emulation_source",
     src: "data/camera/camera_emulation.mp4",
     defaults: ["harry_res_defaults"],
-    sub_dir: "harry/camera",
+    relative_install_path: "harry/camera",
+    filename_from_src: true,
 }
 
 prebuilt_etc {
-    name: "harry_res_doc_default",
-    src: "data/GLJJrR1JI4HVEjL1qB40zq",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_doc_galaxy",
-    src: "data/SqyhHN0IUVYPP4qB3NyWW9",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_doc_shiny",
-    src: "data/MdvJSKWuTjjLIXlNHZB2Au",
+    name: "harry_res_documents",
+    srcs: [
+        "data/GLJJrR1JI4HVEjL1qB40zq",
+        "data/SqyhHN0IUVYPP4qB3NyWW9",
+        "data/MdvJSKWuTjjLIXlNHZB2Au",
+    ],
     defaults: ["harry_res_defaults"],
 }
 
 // Fonts
 prebuilt_etc {
-    name: "harry_res_font_inter_black",
-    src: "data/inter_black.otf",
+    name: "harry_res_fonts",
+    srcs: [
+        "data/inter_black.otf",
+        "data/inter_bold.otf",
+        "data/inter_regular.otf",
+        "data/NotoSans-Black.ttf",
+        "data/NotoSans-Bold.ttf",
+        "data/NotoSans-ExtraBold.ttf",
+        "data/NotoSans-ExtraLight.ttf",
+        "data/NotoSans-Light.ttf",
+        "data/NotoSans-Medium.ttf",
+        "data/NotoSans-Regular.ttf",
+        "data/NotoSans-SemiBold.ttf",
+        "data/NotoSans-Thin.ttf",
+        "data/PTSansNarrow-Bold.ttf",
+        "data/PTSansNarrow-Regular.ttf",
+    ],
     defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_inter_bold",
-    src: "data/inter_bold.otf",
-    defaults: ["harry_res_defaults"],
-}
-prebuilt_etc {
-    name: "harry_res_font_inter_regular",
-    src: "data/inter_regular.otf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_black",
-    src: "data/NotoSans-Black.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_bold",
-    src: "data/NotoSans-Bold.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_extrabold",
-    src: "data/NotoSans-ExtraBold.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_extralight",
-    src: "data/NotoSans-ExtraLight.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_light",
-    src: "data/NotoSans-Light.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_medium",
-    src: "data/NotoSans-Medium.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_regular",
-    src: "data/NotoSans-Regular.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_semibold",
-    src: "data/NotoSans-SemiBold.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_notosans_thin",
-    src: "data/NotoSans-Thin.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_pt_sans_narrow_bold",
-    src: "data/PTSansNarrow-Bold.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "harry_res_font_pt_sans_narrow_regular",
-    src: "data/PTSansNarrow-Regular.ttf",
-    defaults: ["harry_res_defaults"],
-}
-
-prebuilt_etc {
-    name: "com.google.display_safety.har.init_data_folder.sh",
-    src: "init_data_folder.sh",
-    defaults: ["harry_res_defaults"],
-    installable: false,
-    vendor: true
 }

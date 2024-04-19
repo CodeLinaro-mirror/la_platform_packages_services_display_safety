@@ -1,0 +1,49 @@
+apex {
+    name: "com.google.display_safety.har",
+    manifest: "apex_manifest.json",
+    // Using the cert from the SDV samples.
+    key: "com.android.sdv.samples.rpc.key",
+    certificate: ":com.android.sdv.samples.rpc.certificate",
+
+    binaries: [
+        "harry",
+        "fake_vehicledata_publisher_service",
+        "vehicledata_publisher_service",
+        "har_sdv_service",
+    ],
+    compile_multilib: "both",
+    updatable: false,
+    platform_apis: false,
+    vendor: true,
+    // The SELinux security contexts (or labels) assigned the executable and other files within the
+    // APEX. It allows the definition of SELinux policies for these files.
+    file_contexts: "file_contexts",
+    // The init .rc script for the APEX package. It is automatically parsed by the init process
+    // after the APEX package had been mounted.
+    prebuilts: [
+        "com.google.display_safety.har.init.rc",
+        "harry_res_config",
+        "harry_res_documents",
+        "harry_res_fonts",
+        "harry_res_audio_config",
+        "harry_res_chimes_config",
+        "harry_res_audio_chimes",
+        "harry_res_camera_config",
+        "harry_res_camera_emulation_source",
+        "com.google.display_safety.har.init_data_folder_apex.sh",
+    ],
+    // Vendor apex should not use vndk as stable: http://b/290318998
+    use_vndk_as_stable: false,
+}
+
+prebuilt_etc {
+    name: "com.google.display_safety.har.init.rc",
+    src: "init.display_safety.har.rc",
+    installable: false,
+}
+
+prebuilt_etc {
+    name: "com.google.display_safety.har.init_data_folder_apex.sh",
+    src: "init_data_folder.sh",
+    installable: false,
+}

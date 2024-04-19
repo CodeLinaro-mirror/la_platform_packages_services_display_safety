@@ -1,0 +1,2 @@
+# Define data directory access for HAR
+/data/vendor/com.google.display_safety.har(/.*)? u:object_r:vendor_harplatform_data_file:s0

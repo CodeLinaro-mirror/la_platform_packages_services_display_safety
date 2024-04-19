@@ -1,0 +1,7 @@
+prebuilt_etc {
+    name: "com.google.display_safety.har.init_data_folder.sh",
+    src: "init_data_folder.sh",
+    defaults: ["harry_res_defaults"],
+    installable: false,
+    vendor: true
+}

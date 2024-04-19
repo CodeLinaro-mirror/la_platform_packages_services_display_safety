@@ -1,0 +1,5 @@
+{
+    "name": "com.google.display_safety.har",
+    "version": 0,
+    "requireNativeLibs": [":sphal"]
+}
