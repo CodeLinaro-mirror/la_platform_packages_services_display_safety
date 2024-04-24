@@ -3,5 +3,5 @@ prebuilt_etc {
     src: "init_data_folder.sh",
     defaults: ["harry_res_defaults"],
     installable: false,
-    vendor: true
+    vendor: true,
 }

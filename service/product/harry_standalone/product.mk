@@ -25,9 +25,11 @@ endif #DISPLAY_SAFETY_HOME
 BOARD_VENDOR_SEPOLICY_DIRS += \
     $(DISPLAY_SAFETY_HOME)/product/harry_standalone/sepolicy \
 
-# Add Harry and SDV libraries
+# Add Harry and SDV libraries/services
 PRODUCT_PACKAGES += \
     harry \
+    har_user_preferences_service \
+    har_preferences_service \
     vehicledata_publisher_service \
     fake_vehicledata_publisher_service \
     har_sdv_service \
@@ -47,3 +49,4 @@ PRODUCT_PACKAGES += \
         harry_res_camera_config \
         harry_res_emulated_camera_config \
         harry_res_camera_emulation_source \
+        har_preferences_admin \

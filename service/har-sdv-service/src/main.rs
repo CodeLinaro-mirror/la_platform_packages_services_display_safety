@@ -23,8 +23,8 @@ use crate::grpc_proxy::DriverUiGrpcProxy;
 use crate::mapper::HashMapTopicMapper;
 use crate::mapper::SdvToHarMapper;
 use crate::mapper::TopicMapper;
+use crate::preferences::create_har_user_preferences_client;
 use core::time::Duration;
-use futures::future::join_all;
 use futures_util::SinkExt;
 use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceFqin::ServiceFqin;
 use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceIdentity::PublicKey::PublicKey;
@@ -32,11 +32,12 @@ use grpcio::WriteFlags;
 use har_sdv_rpc::sdv_service_discovery::register_service;
 use log::info;
 use log::warn;
-
 use rustutils::system_properties;
-
+use std::panic;
 mod grpc_proxy;
 mod mapper;
+mod preferences;
+use std::thread;
 
 // Defines where the GRPC server listens at.
 const DRIVERUI_RPC_SERVER_PORT: i32 = 7000;
@@ -45,11 +46,10 @@ const DRIVERUI_RPC_SERVER_HOST: &str = "0.0.0.0";
 // Defines where the GRPC proxy connects to.
 const DRIVERUI_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:7001";
 
-#[tokio::main]
-async fn main() -> Result<(), ()> {
+fn main() -> Result<(), ()> {
     // Allow time for Harry to start GRPC.
     // TODO: Use the property trigger once it is fixed (sepolicy missing).
-    tokio::time::sleep(Duration::from_secs(1)).await;
+    thread::sleep(Duration::from_secs(1));
 
     sdv_log::init_logger("har_sdv_service").unwrap_or_else(|error| match &error {
         sdv_log::LoggerError::AlreadyInitializedError(_) => {
@@ -81,7 +81,6 @@ async fn main() -> Result<(), ()> {
     let env = Arc::new(EnvBuilder::new().build());
     let env_cloned = env.clone();
     let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
-    let mapper_cloned = mapper.clone();
 
     // Run the proxy between HAR and DriverUI
     let driverui_rpc_proxy = DriverUiGrpcProxy::new(
@@ -89,20 +88,22 @@ async fn main() -> Result<(), ()> {
         DRIVERUI_RPC_CLIENT_ADDRESS.to_string(),
     );
     let proxy_server = driverui_rpc_proxy.run(env.clone());
+    info!("Cluster app GRPC dispatcher running.");
 
     // The QNX IP address has to be hardcoded.  Set as a system property.
     let handle_qnx = match system_properties::read("vendor.harplatform.safety_monitor") {
         Ok(value) => value.map(|ip| {
             info!("Starting QNX data service");
             let qnx_rpc_server_address = ip + ":50051";
-            tokio::spawn(async move {
-                // Start SDV Data tunnel services.
-                // TODO: handle errors, use a different transport
-                let ch = ChannelBuilder::new(env.clone())
-                    .initial_reconnect_backoff(Duration::from_millis(10))
-                    .max_reconnect_backoff(Duration::from_millis(50))
-                    .connect(&qnx_rpc_server_address);
-                let vehicle_data_client = VehicleDataServiceClient::new(ch);
+            // Start SDV Data tunnel services.
+            // TODO: handle errors, use a different transport
+            let ch = ChannelBuilder::new(env.clone())
+                .initial_reconnect_backoff(Duration::from_millis(10))
+                .max_reconnect_backoff(Duration::from_millis(50))
+                .connect(&qnx_rpc_server_address);
+            let vehicle_data_client = VehicleDataServiceClient::new(ch);
+            let mapper = mapper.clone();
+            thread::spawn(move || {
                 // TODO: Do this in some sort of a loop to make sure it never stops
                 match vehicle_data_client.receive_vehicle_data() {
                     Ok((vehicle_data_sender, _vehicle_data_receiver)) => {
@@ -130,14 +131,15 @@ async fn main() -> Result<(), ()> {
 
     info!("Starting HAR data service");
 
-    let handle_sdv = tokio::spawn(async move {
-        // Start SDV Data tunnel services.
-        // TODO: handle errors, use a different transport
-        let ch = ChannelBuilder::new(env_cloned)
-            .initial_reconnect_backoff(Duration::from_millis(10))
-            .max_reconnect_backoff(Duration::from_millis(50))
-            .connect("127.0.0.1:50051");
-        let vehicle_data_client = VehicleDataServiceClient::new(ch);
+    // Start SDV Data tunnel services.
+    // TODO: handle errors, use a different transport
+    let ch = ChannelBuilder::new(env_cloned)
+        .initial_reconnect_backoff(Duration::from_millis(10))
+        .max_reconnect_backoff(Duration::from_millis(50))
+        .connect("127.0.0.1:50051");
+    let vehicle_data_client = VehicleDataServiceClient::new(ch);
+    let mapper_cloned = mapper.clone();
+    let handle_sdv = thread::spawn(move || {
         // TODO: Do this in some sort of a loop to make sure it never stops
         match vehicle_data_client.receive_vehicle_data() {
             Ok((vehicle_data_sender, _vehicle_data_receiver)) => {
@@ -157,19 +159,38 @@ async fn main() -> Result<(), ()> {
         }
     });
 
-    let mut futures = vec![handle_sdv];
+    let mut handles = vec![handle_sdv];
     if let Some(handle_qnx) = handle_qnx {
-        futures.push(handle_qnx);
+        handles.push(handle_qnx);
     }
 
-    join_all(futures).await;
+    // Start SDV Data tunnel services.
+    // TODO: handle errors, use a different transport
+    let ch = ChannelBuilder::new(env)
+        .initial_reconnect_backoff(Duration::from_millis(10))
+        .max_reconnect_backoff(Duration::from_millis(50))
+        .connect("127.0.0.1:50051");
+    let vehicle_data_client = VehicleDataServiceClient::new(ch);
+
+    // Setup user preferences
+    let _prefs_client =
+        create_har_user_preferences_client(vehicle_data_client.clone(), mapper.clone());
+
+    info!("HAR User Preferences services started.");
+
+    // Join&unwrap all to see any issues. Note: the order matters here, so we might be
+    // waiting on something that works while other have already failed.
+    // TODO: Move back to async futures and join_all.
+    for handle in handles {
+        handle.join().expect("One of the threads failed.");
+    }
 
     proxy_server.shutdown();
     info!("HAR SDV service completed");
     Ok(())
 }
 
-fn send_data_blocking<T>(sender: Arc<Mutex<ClientDuplexSender<T>>>, data: T) {
+pub(crate) fn send_data_blocking<T>(sender: Arc<Mutex<ClientDuplexSender<T>>>, data: T) {
     if let Ok(mut sender) = sender.lock() {
         let result = futures::executor::block_on(sender.send((data, WriteFlags::default())));
         if result.is_err() {
@@ -302,5 +323,8 @@ pub fn create_topic_map() -> HashMapTopicMapper {
     map.add("har.vehicledata.TellTaleStatus.TURN_SIGNAL_LEFT", "turn_signal_left");
     map.add("har.vehicledata.TellTaleStatus.SPEED_LIMIT_DISPLAYED", "speed_limit_displayed");
 
+    // A set of SDV user preferences mapped to HAR events.
+    map.add("TEMPERATURE_UNITS", "sdv.preferences.temperature_units");
+    map.add("DISTANCE_UNITS", "sdv.preferences.distance_units");
     map
 }

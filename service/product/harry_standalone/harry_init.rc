@@ -26,12 +26,30 @@ service fake_vehicledata_publisher_service /vendor/bin/fake_vehicledata_publishe
     oneshot
     disabled
 
+service har_user_preferences_service /vendor/bin/har_user_preferences_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
+service har_preferences_service /vendor/bin/har_preferences_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
 # Executing HAR and the data publisher at the earliest possible time.
 on property:sys.boot_completed=1
     # Start fake camera
     exec_background u:r:su:s0 -- /vendor/bin/ffmpeg -nostdin -stream_loop -1 -re -i /vendor/etc/harry/camera/camera_emulation.mp4 -f v4l2 -vcodec rawvideo -pix_fmt bgra -vf scale=640:360 /dev/video10
     # Initialize data folder. This is no-op after the first run.
     exec u:r:su:s0 -- /system/bin/sh /vendor/etc/harry/com.google.display_safety.har.init_data_folder.sh
+    # Start the SDV User preferences service
+    start har_user_preferences_service
+    # Start the HAR preferences service
+    start har_preferences_service
     # Start the SDV Vehicle data service
     start vehicledata_publisher_service
     # Start the mock data sender service

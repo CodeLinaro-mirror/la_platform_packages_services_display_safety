@@ -1,0 +1,23 @@
+// Copyright 2024 Google LLC
+syntax = "proto3";
+option java_package = "com.google.displaysafety.har.preferences";
+option java_outer_classname = "HarPreferencesProto";
+
+package displaysafety.harry;
+
+// Note that enum values use C++ scoping rules, meaning that enum
+// values are siblings of their type, not children of it.  Therefore,
+// "UNKNOWN" must be unique within "displaysafety.harry".
+
+// TODO(b/291979113): Consider IMPERIAL/METRIC instead.
+enum DistanceUnit {
+    DISTANCE_UNIT_UNKNOWN = 0;
+    KILOMETERS = 1;
+    MILES = 2;
+}
+
+enum TemperatureUnit {
+    TEMPERATURE_UNIT_UNKNOWN = 0;
+    CELSIUS = 1;
+    FAHRENHEIT = 2;
+}
