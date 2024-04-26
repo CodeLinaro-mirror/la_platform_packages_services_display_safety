@@ -1,32 +1,8 @@
 {
   "chimes": [
     {
-      "id": "turn_signal_1",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/tick.48000.wav",
-      "lazy_load": false,
-      "overrun_behavior": "ABORT"
-    },
-    {
-      "id": "turn_signal_2",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/tock.48000.wav",
-      "lazy_load": false,
-      "overrun_behavior": "ABORT"
-    },
-    {
-      "id": "alert",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/wilhelm_scream.48000.wav",
-      "lazy_load": false,
-      "overrun_behavior": "ABORT"
-    },
-    {
-      "id": "welcome_to_harry",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/welcome_to_harry.48000.wav",
-      "lazy_load": true,
-      "overrun_behavior": "RESUME_WHEN_AVAILABLE"
-    },
-    {
       "id": "alert_mono",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/wilhelm_scream.mono.48000.wav",
+      "path": "/data/vendor/com.google.display_safety.har/chimes/alert.mono.48000.wav",
       "lazy_load": false,
       "overrun_behavior": "ABORT"
     },

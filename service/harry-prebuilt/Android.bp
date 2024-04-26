@@ -83,12 +83,8 @@ prebuilt_etc {
 prebuilt_etc {
     name: "harry_res_audio_chimes",
     srcs: [
-        "data/chimes/tick.48000.wav",
-        "data/chimes/tock.48000.wav",
-        "data/chimes/welcome_to_harry.48000.wav",
-        "data/chimes/wilhelm_scream.48000.wav",
         "data/chimes/welcome_to_harry.mono.48000.wav",
-        "data/chimes/wilhelm_scream.mono.48000.wav",
+        "data/chimes/alert.mono.48000.wav",
     ],
     defaults: ["harry_res_defaults"],
     relative_install_path: "harry/chimes",
