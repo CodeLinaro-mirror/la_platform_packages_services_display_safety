@@ -24,6 +24,7 @@ use crate::mapper::HashMapTopicMapper;
 use crate::mapper::SdvToHarMapper;
 use crate::mapper::TopicMapper;
 use core::time::Duration;
+use futures::future::join_all;
 use futures_util::SinkExt;
 use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceFqin::ServiceFqin;
 use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceIdentity::PublicKey::PublicKey;
@@ -31,6 +32,8 @@ use grpcio::WriteFlags;
 use har_sdv_rpc::sdv_service_discovery::register_service;
 use log::info;
 use log::warn;
+
+use rustutils::system_properties;
 
 mod grpc_proxy;
 mod mapper;
@@ -76,7 +79,9 @@ async fn main() -> Result<(), ()> {
     info!("SDV Service registered: {:?}", registration_result);
 
     let env = Arc::new(EnvBuilder::new().build());
+    let env_cloned = env.clone();
     let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
+    let mapper_cloned = mapper.clone();
 
     // Run the proxy between HAR and DriverUI
     let driverui_rpc_proxy = DriverUiGrpcProxy::new(
@@ -85,30 +90,79 @@ async fn main() -> Result<(), ()> {
     );
     let proxy_server = driverui_rpc_proxy.run(env.clone());
 
-    // Start SDV Data tunnel services.
-    // TODO: handle errors, use a different transport
-    let ch = ChannelBuilder::new(env)
-        .initial_reconnect_backoff(Duration::from_millis(10))
-        .max_reconnect_backoff(Duration::from_millis(50))
-        .connect("127.0.0.1:50051");
-    let vehicle_data_client = VehicleDataServiceClient::new(ch);
-    // TODO: Do this in some sort of a loop to make sure it never stops
-    match vehicle_data_client.receive_vehicle_data() {
-        Ok((vehicle_data_sender, _vehicle_data_receiver)) => {
-            // Connection is established
-            let vehicle_data_sender = Arc::new(Mutex::new(vehicle_data_sender));
-            let mut sdv_service =
-                create_sdv_data_service(vehicle_data_sender.clone(), mapper.clone());
-            let _ = sdv_service.start();
-            sdv_service.join();
-            // TODO: receive response from server (vehicle_data_receiver)
-            // TODO: join or close channels.
+    // The QNX IP address has to be hardcoded.  Set as a system property.
+    let handle_qnx = match system_properties::read("vendor.harplatform.safety_monitor") {
+        Ok(value) => value.map(|ip| {
+            info!("Starting QNX data service");
+            let qnx_rpc_server_address = ip + ":50051";
+            tokio::spawn(async move {
+                // Start SDV Data tunnel services.
+                // TODO: handle errors, use a different transport
+                let ch = ChannelBuilder::new(env.clone())
+                    .initial_reconnect_backoff(Duration::from_millis(10))
+                    .max_reconnect_backoff(Duration::from_millis(50))
+                    .connect(&qnx_rpc_server_address);
+                let vehicle_data_client = VehicleDataServiceClient::new(ch);
+                // TODO: Do this in some sort of a loop to make sure it never stops
+                match vehicle_data_client.receive_vehicle_data() {
+                    Ok((vehicle_data_sender, _vehicle_data_receiver)) => {
+                        // Connection is established
+                        let vehicle_data_sender = Arc::new(Mutex::new(vehicle_data_sender));
+                        let mut sdv_service =
+                            create_sdv_data_service(vehicle_data_sender.clone(), mapper.clone());
+                        let _ = sdv_service.start();
+                        sdv_service.join();
+                        // TODO: receive response from server (vehicle_data_receiver)
+                        // TODO: join or close channels.
+                    }
+                    Err(err) => {
+                        // TODO: No panic!
+                        panic!("Failed to call Vehicle data api. Err: {:?}", err);
+                    }
+                }
+            })
+        }),
+
+        Err(e) => {
+            panic!("Could not fetch Safety Monitor IP property. Err: {:?}", e);
         }
-        Err(err) => {
-            // TODO: No panic!
-            panic!("Failed to call Vehicle data api. Err: {:?}", err);
+    };
+
+    info!("Starting HAR data service");
+
+    let handle_sdv = tokio::spawn(async move {
+        // Start SDV Data tunnel services.
+        // TODO: handle errors, use a different transport
+        let ch = ChannelBuilder::new(env_cloned)
+            .initial_reconnect_backoff(Duration::from_millis(10))
+            .max_reconnect_backoff(Duration::from_millis(50))
+            .connect("127.0.0.1:50051");
+        let vehicle_data_client = VehicleDataServiceClient::new(ch);
+        // TODO: Do this in some sort of a loop to make sure it never stops
+        match vehicle_data_client.receive_vehicle_data() {
+            Ok((vehicle_data_sender, _vehicle_data_receiver)) => {
+                // Connection is established
+                let vehicle_data_sender = Arc::new(Mutex::new(vehicle_data_sender));
+                let mut sdv_service =
+                    create_sdv_data_service(vehicle_data_sender.clone(), mapper_cloned);
+                let _ = sdv_service.start();
+                sdv_service.join();
+                // TODO: receive response from server (vehicle_data_receiver)
+                // TODO: join or close channels.
+            }
+            Err(err) => {
+                // TODO: No panic!
+                panic!("Failed to call Vehicle data api. Err: {:?}", err);
+            }
         }
+    });
+
+    let mut futures = vec![handle_sdv];
+    if let Some(handle_qnx) = handle_qnx {
+        futures.push(handle_qnx);
     }
+
+    join_all(futures).await;
 
     proxy_server.shutdown();
     info!("HAR SDV service completed");

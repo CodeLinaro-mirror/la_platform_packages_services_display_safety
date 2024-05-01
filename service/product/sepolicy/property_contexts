@@ -1,2 +1,3 @@
 # Property trigger to start har_grpc_service after harry started the GRPC server.
 vendor.harplatform.grpc.started u:object_r:vendor_harplatform_props:s0 exact bool
+vendor.harplatform.safetymonitor u:object_r:vendor_harplatform_props:s0 exact string
