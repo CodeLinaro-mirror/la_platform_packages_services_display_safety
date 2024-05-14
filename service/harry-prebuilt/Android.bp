@@ -1,3 +1,10 @@
+// Generates a non-functional placeholder prebuilt to not break builds for unsupported targets.
+genrule {
+    name: "harry_binary_placeholder",
+    cmd: "touch $(out) && chmod a+x $(out)",
+    out: ["harry_binary_placeholder.unused"],
+}
+
 // The prebuilt binary package using DRM for rendering.
 cc_prebuilt_binary {
     // TODO: Rename this to harry-sdv or similar to allow a different
@@ -7,13 +14,13 @@ cc_prebuilt_binary {
 
     arch: {
         arm: {
-            enabled: false,
+            srcs: [":harry_binary_placeholder"],
         },
         arm64: {
             srcs: ["arm64/harry"],
         },
         x86: {
-            enabled: false,
+            srcs: [":harry_binary_placeholder"],
         },
         x86_64: {
             srcs: ["x86_64/harry"],
