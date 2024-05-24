@@ -27,7 +27,10 @@ cc_prebuilt_binary {
         },
     },
     shared_libs: [
-        "libGLESv2", "libgbm", "liblog", "libEGL"
+        "libGLESv2",
+        "libgbm",
+        "liblog",
+        "libEGL",
     ],
     vendor: true,
 }
@@ -54,7 +57,7 @@ cc_prebuilt_binary {
         },
     },
     shared_libs: [
-        "libhar_graphics"
+        "libhar_graphics",
     ],
 }
 
