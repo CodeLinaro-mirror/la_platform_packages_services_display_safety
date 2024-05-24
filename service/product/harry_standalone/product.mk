@@ -45,4 +45,5 @@ PRODUCT_PACKAGES += \
         harry_res_chimes_config \
         harry_res_audio_chimes \
         harry_res_camera_config \
+        harry_res_emulated_camera_config \
         harry_res_camera_emulation_source \

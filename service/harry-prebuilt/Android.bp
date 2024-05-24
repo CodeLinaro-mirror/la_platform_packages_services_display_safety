@@ -108,6 +108,13 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
+    name: "harry_res_emulated_camera_config",
+    src: "data/harry-camera-config-emulated.json",
+    defaults: ["harry_res_defaults"],
+    filename_from_src: true,
+}
+
+prebuilt_etc {
     name: "harry_res_camera_emulation_source",
     src: "data/camera/camera_emulation.mp4",
     defaults: ["harry_res_defaults"],
