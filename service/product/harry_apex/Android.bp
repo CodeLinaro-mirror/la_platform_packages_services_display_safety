@@ -2,8 +2,8 @@ apex {
     name: "com.google.display_safety.har",
     manifest: "apex_manifest.json",
     // Using the cert from the SDV samples.
-    key: "com.android.sdv.samples.rpc.key",
-    certificate: ":com.android.sdv.samples.rpc.certificate",
+    key: "com.google.display_safety.har.key",
+    certificate: ":com.google.display_safety.har.certificate",
 
     binaries: [
         "harry",
@@ -35,6 +35,25 @@ apex {
     ],
     // Vendor apex should not use vndk as stable: http://b/290318998
     use_vndk_as_stable: false,
+}
+
+// openssl genrsa -out keys/com.google.display_safety.har.pem 4096
+// $ANDROID_TOP_DIR/out/host/linux-x86/bin/avbtool extract_public_key \
+//    --key com.google.display_safety.har.pem \
+//    --output com.google.display_safety.har.avbpubkey
+apex_key {
+    name: "com.google.display_safety.har.key",
+    public_key: "keys/com.google.display_safety.har.avbpubkey",
+    private_key: "keys/com.google.display_safety.har.pem",
+}
+
+// $ANDROID_TOP_DIR/development/tools/make_key \
+//     com.google.display_safety.har \
+//     "/C=US/ST=California/L=Mountain View/O=Google Inc./OU=Android/CN=com.google.display_safety.har" \
+//     rsa
+android_app_certificate {
+    name: "com.google.display_safety.har.certificate",
+    certificate: "keys/com.google.display_safety.har",
 }
 
 prebuilt_etc {
