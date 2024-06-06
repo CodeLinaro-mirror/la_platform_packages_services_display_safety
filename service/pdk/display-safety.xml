@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <remote
-    name="aae-design-compose-partners"
-    fetch="https://aae-design-compose-partners.googlesource.com/" />
 
   <remote
     name="github"
-    fetch="https://github.com/" />
+    fetch="https://github.com" />
+
+  <remote
+    name="aae-design-compose-partners"
+    fetch="https://aae-design-compose-partners.googlesource.com" />
 
   <project
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="887e2f396902b8ec475336c0749f9c77b43278b0" />
+    revision="0bc3edc46fbd65c6eaeb4d40735c5b3c1f1207a9" />
 
   <project
     name="bdero/impeller-cmake.git"
@@ -30,7 +31,7 @@
     name="google/automotive-design-compose.git"
     path="vendor/google/display_safety/service/pdk/display-safety/submodules/automotive-design-compose"
     remote="github"
-    revision="f8a74de02706c20e2e4c0c0c1a79a7acb4abf99a" />
+    revision="556df14f4c3ebdfba2401efc45dc61dd71038627" />
 
   <project
     name="mity/acutest.git"
@@ -43,6 +44,12 @@
     path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/fff"
     remote="github"
     revision="5111c61e1ef7848e3afd3550044a8cf4405f4199" />
+
+  <project
+    name="grpc/grpc.git"
+    path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/grpc"
+    remote="github"
+    revision="d02c17e2465ced3d95b600255db2c31706ce20be" />
 
   <project
     name="third-party/ring"
