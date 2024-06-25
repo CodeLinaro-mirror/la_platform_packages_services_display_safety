@@ -1,0 +1,2 @@
+# Allow init to set vendor.harplatform.grpc.started.
+allow vendor_init vendor_harplatform_props:property_service set;

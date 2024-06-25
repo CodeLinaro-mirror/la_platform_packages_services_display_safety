@@ -1,7 +1,7 @@
 service harry /apex/com.google.display_safety.har/bin/harry
     class main
     user root
-    group root
+    group audio camera graphics
     oneshot
     disabled
 

@@ -1,21 +1,64 @@
 # Main domain definition
 type vendor_harplatform, domain;
 type vendor_harplatform_exec, exec_type, vendor_file_type, file_type;
-type vendor_harplatform_data_file, file_type, data_file_type;
 type vendor_harplatform_data_file_vendor_type, vendor_file_type, file_type;
 type vendor_harplatform_lib_file, vendor_file_type, file_type;
+
+# Allow to use SDV data tunnel, rpc agent, and service discovery.
+typeattribute vendor_harplatform sdv_dt_client;
+typeattribute vendor_harplatform sdv_rpcagent_client;
+typeattribute vendor_harplatform sdv_sd_client;
 
 # Allow har to transition from init to daemon. Required by init.rc.
 init_daemon_domain(vendor_harplatform)
 
+# Allow to use the binder IPC.
+binder_use(vendor_harplatform)
+
 # Allows file operations
-allow vendor_harplatform vendor_harplatform_data_file:file create_file_perms;
-allow vendor_harplatform vendor_harplatform_data_file:dir create_dir_perms;
+allow vendor_harplatform vendor_data_file:file create_file_perms;
+allow vendor_harplatform vendor_data_file:dir create_dir_perms;
 
 # Set up HAR property triggers.
 vendor_internal_prop(vendor_harplatform_props)
-get_prop(vendor_harplatform, vendor_harplatform_props)
 set_prop(vendor_harplatform, vendor_harplatform_props)
 
-# Allows HAR plaform to use SDV service discovery.
-allow vendor_harplatform sdv_dt_service:service_manager find;
+#allow vendor_harplatform boot_status_prop:file read;
+get_prop(vendor_harplatform, boot_status_prop)
+
+# Allow to access /dev/snd/*.
+allow vendor_harplatform audio_device:dir r_dir_perms;
+allow vendor_harplatform audio_device:chr_file rw_file_perms;
+
+# Allow to access /dev/dri/card* and /dev/dri/renderD*.
+allow vendor_harplatform gpu_device:dir r_dir_perms;
+allow vendor_harplatform gpu_device:chr_file rw_file_perms;
+allow vendor_harplatform graphics_device:chr_file rw_file_perms;
+
+# Allow to access /dev/video*.
+allow vendor_harplatform video_device:chr_file rw_file_perms;
+
+# Allow to access /dev/random and /dev/urandom
+allow vendor_harplatform random_device:chr_file rw_file_perms;
+
+# Allow to access /dev/null.
+allow vendor_harplatform null_device:chr_file rw_file_perms;
+
+# Allow to access graphics properties.
+get_prop(vendor_harplatform, graphics_config_prop)
+get_prop(vendor_harplatform, graphics_config_writable_prop)
+
+# Allow to access ro.product.manufacturer, ro.product.model, and ro.build.version.sdk.
+get_prop(vendor_harplatform, build_prop)
+
+# Allow to communicate over tcp.
+allow vendor_harplatform proc_net:file r_file_perms;
+allow vendor_harplatform self:tcp_socket { accept bind create connect getattr getopt listen node_bind read setopt shutdown write };
+allow vendor_harplatform node:tcp_socket node_bind;
+allow vendor_harplatform port:tcp_socket { name_bind name_connect };
+
+# TODO(b/349450954): Below permissions are added to address reported selinux violations while harry
+#                    is running. Their usages are desired to be clarified.
+allow vendor_harplatform device:dir r_dir_perms;
+allow vendor_harplatform sysfs:file r_file_perms;
+allow vendor_harplatform self:capability sys_admin;
