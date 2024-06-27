@@ -1,0 +1,2 @@
+# Allow crash_dump to acess vendor_harplatform_lib files.
+allow crash_dump vendor_harplatform_lib_file:file r_file_perms;
