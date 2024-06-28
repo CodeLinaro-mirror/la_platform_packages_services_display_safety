@@ -37,6 +37,7 @@ async fn main() -> Result<(), ()> {
             .and_then(Task::set_all_telltales_alert(true))
             .and_then(Task::delay(Duration::from_secs(1)))
             .and_then(Task::set_all_telltales_alert(false))
+            .and_then(Task::delay(Duration::from_secs(2)))
             // Seatbelt warning is on.  Seatbelt warning turns off after
             // a couple of seconds indicating driver put on seatbelt.
             .and_then(Task::set_telltale_alert(Telltale::SEATBELT_DRIVER, true))
