@@ -1,3 +1,5 @@
+// Copyright 2024 Google LLC
+
 rust_protobuf {
     name: "libhar_user_preferences",
     crate_name: "har_user_preferences",

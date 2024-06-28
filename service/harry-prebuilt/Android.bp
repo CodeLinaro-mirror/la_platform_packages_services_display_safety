@@ -1,3 +1,5 @@
+// Copyright 2024 Google LLC
+
 // Generates a non-functional placeholder prebuilt to not break builds for unsupported targets.
 genrule {
     name: "harry_binary_placeholder",

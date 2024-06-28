@@ -1,3 +1,5 @@
+// Copyright 2024 Google LLC
+
 rust_binary {
     name: "fake_vehicledata_publisher_service",
     crate_name: "fake_vehicledata_publisher_service",

@@ -1,3 +1,4 @@
+// Copyright 2024 Google LLC
 // Device library that defines the sample vehicle messages catalog.
 rust_protobuf {
     name: "liboem_harry_vehicle_messages_catalog",

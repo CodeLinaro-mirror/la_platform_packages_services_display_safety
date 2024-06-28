@@ -1,6 +1,7 @@
+// Copyright 2024 Google LLC
+
 // WARNING: The usage of this implementation is unsafe
 // and only meant for internal testing.
-
 
 cc_defaults {
     name: "libhar_graphics_defaults",

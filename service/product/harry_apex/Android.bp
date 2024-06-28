@@ -1,3 +1,5 @@
+// Copyright 2024 Google LLC
+
 apex {
     name: "com.google.display_safety.har",
     manifest: "apex_manifest.json",

@@ -1,3 +1,5 @@
+// Copyright 2024 Google LLC
+
 use crate::HashMapTopicMapper;
 use crate::SdvToHarMapper;
 use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
