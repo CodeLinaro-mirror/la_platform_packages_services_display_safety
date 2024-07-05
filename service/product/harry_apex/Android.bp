@@ -38,8 +38,6 @@ apex {
         "harry_res_camera_emulation_source",
         "com.google.display_safety.har.init_data_folder_apex.sh",
     ],
-    // Vendor apex should not use vndk as stable: http://b/290318998
-    use_vndk_as_stable: false,
 }
 
 // openssl genrsa -out keys/com.google.display_safety.har.pem 4096
