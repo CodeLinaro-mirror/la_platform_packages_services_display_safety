@@ -20,13 +20,7 @@ pub(crate) const HAR_PREFERENCES_SERVICE_FQIN: &str = "HarPreferencesService";
 
 /// Starts the service.
 pub fn main() {
-    sdv_log::init_logger("har_preferences").unwrap_or_else(|error| match &error {
-        sdv_log::LoggerError::AlreadyInitializedError(_) => {
-            // Only inform error, not panic
-            log::info!("{}", error)
-        }
-        _ => panic!("{}", error),
-    });
+    sdv_log::init_logger("har_preferences").unwrap();
 
     // Initialize user preferences
     let settings = default_settings();

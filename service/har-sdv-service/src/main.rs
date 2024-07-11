@@ -51,13 +51,7 @@ fn main() -> Result<(), ()> {
     // TODO: Use the property trigger once it is fixed (sepolicy missing).
     thread::sleep(Duration::from_secs(1));
 
-    sdv_log::init_logger("har_sdv_service").unwrap_or_else(|error| match &error {
-        sdv_log::LoggerError::AlreadyInitializedError(_) => {
-            // Only inform error, not panic
-            log::info!("{}", error)
-        }
-        _ => panic!("{}", error),
-    });
+    sdv_log::init_logger("har_sdv_service").unwrap();
 
     info!("HAR SDV service starting");
 

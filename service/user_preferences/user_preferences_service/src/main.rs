@@ -19,13 +19,7 @@ use std::sync::Arc;
 use user_preferences_service_impl::UserPreferencesServiceImpl;
 
 fn main() {
-    sdv_log::init_logger("har_user_preferences").unwrap_or_else(|error| match &error {
-        sdv_log::LoggerError::AlreadyInitializedError(_) => {
-            // Only inform error, not panic
-            log::info!("{}", error)
-        }
-        _ => panic!("{}", error),
-    });
+    sdv_log::init_logger("har_user_preferences").unwrap();
 
     let user_preferences_impl = Arc::new(UserPreferencesServiceImpl::new());
     let service = UserPreferencesServer::new();

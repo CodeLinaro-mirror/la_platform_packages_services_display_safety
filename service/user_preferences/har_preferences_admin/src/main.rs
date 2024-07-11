@@ -33,13 +33,7 @@ pub(crate) const TEMPERATURE_UNITS: &str = "TEMPERATURE_UNITS";
 // On a production system, we expect the IVI system to make these changes.
 
 fn main() -> Result<(), String> {
-    sdv_log::init_logger("har_preferences_admin").unwrap_or_else(|error| match &error {
-        sdv_log::LoggerError::AlreadyInitializedError(_) => {
-            // Only inform error, not panic
-            log::info!("{}", error)
-        }
-        _ => panic!("{}", error),
-    });
+    sdv_log::init_logger("har_preferences_admin").unwrap();
 
     let har_preferences_service = HarPreferencesAdmin::new();
 
