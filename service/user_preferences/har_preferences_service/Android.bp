@@ -19,6 +19,7 @@ rust_binary {
         "libhar_grpc_services",
         "libitertools",
         "libuser_preferences_utils",
+        "librustutils",
         "libsdvmiddleware_rpc_grpc_transport",
         "libgrpcio",
         "libfutures_util",

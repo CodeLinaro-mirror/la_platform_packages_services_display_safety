@@ -17,6 +17,7 @@ mod settings;
 mod user_controllable_preferences_impl;
 
 pub(crate) const HAR_PREFERENCES_SERVICE_FQIN: &str = "HarPreferencesService";
+const HAR_PREFERENCES_SERVICE_STARTED_PROPERTY: &str = "vendor.harplatform.harprefs.started";
 
 /// Starts the service.
 pub fn main() {
@@ -27,6 +28,16 @@ pub fn main() {
     let preferences_impl = Arc::new(UserControllablePreferencesServiceImpl::new(settings));
     // Run the server
     let _preferences_service = start_user_preferences_service(preferences_impl.clone());
+
+    if let Err(e) =
+        rustutils::system_properties::write(HAR_PREFERENCES_SERVICE_STARTED_PROPERTY, "true")
+    {
+        log::error!(
+            "Error setting system property {}: {:?}",
+            HAR_PREFERENCES_SERVICE_STARTED_PROPERTY,
+            e
+        );
+    }
 
     loop {
         std::thread::park();

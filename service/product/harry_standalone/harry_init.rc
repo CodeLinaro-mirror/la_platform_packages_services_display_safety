@@ -48,8 +48,6 @@ on property:sys.boot_completed=1
     exec u:r:su:s0 -- /system/bin/sh /vendor/etc/harry/com.google.display_safety.har.init_data_folder.sh
     # Start the SDV User preferences service
     start har_user_preferences_service
-    # Start the HAR preferences service
-    start har_preferences_service
     # Start the SDV Vehicle data service
     start vehicledata_publisher_service
     # Start the mock data sender service
@@ -57,6 +55,12 @@ on property:sys.boot_completed=1
     # start the HAR application
     start harry
 
+# The HAR preferences service needs the base "UserPreferencesService" to be running to register preferences.
+on property:vendor.harplatform.userprefs.started=true
+    # Start the HAR preferences service
+    start har_preferences_service
+
 # The proxy service needs HAR running to avoid an initial connection failure and a reconnect attempt.
-on property:vendor.harplatform.grpc.started=true
+# The proxy service needs HAR preferences to be up and running, otherwise it cannot subscribe to updates.
+on property:vendor.harplatform.grpc.started=true && property:vendor.harplatform.harprefs.started=true
     start har_sdv_service
