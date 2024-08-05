@@ -13,7 +13,7 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="6d83bc6c2a211aac5238dac4c679f13af65372b0" />
+    revision="e95e6544ff538b71744c1d7126b0e2c5eb38d566" />
 
   <project
     name="bdero/impeller-cmake.git"
@@ -31,7 +31,7 @@
     name="google/automotive-design-compose.git"
     path="vendor/google/display_safety/service/pdk/display-safety/submodules/automotive-design-compose"
     remote="github"
-    revision="556df14f4c3ebdfba2401efc45dc61dd71038627" />
+    revision="b886b96877779de10dbf5aaaeaddc5727ace2547" />
 
   <project
     name="mity/acutest.git"
