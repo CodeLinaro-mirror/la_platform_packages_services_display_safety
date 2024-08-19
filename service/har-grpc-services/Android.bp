@@ -14,3 +14,52 @@ rust_protobuf {
     source_stem: "generated_har_grpc_services",
     vendor: true,
 }
+
+java_genrule {
+    name: "hargrpcservice-grpc-java-stub-lite",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-java-plugin",
+        "soong_zip",
+    ],
+    cmd: "mkdir -p $(genDir)/gen && " +
+        "$(location aprotoc) --java_opt=annotate_code=false " +
+        " -Iexternal/protobuf/src " +
+        " -Ivendor/google/display_safety/service/har-grpc-services/src/proto " +
+        " --plugin=protoc-gen-grpc-java=$(location protoc-gen-grpc-java-plugin) " +
+        " --grpc-java_out=lite:$(genDir)/gen $(in) && " +
+        " $(location soong_zip) -o $(out) -C $(genDir)/gen -D $(genDir)/gen",
+    srcs: [
+        "src/proto/vehicledata.proto",
+        "src/proto/driverui.proto",
+        ":libprotobuf-internal-protos",
+    ],
+    out: ["libhargrpcservice-grpc-proto.srcjar"],
+
+}
+
+java_library {
+    name: "hargrpcservice-grpc-java-proto-lite",
+    proto: {
+        type: "lite",
+        include_dirs: [
+            "external/protobuf/src",
+            "external/protobuf/java",
+            "vendor/google/display_safety/service/har-grpc-services/src/proto",
+        ],
+    },
+    srcs: [
+        "src/proto/vehicledata.proto",
+        "src/proto/driverui.proto",
+        ":hargrpcservice-grpc-java-stub-lite",
+        ":libprotobuf-internal-protos",
+    ],
+    libs: ["javax_annotation-api_1.3.2"],
+    static_libs: [
+        "libprotobuf-java-lite",
+        "grpc-java-core-android",
+        "grpc-java-okhttp-client-lite",
+        "guava",
+    ],
+    sdk_version: "current",
+}
