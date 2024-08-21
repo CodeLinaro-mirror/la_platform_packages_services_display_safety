@@ -138,4 +138,24 @@ impl HarryGrpcService for DriverUiServer {
             }
         }
     }
+
+    fn design_token_update(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: DesignTokenUpdateRequest,
+        sink: ::grpcio::UnarySink<DesignTokenUpdateResponse>,
+    ) {
+        match self.rpc_client.design_token_update(&req) {
+            Ok(response) => {
+                let future = sink
+                    .success(response)
+                    .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                    .map(|_| ());
+                ctx.spawn(future);
+            }
+            Err(err) => {
+                warn!("Error dispatching {:?}: {:?}", req, err);
+            }
+        }
+    }
 }

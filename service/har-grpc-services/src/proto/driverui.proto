@@ -71,6 +71,19 @@ message DocumentUpdatedResponse {
   Status status = 1;
 }
 
+// Request for Harry to change used design tokens.
+message DesignTokenUpdateRequest {
+
+  // Theme (or Collection) name to use.
+  string theme = 1;
+
+  // Variable Mode (e.g. Light / Dark Mode)
+  string variable_mode = 2;
+}
+
+// Response to DesignTokenUpdateRequest.
+message DesignTokenUpdateResponse {}
+
 message HarryRequest {
   oneof oneof {
     // Heartbeat.
@@ -81,6 +94,9 @@ message HarryRequest {
 
     // Document updated in DriverUI.
     DocumentUpdatedRequest document_updated_request = 3;
+
+    // Request for update of used design token in Harry
+    DesignTokenUpdateRequest design_token_update_request = 4;
   }
 }
 
@@ -94,6 +110,9 @@ message HarryResponse {
 
     // Document updated in DriverUI.
     DocumentUpdatedResponse document_updated_response = 3;
+
+    // Response to DesignTokenUpdateRequest.
+    DesignTokenUpdateResponse design_token_update_response = 4;
   }
 }
 
@@ -105,4 +124,7 @@ service HarryGrpcService {
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
   rpc DocumentSwitched(DocumentSwitchedRequest) returns (DocumentSwitchedResponse) {}
   rpc DocumentUpdated(DocumentUpdatedRequest) returns (DocumentUpdatedResponse) {}
+
+  /// Request for Harry to change what design tokens are used.
+  rpc DesignTokenUpdate(DesignTokenUpdateRequest) returns (DesignTokenUpdateResponse) {}
 }
