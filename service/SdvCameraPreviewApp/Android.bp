@@ -50,11 +50,20 @@ android_app {
     static_libs: [
         "androidx.annotation_annotation",
         "car-evs-helper-lib",
+        "grpc-java-core-android",
+        "grpc-java-lite",
+        "grpc-java-okhttp-client-lite",
+        "guava",
+        "hargrpcservice-grpc-java-proto-lite",
+        "libprotobuf-java-lite",
+        "libsdvgateway_proto_java",
     ],
 
     // To make this app be able to re-installed
     use_embedded_native_libs: true,
-    jni_libs: ["libcarevsglrenderer_jni"],
-
+    jni_libs: [
+        "libcarevsglrenderer_jni",
+        "libharsdvgateway_jni",
+    ],
     overrides: ["CarEvsCameraPreviewApp"],
 }
