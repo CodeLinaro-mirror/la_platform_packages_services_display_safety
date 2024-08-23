@@ -13,25 +13,19 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="e95e6544ff538b71744c1d7126b0e2c5eb38d566" />
+    revision="a80dbe8dbba83c6f7198aeb868fd3d8d528d5bf2" />
 
   <project
     name="bdero/impeller-cmake.git"
-    path="vendor/google/display_safety/service/pdk/display-safety/crates/impeller-rs/impeller-cmake"
+    path="vendor/google/display_safety/service/pdk/display-safety/crates/framework/graphics/impeller-rs/impeller-cmake"
     remote="github"
     revision="cb40c8be9f8caa3f78b104bc4aa02a3453ce45fb" />
 
   <project
     name="tinyalsa/tinyalsa.git"
-    path="vendor/google/display_safety/service/pdk/display-safety/crates/tinyalsa-rs/tinyalsa"
+    path="vendor/google/display_safety/service/pdk/display-safety/crates/reference/audio/tinyalsa-rs/tinyalsa"
     remote="github"
     revision="f78ed25aced2dfea743867b8205a787bfb091340" />
-
-  <project
-    name="google/automotive-design-compose.git"
-    path="vendor/google/display_safety/service/pdk/display-safety/submodules/automotive-design-compose"
-    remote="github"
-    revision="b886b96877779de10dbf5aaaeaddc5727ace2547" />
 
   <project
     name="mity/acutest.git"
