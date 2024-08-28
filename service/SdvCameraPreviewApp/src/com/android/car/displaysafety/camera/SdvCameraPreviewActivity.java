@@ -43,13 +43,25 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 
 import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
 
 import com.android.car.internal.evs.CarEvsGLSurfaceView;
 import com.android.car.internal.evs.GLES20CarEvsBufferRenderer;
+import com.google.displaysafety.harry.HarryGrpcServiceGrpc;
+import com.google.displaysafety.harry.HeartbeatResponse;
+import com.google.displaysafety.harry.HeartbeatRequest;
 
+import io.grpc.ManagedChannel;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class SdvCameraPreviewActivity extends Activity
         implements CarEvsGLSurfaceView.BufferCallback {
@@ -82,6 +94,11 @@ public class SdvCameraPreviewActivity extends Activity
         },
     };
 
+    private static final String IDENTITY_KEY = "SDVCAMERAPREVIEWAPP-AA05";
+    private static final String SDV_PACKAGE_NAME = "android.sdv.displaysafety";
+    private static final String SDV_SERVICE_NAME = "driverui-service";
+    private static final String SDV_CLIENT_NAME = TAG;
+
     private static String streamStateToString(int state) {
         switch (state) {
             case STREAM_STATE_STOPPED:
@@ -107,8 +124,9 @@ public class SdvCameraPreviewActivity extends Activity
 
     private final Object mLock = new Object();
 
-    /** Callback executors */
+    /** Callback / gRPC executors */
     private final ExecutorService mCallbackExecutor = Executors.newFixedThreadPool(1);
+    private final ExecutorService mGrpcTaskExecutor = Executors.newFixedThreadPool(1);
 
     /** GL backed surface view to render the camera preview */
     private CarEvsGLSurfaceView mEvsView;
@@ -136,6 +154,7 @@ public class SdvCameraPreviewActivity extends Activity
 
     private boolean mUseSystemWindow;
     private int mServiceType;
+    private SdvConnectionManager mSdvConnectionManager;
 
     /** Callback to listen to EVS stream */
     private final CarEvsManager.CarEvsStreamCallback mStreamHandler =
@@ -311,6 +330,14 @@ public class SdvCameraPreviewActivity extends Activity
             wm.addView(mRootView, params);
         } else {
             setContentView(mRootView, params);
+        }
+
+        mSdvConnectionManager = SdvConnectionManager.Create(
+            IDENTITY_KEY.getBytes(), getApplicationContext().getPackageName(), SDV_CLIENT_NAME,
+                    SDV_PACKAGE_NAME, SDV_SERVICE_NAME);
+
+        if (mSdvConnectionManager == null) {
+            Log.w(TAG, "Failed to create SDV connection manager instance.");
         }
     }
 
@@ -501,6 +528,11 @@ public class SdvCameraPreviewActivity extends Activity
         } catch (Exception e) {
             Log.w(TAG, "CarEvsService is not available.");
         }
+
+        if (mSdvConnectionManager != null) {
+            var unused = mGrpcTaskExecutor.submit(new GrpcTaskRunnable(mSdvConnectionManager,
+                      SDV_PACKAGE_NAME, SDV_SERVICE_NAME, SDV_CLIENT_NAME));
+        }
     }
 
     private void handleCloseButtonTriggered() {
@@ -509,5 +541,61 @@ public class SdvCameraPreviewActivity extends Activity
             handleVideoStreamLocked(STREAM_STATE_STOPPED);
         }
         finish();
+    }
+
+    private static class GrpcTaskRunnable implements Runnable {
+        private final WeakReference<SdvConnectionManager> connManagerReference;
+        private final String servicePackageName;
+        private final String serviceName;
+        private final String clientName;
+
+        private ManagedChannel channel;
+
+        public GrpcTaskRunnable(@NonNull SdvConnectionManager connMgr, String servicePackageName,
+                String serviceName, String clientName) {
+            this.connManagerReference = new WeakReference<>(connMgr);
+            this.servicePackageName = servicePackageName;
+            this.serviceName = serviceName;
+            this.clientName = clientName;
+        }
+
+        @Override
+        public void run() {
+            try {
+                SdvConnectionManager mgr = connManagerReference.get();
+                if (mgr == null) {
+                    Log.d(TAG, "SDV connection manager is invalid.");
+                    return;
+                }
+
+                channel = mgr.obtainInsecureManagedChannel(
+                        servicePackageName, serviceName, clientName);
+
+                HarryGrpcServiceGrpc.HarryGrpcServiceBlockingStub stub =
+                        HarryGrpcServiceGrpc.newBlockingStub(channel);
+                HeartbeatRequest msg = HeartbeatRequest.newBuilder()
+                        .setUptime(android.os.SystemClock.uptimeMillis())
+                        .setSource(HeartbeatRequest.Source.SOURCE_CAMERA_SERVICE)
+                        .build();
+
+                HeartbeatResponse response = stub.heartbeat(msg);
+                Log.i(TAG, "HeartbeatResponse: " + response);
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                pw.flush();
+
+                String exceptionMsg = String.format(
+                        "Failed to send a heartbeat message: %n%s.", sw);
+                Log.e(TAG, exceptionMsg);
+            } finally {
+                try {
+                    channel.shutdown().awaitTermination(1, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 }
