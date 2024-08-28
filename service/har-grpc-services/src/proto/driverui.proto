@@ -17,7 +17,6 @@ message HeartbeatRequest {
     SOURCE_UNKNOWN = 0;
     SOURCE_ANDROID = 1;
     SOURCE_INSTRUMENT_CLUSTER = 2;
-    SOURCE_CAMERA_SERVICE = 3;
   }
   Source source = 2;
 }
