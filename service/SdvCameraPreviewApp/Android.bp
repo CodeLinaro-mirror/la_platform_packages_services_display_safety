@@ -17,20 +17,72 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+soong_config_module_type {
+    name: "sdvcamerapreviewapp_config_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "sdvcamerapreviewapp",
+    bool_variables: ["enabled"],
+    properties: [
+        "srcs",
+        "jni_libs",
+        "static_libs",
+    ],
+}
+
+filegroup {
+    name: "com.android.car.displaysafety.camera-srcs",
+    srcs: [
+        "src/com/android/car/displaysafety/camera/SdvCameraActivity.java",
+        "src/com/android/car/displaysafety/camera/SdvCameraPreviewActivity.java",
+        "src/com/android/car/displaysafety/camera/SdvConnectionManager.java",
+    ],
+}
+
+sdvcamerapreviewapp_config_java_defaults {
+    name: "sdvcamerapreviewapp-defaults",
+    soong_config_variables: {
+        enabled: {
+            srcs: ["src/com/android/car/displaysafety/camera/SdvConnectionManagerImpl.java"],
+            jni_libs: ["libharsdvgateway_jni"],
+            static_libs: ["libsdvgateway_proto_java"],
+        },
+    },
+}
+
+java_defaults {
+    name: "com.android.car.displaysafety.camera-defaults",
+    srcs: [":com.android.car.displaysafety.camera-srcs"],
+    resource_dirs: ["res"],
+    libs: [
+        "android.car",
+        "android.car-system-stubs",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "car-evs-helper-lib",
+        "grpc-java-core-android",
+        "grpc-java-lite",
+        "grpc-java-okhttp-client-lite",
+        "guava",
+        "hargrpcservice-grpc-java-proto-lite",
+        "libprotobuf-java-lite",
+    ],
+    // To make this app be able to re-installed
+    use_embedded_native_libs: true,
+    jni_libs: ["libcarevsglrenderer_jni"],
+}
+
 android_app {
     name: "SdvCameraPreviewApp",
-
     owner: "google",
-
-    srcs: ["src/**/*.java"],
-
-    resource_dirs: ["res"],
+    defaults: [
+        "com.android.car.displaysafety.camera-defaults",
+        "sdvcamerapreviewapp-defaults",
+    ],
 
     // registerReceiverForAllUsers() is a hidden api.
     platform_apis: true,
-
     certificate: "platform",
-
     optimize: {
         enabled: false,
     },
@@ -41,29 +93,5 @@ android_app {
     dex_preopt: {
         enabled: false,
     },
-
-    libs: [
-        "android.car",
-        "android.car-system-stubs",
-    ],
-
-    static_libs: [
-        "androidx.annotation_annotation",
-        "car-evs-helper-lib",
-        "grpc-java-core-android",
-        "grpc-java-lite",
-        "grpc-java-okhttp-client-lite",
-        "guava",
-        "hargrpcservice-grpc-java-proto-lite",
-        "libprotobuf-java-lite",
-        "libsdvgateway_proto_java",
-    ],
-
-    // To make this app be able to re-installed
-    use_embedded_native_libs: true,
-    jni_libs: [
-        "libcarevsglrenderer_jni",
-        "libharsdvgateway_jni",
-    ],
     overrides: ["CarEvsCameraPreviewApp"],
 }

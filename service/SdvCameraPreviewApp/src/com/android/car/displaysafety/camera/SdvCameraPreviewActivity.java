@@ -63,6 +63,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import java.lang.reflect.Method;
+
 public class SdvCameraPreviewActivity extends Activity
         implements CarEvsGLSurfaceView.BufferCallback {
 
@@ -76,6 +78,11 @@ public class SdvCameraPreviewActivity extends Activity
     private final static String DIALOG_CLOSE_REASON_CAR_SYSTEMBAR_BUTTON = "carsystembarbutton";
     /** This string literal is from com.android.server.policy.PhoneWindowManager class. */
     private final static String DIALOG_CLOSE_REASON_HOME_KEY = "homekey";
+    /** This string literal is the name of class that implements SdvConnectionManager interface. */
+    private final static String CONNECTION_MANAGER_CLASSNAME =
+            "com.android.car.displaysafety.camera.SdvConnectionManagerImpl";
+    /** A name of the factory method to instantiate SdvConnectionManager implementation. */
+    private final static String CONNECTION_MANAGER_CREATOR_METHODNAME = "Create";
 
     /**
      * Defines internal states.
@@ -332,9 +339,20 @@ public class SdvCameraPreviewActivity extends Activity
             setContentView(mRootView, params);
         }
 
-        mSdvConnectionManager = SdvConnectionManager.Create(
-            IDENTITY_KEY.getBytes(), getApplicationContext().getPackageName(), SDV_CLIENT_NAME,
-                    SDV_PACKAGE_NAME, SDV_SERVICE_NAME);
+        try {
+            Class clazz = Class.forName(CONNECTION_MANAGER_CLASSNAME);
+            Method method = clazz.getDeclaredMethod(CONNECTION_MANAGER_CREATOR_METHODNAME,
+                    byte[].class, String.class, String.class, String.class, String.class);
+            mSdvConnectionManager = (SdvConnectionManager) method.invoke(/* obj= */ null,
+                    IDENTITY_KEY.getBytes(), getApplicationContext().getPackageName(),
+                            SDV_CLIENT_NAME, SDV_PACKAGE_NAME, SDV_SERVICE_NAME);
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "Failed to find SdvConnectionManagerImpl class.");
+        } catch (NoSuchMethodException e) {
+            Log.e(TAG, "Create method does not exist in SdvConnectionManagerImpl class.");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to invoke Create()." + e);
+        }
 
         if (mSdvConnectionManager == null) {
             Log.w(TAG, "Failed to create SDV connection manager instance.");

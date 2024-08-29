@@ -18,38 +18,51 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+soong_config_module_type {
+    name: "sdvcamerapreviewapp_config_cc_defaults",
+    module_type: "cc_defaults",
+    config_namespace: "sdvcamerapreviewapp",
+    bool_variables: ["enabled"],
+    properties: [
+        "cflags",
+        "shared_libs",
+        "srcs",
+        "static_libs",
+    ],
+}
+
 // TODO(b/334163598): Remove dependency on Data Tunnel libraries in the JNI lib.
-cc_defaults {
-    name: "libharsdvgateway_jni@cc_defaults",
-    cflags: [
-        "-Werror",
-    ],
-    header_libs: [
-        "jni_headers",
-    ],
-    srcs: [
-        "JniLoader.cpp",
-    ],
-    shared_libs: [
-        "google.sdv.dt-aidl-V1-ndk",
-        "google.sdv.rpc-aidl-V1-ndk",
-        "libbase",
-        "liblog",
-        "libprotobuf-cpp-full",
-        "libsdv_dt",
-        "libsdv_dt_core",
-        "libsdvgateway",
-    ],
-    static_libs: [
-        "libsdvgateway_proto_cpp",
-    ],
-    stl: "c++_static",
+sdvcamerapreviewapp_config_cc_defaults {
+    name: "sdvcamerapreviewapp_cc_defaults",
+    soong_config_variables: {
+        enabled: {
+            cflags: ["-D__ENABLED__"],
+            shared_libs: [
+                "google.sdv.dt-aidl-V1-ndk",
+                "google.sdv.rpc-aidl-V1-ndk",
+                "libprotobuf-cpp-full",
+                "libsdv_dt",
+                "libsdv_dt_core",
+                "libsdvgateway",
+            ],
+            srcs: ["JniMethods.cpp"],
+            static_libs: ["libsdvgateway_proto_cpp"],
+        },
+    },
 }
 
 cc_library_shared {
     name: "libharsdvgateway_jni",
-    defaults: ["libharsdvgateway_jni@cc_defaults"],
+    defaults: ["sdvcamerapreviewapp_cc_defaults"],
+    header_libs: ["jni_headers"],
+    srcs: ["JniLoader.cpp"],
+    shared_libs: [
+        "libbase",
+        "liblog",
+    ],
     cflags: [
+        "-Werror",
         "-DLOG_TAG=\"CarEvsSdvConnectionManager\"",
     ],
+    stl: "c++_static",
 }
