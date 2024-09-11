@@ -103,7 +103,7 @@ public class SdvCameraPreviewActivity extends Activity
 
     private static final String IDENTITY_KEY = "SDVCAMERAPREVIEWAPP-AA05";
     private static final String SDV_PACKAGE_NAME = "android.sdv.displaysafety";
-    private static final String SDV_SERVICE_NAME = "driverui-service";
+    private static final String SDV_SERVICE_NAME = "camera-service";
     private static final String SDV_CLIENT_NAME = TAG;
 
     private static String streamStateToString(int state) {

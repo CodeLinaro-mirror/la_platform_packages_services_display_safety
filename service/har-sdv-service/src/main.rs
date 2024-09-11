@@ -19,7 +19,8 @@ use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-use crate::grpc_proxy::DriverUiGrpcProxy;
+use crate::camera_grpc_proxy::CameraServiceGrpcProxy;
+use crate::driverui_grpc_proxy::DriverUiGrpcProxy;
 use crate::mapper::HashMapTopicMapper;
 use crate::mapper::SdvToHarMapper;
 use crate::mapper::TopicMapper;
@@ -34,7 +35,8 @@ use log::info;
 use log::warn;
 use rustutils::system_properties;
 use std::panic;
-mod grpc_proxy;
+mod camera_grpc_proxy;
+mod driverui_grpc_proxy;
 mod mapper;
 mod preferences;
 use std::thread;
@@ -43,8 +45,11 @@ use std::thread;
 const DRIVERUI_RPC_SERVER_PORT: i32 = 7000;
 const DRIVERUI_RPC_SERVER_HOST: &str = "0.0.0.0";
 
+const CAMERA_RPC_SERVER_PORT: i32 = 8000;
+
 // Defines where the GRPC proxy connects to.
 const DRIVERUI_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:7001";
+const CAMERA_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:8001";
 
 fn main() -> Result<(), ()> {
     // Allow time for Harry to start GRPC.
@@ -83,6 +88,30 @@ fn main() -> Result<(), ()> {
     );
     let proxy_server = driverui_rpc_proxy.run(env.clone());
     info!("Cluster app GRPC dispatcher running.");
+
+    let camera_fqin = ServiceFqin {
+        vm_name: "".to_string(),
+        package_name: "android.sdv.displaysafety".to_string(),
+        service_name: "camera-service".to_string(),
+        instance_name: "default".to_string(),
+    };
+
+    let camera_publickey = PublicKey { value: *b"HARSDVGATEWAY-CAMERA-7890123456\0" };
+    let camera_registration_result = register_service(
+        &camera_publickey,
+        &camera_fqin,
+        /* custom-metadata: */ "".as_bytes().to_vec(),
+        CAMERA_RPC_SERVER_PORT,
+    );
+    info!("SDV camera proxy service registered: {:?}", camera_registration_result);
+
+    // Run another proxy between HAR and IVI Camera Service.
+    let camera_rpc_proxy = CameraServiceGrpcProxy::new(
+        format!("{}:{}", DRIVERUI_RPC_SERVER_HOST, CAMERA_RPC_SERVER_PORT),
+        CAMERA_RPC_CLIENT_ADDRESS.to_string(),
+    );
+    let camera_proxy_server = camera_rpc_proxy.run(env.clone());
+    info!("Camera service GRPC dispatcher running.");
 
     // The QNX IP address has to be hardcoded.  Set as a system property.
     let handle_qnx = match system_properties::read("vendor.harplatform.safety_monitor") {
@@ -180,6 +209,7 @@ fn main() -> Result<(), ()> {
     }
 
     proxy_server.shutdown();
+    camera_proxy_server.shutdown();
     info!("HAR SDV service completed");
     Ok(())
 }

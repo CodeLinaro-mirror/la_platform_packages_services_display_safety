@@ -157,7 +157,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
                 return null;
             }
 
-            Log.i(TAG, "Connected to the service: " + status.getStringReturnValue());
+            Log.i(TAG, "Connected to the service: " + status.getErrorMessage());
         } catch (InvalidProtocolBufferException e) {
             Log.e(TAG, "SDV return status proto deserialization failed");
             return null;
@@ -277,7 +277,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
                       + ", cannot create channel"));
         }
 
-        String connectionString = status.getStringReturnValue();
+        String connectionString = status.getErrorMessage();
         Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
         return obtainSecureManagedChannelInternal(connectionString);
     }
@@ -294,7 +294,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
                       + ", cannot create channel"));
         }
 
-        String connectionString = status.getStringReturnValue();
+        String connectionString = status.getErrorMessage();
         return obtainInsecureManagedChannelInternal(connectionString);
     }
 }
