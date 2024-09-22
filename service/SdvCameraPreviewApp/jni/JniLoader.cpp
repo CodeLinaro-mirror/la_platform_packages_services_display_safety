@@ -29,15 +29,20 @@ jint registerSdvConnectionManager([[maybe_unused]] JavaVM* vm, [[maybe_unused]] 
     return JNI_OK;
 }
 
-} // namespace
+}  // namespace
 #endif
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/) {
     JNIEnv* env = nullptr;
-    if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) return JNI_ERR;
-    if (registerSdvConnectionManager(vm, env) != JNI_OK) {
-        ALOGE("Failed to register SDV connection manager.");
+    if (vm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK) {
+        LOG(ERROR) << "Failed to get JNI 1_6";
         return JNI_ERR;
     }
+
+    if (registerSdvConnectionManager(vm, env) != JNI_OK) {
+        LOG(ERROR) << "Failed to register SDV connection manager.";
+        return JNI_ERR;
+    }
+
     return JNI_VERSION_1_6;
 }

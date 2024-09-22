@@ -38,15 +38,19 @@ sdvcamerapreviewapp_config_cc_defaults {
         enabled: {
             cflags: ["-D__ENABLED__"],
             shared_libs: [
+                "google.sdv.gateway-aidl-V1-ndk",
                 "google.sdv.dt-aidl-V1-ndk",
                 "google.sdv.rpc-aidl-V1-ndk",
+                "google.sdv.sd-aidl-V1-ndk",
+                "libbinder_ndk",
                 "libprotobuf-cpp-full",
                 "libsdv_dt",
                 "libsdv_dt_core",
+            ],
+            static_libs: [
                 "libsdvgateway",
             ],
             srcs: ["JniMethods.cpp"],
-            static_libs: ["libsdvgateway_proto_cpp"],
         },
     },
 }
@@ -56,8 +60,10 @@ cc_library_shared {
     defaults: ["sdvcamerapreviewapp_cc_defaults"],
     header_libs: ["jni_headers"],
     srcs: ["JniLoader.cpp"],
-    shared_libs: [
+    static_libs: [
         "libbase",
+    ],
+    shared_libs: [
         "liblog",
     ],
     cflags: [

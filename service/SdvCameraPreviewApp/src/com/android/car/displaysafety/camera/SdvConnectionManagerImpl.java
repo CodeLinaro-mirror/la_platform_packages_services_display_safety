@@ -21,8 +21,12 @@ import android.util.Log;
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
-import com.android.sdv.gateway.SdvGatewayStatus;
 import com.google.protobuf.InvalidProtocolBufferException;
+import google.sdv.gateway.ISdvGatewaySession;
+import google.sdv.gateway.PublicKey;
+import google.sdv.gateway.RawMessage;
+import google.sdv.gateway.ResultStatus;
+import google.sdv.gateway.SdvGatewayStatusCode;
 
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
@@ -38,7 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public final class SdvConnectionManagerImpl implements SdvConnectionManager {
+public final class SdvConnectionManagerImpl implements SdvConnectionManager, TopicDataListener {
     private static final String TAG = SdvConnectionManagerImpl.class.getSimpleName();
 
     private final static class ChannelInfo {
@@ -46,44 +50,32 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
         public int port;
     }
 
+    private final HashMap<String, List<DataTunnelCallback>> mDataTunnelCallbacks = new HashMap<>();
+    private final Object mDataTunnelListenerLock = new Object();
+
     private static void loadLibrary(String name) {
         System.loadLibrary(name);
     }
 
     // TODO(b/341370027): App should retry DT subscribes periodically.
     private boolean subscribeToTopic(String topicName) {
-        try {
-            byte[] rawStatus = nativeSubscribeToTopic(topicName);
-            SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (status.getSuccess()) {
-                return true;
-            }
-
-            Log.e(TAG, "Subscribe to topic failed with error " + status.getErrorMessage());
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed");
+        var status = nativeSubscribeToTopic(topicName);
+        if (status.statusCode == SdvGatewayStatusCode.OK) {
+            return true;
         }
 
+        Log.e(TAG, "Subscribe to topic failed with error " + status.errorMessage);
         return false;
     }
-
-    private final HashMap<String, List<DataTunnelCallback>> mDataTunnelCallbacks = new HashMap<>();
-    private final Object mDataTunnelListenerLock = new Object();
 
     private SdvConnectionManagerImpl() {}
 
     private boolean initSdvComms(byte[] identityKey, String packageName, String appName) {
-        try {
-            byte[] rawStatus = nativeInitSdvComms(identityKey, packageName, appName);
-            SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (!status.getSuccess())   {
-                Log.e(TAG, "SDV Gateway initSdvComms failed with error "
-                  + status.getErrorMessage()
-                  + ", cannot start communication with SDV");
-                return false;
-            }
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed.");
+        ResultStatus status = nativeInitSdvComms(identityKey, packageName, appName);
+        if (status.statusCode != SdvGatewayStatusCode.OK) {
+            Log.e(TAG, "SDV Gateway initSdvComms failed with error "
+              + status.errorMessage
+              + ", cannot start communication with SDV");
             return false;
         }
 
@@ -118,20 +110,20 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
 
     private native String nativeGetVersion();
 
-    private native byte[] nativeInitSdvComms(
+    private native ResultStatus nativeInitSdvComms(
             byte[] identityKey, String packageName, String serviceName);
 
-    private native byte[] nativeConnectToServer(
+    private native ResultStatus nativeConnectToServer(
             String serverPackageName, String serverName, String clientName);
 
-    private native byte[] nativeCreateServer(String serverName, int port);
+    private native ResultStatus nativeCreateServer(String serverName, int port);
 
-    private native byte[] nativeSubscribeToTopic(String topicname);
+    private native ResultStatus nativeSubscribeToTopic(String topicname);
 
-    private native byte[] nativeRegisterTopic(String topicname, long messageSize,
+    private native ResultStatus nativeRegisterTopic(String topicname, long messageSize,
             long messageCount);
 
-    private native byte[] nativePublishToTopic(String topicname, byte[] message);
+    private native ResultStatus nativePublishToTopic(String topicname, byte[] message);
 
     static {
         System.loadLibrary("harsdvgateway_jni");
@@ -141,79 +133,62 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
             String appName, String servicePackageName, String serviceName) {
 
         SdvConnectionManagerImpl mgr = new SdvConnectionManagerImpl();
-        if (!mgr.initSdvComms(identityKey, packageName, appName)) {
+        if (mgr == null) {
             Log.e(TAG, "Failed to instantiate SdvConnectionManager class.");
             return null;
         }
 
-        SdvGatewayStatus status;
-        try {
-            // Attempt to connect to the target service.
-            byte[] rawStatus = mgr.nativeConnectToServer(servicePackageName, serviceName, appName);
-            status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (!status.getSuccess()) {
-                Log.e(TAG, "Failed to connect the service: " + servicePackageName +
-                        "/" + serviceName);
-                return null;
-            }
-
-            Log.i(TAG, "Connected to the service: " + status.getErrorMessage());
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed");
+        if (!mgr.initSdvComms(identityKey, packageName, appName)) {
+            Log.e(TAG, "Failed to initialize SDV Comm.");
             return null;
         }
 
+        // Attempt to connect to the target service.
+        ResultStatus status = mgr.nativeConnectToServer(servicePackageName, serviceName, appName);
+        if (status.statusCode != SdvGatewayStatusCode.OK) {
+            Log.e(TAG, "Failed to connect the service: " + servicePackageName +
+                    "/" + serviceName + " Error: " + status.errorMessage);
+            return null;
+        }
+
+        Log.i(TAG, "Connected to the service: " + status.returnValue);
         return (SdvConnectionManager) mgr;
     }
 
+    @Override
     public boolean createServer(String serverName, int port) {
-        try {
-            byte[] rawStatus = nativeCreateServer(serverName, port);
-            SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (status.getSuccess()) {
-                return true;
-            }
-
-            Log.e(TAG, "Creating rpc server failed with error " + status.getErrorMessage());
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed");
+        ResultStatus status = nativeCreateServer(serverName, port);
+        if (status.statusCode == SdvGatewayStatusCode.OK) {
+            return true;
         }
 
+        Log.e(TAG, "Creating rpc server failed with error " + status.errorMessage);
         return false;
     }
 
+    @Override
     public boolean registerTopic(String topicName, long messageSize, long messageCount) {
-        try {
-            byte[] rawStatus = nativeRegisterTopic(topicName, messageSize, messageCount);
-            SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (status.getSuccess()) {
-                return true;
-            }
-
-            Log.e(TAG, "Registering DT topic failed with error " + status.getErrorMessage());
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed");
+        ResultStatus status = nativeRegisterTopic(topicName, messageSize, messageCount);
+        if (status.statusCode == SdvGatewayStatusCode.OK) {
+            return true;
         }
 
+        Log.e(TAG, "Registering DT topic failed with error " + status.errorMessage);
         return false;
     }
 
+    @Override
     public boolean publishToTopic(String topicName, byte[] message) {
-        try {
-            byte[] rawStatus = nativePublishToTopic(topicName, message);
-            SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-            if (status.getSuccess()) {
-                return true;
-            }
-
-            Log.e(TAG, "Publish to topic failed with error " + status.getErrorMessage());
-        } catch (InvalidProtocolBufferException e) {
-            Log.e(TAG, "SDV return status proto deserialization failed");
+        ResultStatus status = nativePublishToTopic(topicName, message);
+        if (status.statusCode == SdvGatewayStatusCode.OK) {
+            return true;
         }
 
+        Log.e(TAG, "Publish to topic failed with error " + status.errorMessage);
         return false;
     }
 
+    @Override
     public boolean registerDataTunnelCallback(@NonNull DataTunnelCallback cb, String topicName) {
         if (cb == null) {
             Log.e(TAG, "registerDataTunnelCallback(): null listener");
@@ -240,12 +215,13 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
         return true;
     }
 
-    public void onEvent(byte[] content, String topicName) {
-        Log.d(TAG, "onEvent SdvConnectionManager data tunnel callback for topic: " + topicName);
+    @Override
+    public void onMessagesAvailable(String topicName, List<RawMessage> rawMessages) {
+        Log.d(TAG, "onMessagesAvailable data tunnel callback for topic: " + topicName);
         synchronized (mDataTunnelListenerLock) {
             List<DataTunnelCallback> subsCallback = mDataTunnelCallbacks.get(topicName);
             if (subsCallback == null) {
-                Log.d(TAG, "Received an event for an unknown topic, " + topicName);
+                Log.w(TAG, "Received an event for an unknown topic, " + topicName);
                 return;
             }
 
@@ -256,45 +232,47 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
                     continue;
                 }
 
-                callback.onEvent(content);
+                for (RawMessage msg : rawMessages) {
+                    callback.onEvent(msg.data);
+                }
             }
         }
     }
 
+    @Override
     public String getVersionString() {
         return nativeGetVersion();
     }
 
+    @Override
     public ManagedChannel obtainSecureManagedChannel(
             String serverPackageName, String serverName, String clientName)
             throws IOException, StatusException {
-        byte[] rawStatus = nativeConnectToServer(serverPackageName, serverName, clientName);
-        SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-        if (!status.getSuccess()) {
+        ResultStatus status = nativeConnectToServer(serverPackageName, serverName, clientName);
+        if (status.statusCode != SdvGatewayStatusCode.OK) {
             throw new StatusException(Status.NOT_FOUND.withDescription(serverName
                       + " is not available, error: "
-                      + status.getErrorMessage()
+                      + status.errorMessage
                       + ", cannot create channel"));
         }
 
-        String connectionString = status.getErrorMessage();
+        String connectionString = status.returnValue;
         Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
         return obtainSecureManagedChannelInternal(connectionString);
     }
 
+    @Override
     public ManagedChannel obtainInsecureManagedChannel(
             String serverPackageName, String serverName, String clientName)
             throws IOException, StatusException {
-        byte[] rawStatus = nativeConnectToServer(serverPackageName, serverName, clientName);
-        SdvGatewayStatus status = SdvGatewayStatus.parseFrom(rawStatus);
-        if (!status.getSuccess()) {
+        ResultStatus status = nativeConnectToServer(serverPackageName, serverName, clientName);
+        if (status.statusCode != SdvGatewayStatusCode.OK) {
             throw new StatusException(Status.NOT_FOUND.withDescription(serverName
                       + " is not available, error: "
-                      + status.getErrorMessage()
+                      + status.errorMessage
                       + ", cannot create channel"));
         }
 
-        String connectionString = status.getErrorMessage();
-        return obtainInsecureManagedChannelInternal(connectionString);
+        return obtainInsecureManagedChannelInternal(status.returnValue);
     }
 }

@@ -41,8 +41,6 @@ public interface SdvConnectionManager {
 
     public boolean registerDataTunnelCallback(@NonNull DataTunnelCallback cb, String topicName);
 
-    public void onEvent(byte[] content, String topicName);
-
     public String getVersionString();
 
     public ManagedChannel obtainSecureManagedChannel(

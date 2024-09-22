@@ -35,6 +35,7 @@ filegroup {
         "src/com/android/car/displaysafety/camera/SdvCameraActivity.java",
         "src/com/android/car/displaysafety/camera/SdvCameraPreviewActivity.java",
         "src/com/android/car/displaysafety/camera/SdvConnectionManager.java",
+        "src/com/android/car/displaysafety/camera/TopicDataListener.java",
     ],
 }
 
@@ -44,7 +45,6 @@ sdvcamerapreviewapp_config_java_defaults {
         enabled: {
             srcs: ["src/com/android/car/displaysafety/camera/SdvConnectionManagerImpl.java"],
             jni_libs: ["libharsdvgateway_jni"],
-            static_libs: ["libsdvgateway_proto_java"],
         },
     },
 }
@@ -60,9 +60,9 @@ java_defaults {
     static_libs: [
         "androidx.annotation_annotation",
         "car-evs-helper-lib",
+        "google.sdv.gateway-aidl-V1-java",
         "grpc-java-core-android",
         "grpc-java-lite",
-        "grpc-java-okhttp-client-lite",
         "guava",
         "hargrpcservice-grpc-java-proto-lite",
         "libprotobuf-java-lite",
