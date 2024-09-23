@@ -1,0 +1,86 @@
+
+
+app_nameDriverUI
+�
+navigation_component_namejcom.google.android.apps.maps/com.google.android.apps.gmm.car.embedded.auxiliarymap.EmbeddedClusterActivity
+
+
+span_image[Image]
+$
+phone_caller_name_unknownInconnu
+
+celsiusC
+
+
+fahrenheitF
+)
+appcard_app_icon_content_descApp Icon
+#
+appcard_image_content_descImage
+
+	label_mphMPH
+
+label_miMI
+L
+ label_please_check_tire_pressure(Veuillez vérifier la pression des pneus
+$
+label_loadingChargement...\u0020
+:
+label_no_media_playing Aucun média en cours de lecture
+
+
+label_mapsmaps
+
+label_battery_kwBATTERIE kW
+$
+label_f_motor_kwP\u002dMOTEUR kW
+$
+label_r_motor_kwR\u002dMOTEUR kW
+
+	label_avgMOYENN.
+
+label_whWh
+
+label_mi_hrMI/HR
+
+label_voltsVOLTS
+
+
+label_ampsAMPS
+$
+label_hours_leftHEURES RESTANTES
+
+label_wh_miWH/MI
+"
+label_hi_margotBonjour, Margot
+7
+label_20_deliveries_today20 livraisons aujourd\'hui
+!
+label_est_3_hoursEst 3 heures
+"
+label_rain_at_4_pmPluie à 16h
+
+
+label_mi_1mi
+
+label_1_30_pm_eta	13h30 ETA
+
+label_15_min15 min
+
+
+label_6_mi6 mi
+
+label_starbucks	Starbucks
+
+label_good_morningBonjour
+D
+ label_windshield_wiper_fluid_low Niveau de liquide lave-glace bas
+Z
+desc_notification_text@Haute tension alerte système ! Garez-vous dès que possible !
+5
+label_autopilot_engagedPilote automatique engagé
+
+label_parkedPARKED1
+label_1_mi_sutter_st	
+1\u0020
+mi Sutter st

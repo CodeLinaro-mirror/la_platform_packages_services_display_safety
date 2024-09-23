@@ -36,6 +36,7 @@ apex {
         "harry_res_camera_config",
         "harry_res_emulated_camera_config",
         "harry_res_camera_emulation_source",
+        "harry_res_locales",
         "com.google.display_safety.har.init_data_folder_apex.sh",
     ],
 }
