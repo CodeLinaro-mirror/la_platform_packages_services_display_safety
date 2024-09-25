@@ -22,7 +22,8 @@ rust_protobuf {
         "-I vendor/google/display_safety/service/vehicledata/vehicledata_publisher_service/proto",
     ],
     source_stem: "harry_vehicle_data_grpc_source",
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }
 
 rust_binary {
@@ -46,5 +47,6 @@ rust_binary {
         "libgrpcio",
         "libthiserror",
     ],
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }

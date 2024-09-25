@@ -12,7 +12,8 @@ rust_protobuf {
     ],
 
     source_stem: "generated_har_grpc_services",
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }
 
 java_genrule {

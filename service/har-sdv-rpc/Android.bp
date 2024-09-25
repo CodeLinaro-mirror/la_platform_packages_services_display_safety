@@ -16,7 +16,8 @@ rust_binary {
         "liblog_rust",
         "libanyhow",
     ],
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }
 
 rust_library {
@@ -35,5 +36,6 @@ rust_library {
         "liblog_rust",
         "libanyhow",
     ],
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }

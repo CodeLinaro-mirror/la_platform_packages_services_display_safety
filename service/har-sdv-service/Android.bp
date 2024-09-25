@@ -30,5 +30,6 @@ rust_binary {
         "librustutils",
         "google.sdv.sd_common-aidl-V1-rust",
     ],
-    vendor: true,
+    vendor_available: true,
+    product_available: true,
 }
