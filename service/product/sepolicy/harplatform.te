@@ -61,3 +61,5 @@ allow vendor_harplatform port:tcp_socket { name_bind name_connect };
 #                    is running. Their usages are desired to be clarified.
 allow vendor_harplatform sysfs:file r_file_perms;
 allow vendor_harplatform self:capability sys_admin;
+
+allow vendor_harplatform device:dir { open read };
