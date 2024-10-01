@@ -11,9 +11,12 @@ genrule {
 cc_prebuilt_binary {
     // TODO: Rename this to harry-sdv or similar to allow a different
     // variant with different dependencies for non-SDV systems.
-    name: "harry",
+    name: "harry_app_prebuilt",
+    overrides: ["harry_app_stub"],
+    installable: false,
+    prefer: true,
     owner: "google",
-
+    stem: "harry",
     arch: {
         arm: {
             srcs: [":harry_binary_placeholder"],

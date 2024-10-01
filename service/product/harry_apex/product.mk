@@ -25,8 +25,18 @@ BOARD_VENDOR_SEPOLICY_DIRS += \
 SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
     vendor/google/display_safety/service/product/har_sdv_service_bundle_apex/lifecycle/sepolicy \
 
+# Set this to true for testing with the stub app.
+HAR_USE_STUB_APP ?= false
+
+ifeq ($(HAR_USE_STUB_APP), true)
+PRODUCT_PACKAGES += \
+    com.google.display_safety.har.stub
+else
 # Add Harry APEX bundle with all required packages.
 PRODUCT_PACKAGES += \
-    com.google.display_safety.har \
-    com.sdv.google.display_safety.services_bundle.apex \
+    com.google.display_safety.har
+endif  # HAR_USE_STUB_APP
 
+# Add SDV Services
+PRODUCT_PACKAGES += \
+    com.sdv.google.display_safety.services_bundle.apex \

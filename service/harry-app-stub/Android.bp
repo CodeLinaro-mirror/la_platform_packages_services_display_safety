@@ -1,0 +1,24 @@
+// Copyright 2024 Google LLC
+
+rust_binary {
+    name: "harry_app_stub",
+    crate_name: "harry_app_stub",
+    srcs: [
+        "src/main.rs",
+    ],
+    stem: "harry",
+    installable: false,
+    prefer_rlib: true,
+    rustlibs: [
+        "libsdv_log_rust",
+        "liblog_rust",
+        "libhar_grpc_services",
+        "libprotobuf",
+        "libgrpcio",
+        "librand",
+        "libtokio",
+        "libfutures",
+        "librustutils",
+    ],
+    vendor: true,
+}
