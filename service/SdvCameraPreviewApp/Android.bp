@@ -47,7 +47,10 @@ sdvcamerapreviewapp_config_java_defaults {
                 "src/com/android/car/displaysafety/camera/TopicDataListener.java",
             ],
             jni_libs: ["libharsdvgateway_jni"],
-            static_libs: ["google.sdv.gateway-aidl-V1-java"],
+            static_libs: [
+                "google.sdv.gateway-aidl-V1-java",
+                "libsdvgatewayclient-java",
+            ],
         },
     },
 }

@@ -33,11 +33,11 @@ public interface SdvConnectionManager {
         public void onEvent(byte[] content);
     }
 
-    public boolean createServer(String serverName, int port);
+    public void createServer(String serverName, int port);
 
-    public boolean registerTopic(String topicName, long messageSize, long messageCount);
+    public void registerTopic(String topicName, long messageSize, long messageCount);
 
-    public boolean publishToTopic(String topicName, byte[] message);
+    public void publishToTopic(String topicName, byte[] message);
 
     public boolean registerDataTunnelCallback(@NonNull DataTunnelCallback cb, String topicName);
 

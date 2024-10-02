@@ -22,11 +22,11 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import google.sdv.gateway.ISdvGatewaySession;
-import google.sdv.gateway.PublicKey;
 import google.sdv.gateway.RawMessage;
-import google.sdv.gateway.ResultStatus;
-import google.sdv.gateway.SdvGatewayStatusCode;
+import google.sdv.gateway.client.SdvGatewayClient;
+import google.sdv.gateway.client.SdvGatewayRuntimeException;
+import google.sdv.gateway.client.TopicDataListener;
+import google.sdv.gateway.client.SdvGatewayClient;
 
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
@@ -57,31 +57,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
         System.loadLibrary(name);
     }
 
-    // TODO(b/341370027): App should retry DT subscribes periodically.
-    private boolean subscribeToTopic(String topicName) {
-        var status = nativeSubscribeToTopic(topicName);
-        if (status.statusCode == SdvGatewayStatusCode.OK) {
-            return true;
-        }
-
-        Log.e(TAG, "Subscribe to topic failed with error " + status.errorMessage);
-        return false;
-    }
-
     private SdvConnectionManagerImpl() {}
-
-    private boolean initSdvComms(byte[] identityKey, String packageName, String appName) {
-        ResultStatus status = nativeInitSdvComms(identityKey, packageName, appName);
-        if (status.statusCode != SdvGatewayStatusCode.OK) {
-            Log.e(TAG, "SDV Gateway initSdvComms failed with error "
-              + status.errorMessage
-              + ", cannot start communication with SDV");
-            return false;
-        }
-
-        Log.i(TAG, "Successfully initialized SDV comm for " + packageName + "/" + appName);
-        return true;
-    }
 
     private ManagedChannel obtainSecureManagedChannelInternal(String connectionString)
             throws IOException {
@@ -110,20 +86,20 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
 
     private native String nativeGetVersion();
 
-    private native ResultStatus nativeInitSdvComms(
+    private native void nativeInitSdvComms(
             byte[] identityKey, String packageName, String serviceName);
 
-    private native ResultStatus nativeConnectToServer(
+    private native String nativeConnectToServer(
             String serverPackageName, String serverName, String clientName);
 
-    private native ResultStatus nativeCreateServer(String serverName, int port);
+    private native void nativeCreateServer(String serverName, int port);
 
-    private native ResultStatus nativeSubscribeToTopic(String topicname);
+    private native void nativeSubscribeToTopic(String topicname);
 
-    private native ResultStatus nativeRegisterTopic(String topicname, long messageSize,
+    private native void nativeRegisterTopic(String topicname, long messageSize,
             long messageCount);
 
-    private native ResultStatus nativePublishToTopic(String topicname, byte[] message);
+    private native void nativePublishToTopic(String topicname, byte[] message);
 
     static {
         System.loadLibrary("harsdvgateway_jni");
@@ -138,54 +114,27 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
             return null;
         }
 
-        if (!mgr.initSdvComms(identityKey, packageName, appName)) {
-            Log.e(TAG, "Failed to initialize SDV Comm.");
-            return null;
-        }
+        mgr.nativeInitSdvComms(identityKey, packageName, appName);
 
         // Attempt to connect to the target service.
-        ResultStatus status = mgr.nativeConnectToServer(servicePackageName, serviceName, appName);
-        if (status.statusCode != SdvGatewayStatusCode.OK) {
-            Log.e(TAG, "Failed to connect the service: " + servicePackageName +
-                    "/" + serviceName + " Error: " + status.errorMessage);
-            return null;
-        }
-
-        Log.i(TAG, "Connected to the service: " + status.returnValue);
+        String connectionString = mgr.nativeConnectToServer(servicePackageName, serviceName, appName);
+        Log.i(TAG, "Connected to the service: " + connectionString);
         return (SdvConnectionManager) mgr;
     }
 
     @Override
-    public boolean createServer(String serverName, int port) {
-        ResultStatus status = nativeCreateServer(serverName, port);
-        if (status.statusCode == SdvGatewayStatusCode.OK) {
-            return true;
-        }
-
-        Log.e(TAG, "Creating rpc server failed with error " + status.errorMessage);
-        return false;
+    public void createServer(String serverName, int port) {
+        nativeCreateServer(serverName, port);
     }
 
     @Override
-    public boolean registerTopic(String topicName, long messageSize, long messageCount) {
-        ResultStatus status = nativeRegisterTopic(topicName, messageSize, messageCount);
-        if (status.statusCode == SdvGatewayStatusCode.OK) {
-            return true;
-        }
-
-        Log.e(TAG, "Registering DT topic failed with error " + status.errorMessage);
-        return false;
+    public void registerTopic(String topicName, long messageSize, long messageCount) {
+        nativeRegisterTopic(topicName, messageSize, messageCount);
     }
 
     @Override
-    public boolean publishToTopic(String topicName, byte[] message) {
-        ResultStatus status = nativePublishToTopic(topicName, message);
-        if (status.statusCode == SdvGatewayStatusCode.OK) {
-            return true;
-        }
-
-        Log.e(TAG, "Publish to topic failed with error " + status.errorMessage);
-        return false;
+    public void publishToTopic(String topicName, byte[] message) {
+        nativePublishToTopic(topicName, message);
     }
 
     @Override
@@ -208,7 +157,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
             mDataTunnelCallbacks.put(topicName, subsCallbacks);
 
             if (isNewTopicName) {
-                subscribeToTopic(topicName);
+                nativeSubscribeToTopic(topicName);
             }
         }
 
@@ -216,7 +165,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
     }
 
     @Override
-    public void onMessagesAvailable(String topicName, List<RawMessage> rawMessages) {
+    public void onMessagesAvailable(String topicName, List<byte[]> rawMessages) {
         Log.d(TAG, "onMessagesAvailable data tunnel callback for topic: " + topicName);
         synchronized (mDataTunnelListenerLock) {
             List<DataTunnelCallback> subsCallback = mDataTunnelCallbacks.get(topicName);
@@ -232,8 +181,9 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
                     continue;
                 }
 
-                for (RawMessage msg : rawMessages) {
-                    callback.onEvent(msg.data);
+
+                for (byte[] data : rawMessages) {
+                    callback.onEvent(data);
                 }
             }
         }
@@ -248,15 +198,8 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
     public ManagedChannel obtainSecureManagedChannel(
             String serverPackageName, String serverName, String clientName)
             throws IOException, StatusException {
-        ResultStatus status = nativeConnectToServer(serverPackageName, serverName, clientName);
-        if (status.statusCode != SdvGatewayStatusCode.OK) {
-            throw new StatusException(Status.NOT_FOUND.withDescription(serverName
-                      + " is not available, error: "
-                      + status.errorMessage
-                      + ", cannot create channel"));
-        }
 
-        String connectionString = status.returnValue;
+        String connectionString = nativeConnectToServer(serverPackageName, serverName, clientName);
         Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
         return obtainSecureManagedChannelInternal(connectionString);
     }
@@ -265,14 +208,8 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
     public ManagedChannel obtainInsecureManagedChannel(
             String serverPackageName, String serverName, String clientName)
             throws IOException, StatusException {
-        ResultStatus status = nativeConnectToServer(serverPackageName, serverName, clientName);
-        if (status.statusCode != SdvGatewayStatusCode.OK) {
-            throw new StatusException(Status.NOT_FOUND.withDescription(serverName
-                      + " is not available, error: "
-                      + status.errorMessage
-                      + ", cannot create channel"));
-        }
-
-        return obtainInsecureManagedChannelInternal(status.returnValue);
+        String connectionString = nativeConnectToServer(serverPackageName, serverName, clientName);
+        Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
+        return obtainInsecureManagedChannelInternal(connectionString);
     }
 }
