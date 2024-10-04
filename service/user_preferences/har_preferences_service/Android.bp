@@ -1,5 +1,7 @@
 // Copyright 2024 Google LLC
 
+// Deprecated: This package is no longer in-use on
+// APEX-based configurations.
 rust_binary {
     name: "har_preferences_service",
     crate_name: "har_preferences_service",
@@ -29,4 +31,41 @@ rust_binary {
     ],
     vendor_available: true,
     product_available: true,
+}
+
+// Service bundle library for Vehicle Data Publisher.
+rust_ffi_shared {
+    name: "libhar_preferences_service_bundle",
+    srcs: ["src/lib.rs"],
+    crate_name: "har_preferences_service_bundle",
+    rustlibs: [
+        // Contains service bundle interface definitions and helper macros.
+        "libsdv_lifecycle_client_rust",
+        // commstack library that provides context object reference.
+        "libsdv_comms_rs",
+        "libsdv_log_rust",
+        "liblog_rust",
+        "libprotobuf",
+        "librand",
+        "libfutures",
+        "libbinder_rs",
+        "libitertools",
+        "librustutils",
+        "libhar_grpc_services",
+        "libhar_sdv_rpc",
+        "libuser_preferences_api",
+        "libuser_preferences_utils",
+        "libsdvmiddleware_rpc",
+        "libsdvmiddleware_rpc_grpc_transport",
+        "libsdvgenerated_har_preferences_service",
+        "libsdvgenerated_rpc_sdv_user_preferences_user_preferences_registry_service",
+        "google.sdv.sd_common-aidl-V1-rust",
+    ],
+    // Allows the library to be available inside APEX.
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    // Service bundle package is packed into /product apexes.
+    product_specific: true,
 }

@@ -53,8 +53,12 @@ const CAMERA_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:8001";
 
 fn main() -> Result<(), ()> {
     // Allow time for Harry to start GRPC.
-    // TODO: Use the property trigger once it is fixed (sepolicy missing).
-    thread::sleep(Duration::from_secs(1));
+    // TODO: Use dependencies between SDV services to wait for
+    // other services to start, after moving this to a service bundle.
+    // A regular startup time for SDV service bundles appears
+    // to be around 15-17 seconds. Giving it 25 to make sure other services
+    // are up and running.
+    thread::sleep(Duration::from_secs(25));
 
     sdv_log::init_logger("har_sdv_service").unwrap();
 

@@ -41,6 +41,26 @@ pub fn get_fake_vehicle_data_publisher_service_bundle() -> ServiceFqin {
     }
 }
 
+/// Returns the HAR-SDV user preferences (base) service bundle fqin
+pub fn get_har_sdv_user_preferences_service_bundle() -> ServiceFqin {
+    ServiceFqin {
+        sdvVmName: "local-vm".to_owned(),
+        sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
+        serviceBundleName: "HarUserPreferencesServiceBundle".to_owned(),
+        serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
+    }
+}
+
+/// Returns the HAR user preferences service bundle fqin
+pub fn get_har_preferences_service_bundle() -> ServiceFqin {
+    ServiceFqin {
+        sdvVmName: "local-vm".to_owned(),
+        sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
+        serviceBundleName: "HarUserPreferencesServiceBundle".to_owned(),
+        serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
+    }
+}
+
 /// Returns the default timeout for SDV service bundle tests.
 /// This timeout should be long enough to have SDV services
 /// start after boot.

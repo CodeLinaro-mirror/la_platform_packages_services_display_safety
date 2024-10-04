@@ -20,3 +20,23 @@ service_instances {
   package_name: "com.sdv.google.display_safety.service_bundle_apex"
   vm_name: "vm-sdv"
 }
+
+# Produces a demo sequence of fake data and requests HarSdvVehicleDataPublisherServiceBundle
+# to publish them on SDV Data tunnel topics.
+service_instances {
+  config_alias: "HarUserPreferencesServiceBundle"
+  instance_name: "instance-1"
+  service_name: "com.sdv.google.display_safety.user_preverences.base"
+  package_name: "com.sdv.google.display_safety.service_bundle_apex"
+  vm_name: "vm-sdv"
+}
+
+# Produces a demo sequence of fake data and requests HarSdvVehicleDataPublisherServiceBundle
+# to publish them on SDV Data tunnel topics.
+service_instances {
+  config_alias: "HarSdvUserPreferencesServiceBundle"
+  instance_name: "instance-1"
+  service_name: "com.sdv.google.display_safety.har_user_preverences"
+  package_name: "com.sdv.google.display_safety.service_bundle_apex"
+  vm_name: "vm-sdv"
+}
