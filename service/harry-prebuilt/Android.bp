@@ -162,7 +162,7 @@ prebuilt_etc {
     srcs: [
         "data/locales/default.protobuf",
         "data/locales/fr.protobuf",
-        "data/locales/fr-rCA.protobuf",
+        "data/locales/fr-CA.protobuf",
     ],
     defaults: ["harry_res_defaults"],
     relative_install_path: "harry/locales",
