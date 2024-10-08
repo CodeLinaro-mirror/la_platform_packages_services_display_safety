@@ -23,6 +23,7 @@ use log::warn;
 use sdvgenerated::harry_vehicle_data_publisher::HarryVehicleDataPublisher;
 use sdvgenerated::harry_vehicle_data_publisher::HarryVehicleDataPublisherCallbacks;
 use std::sync::Arc;
+use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 
@@ -61,7 +62,8 @@ fn run_grpc_server(server_address: String, sdv_service: HarryVehicleDataPublishe
     let quota = ResourceQuota::new(Some("VehicleDataPublisherService")).resize_memory(1024 * 1024);
     let server_ch_builder = ChannelBuilder::new(env.clone()).set_resource_quota(quota);
 
-    let service = create_sdv_vehicle_data_grpc(VehicleDataGrpcServer::new(sdv_service));
+    let service =
+        create_sdv_vehicle_data_grpc(VehicleDataGrpcServer::new(Arc::new(Mutex::new(sdv_service))));
     let mut server = ServerBuilder::new(env.clone())
         .register_service(service)
         .channel_args(server_ch_builder.build_args())

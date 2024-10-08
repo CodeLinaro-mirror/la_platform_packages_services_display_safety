@@ -13,10 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This will package the HAR reference implementation as an APEX.
+# The used SDV services are also packaged as part of the HAR APEX or
+# in separate SDV Service Bundle(s).
+
 # Add product specific sepolicies
 BOARD_VENDOR_SEPOLICY_DIRS += \
     vendor/google/display_safety/service/product/harry_apex/sepolicy \
 
+# Allow HAR SDV Service Bundles to use sockets.
+SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += \
+    vendor/google/display_safety/service/product/har_sdv_service_bundle_apex/lifecycle/sepolicy \
+
 # Add Harry APEX bundle with all required packages.
 PRODUCT_PACKAGES += \
     com.google.display_safety.har \
+    com.sdv.google.display_safety.services_bundle.apex \
+

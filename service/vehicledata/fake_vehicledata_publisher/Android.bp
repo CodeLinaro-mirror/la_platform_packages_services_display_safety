@@ -1,5 +1,7 @@
 // Copyright 2024 Google LLC
 
+// Deprecated: This package is no longer in-use on
+// APEX-based configurations.
 rust_binary {
     name: "fake_vehicledata_publisher_service",
     crate_name: "fake_vehicledata_publisher_service",
@@ -20,4 +22,34 @@ rust_binary {
     ],
     vendor_available: true,
     product_available: true,
+}
+
+// Service bundle library for Vehicle Data Publisher.
+rust_ffi_shared {
+    name: "libhar_sdv_fake_vehicle_data_publisher_service_bundle",
+    srcs: ["src/lib.rs"],
+    crate_name: "har_sdv_fake_vehicle_data_publisher_service_bundle",
+    rustlibs: [
+        // Contains service bundle interface definitions and helper macros.
+        "libsdv_lifecycle_client_rust",
+        // commstack library that provides context object reference.
+        "libsdv_comms_rs",
+        "libsdv_log_rust",
+        "liblog_rust",
+        "liboem_harry_vehicle_messages_catalog",
+        "libharry_vehicle_data_grpc",
+        "libprotobuf",
+        "libgrpcio",
+        "librand",
+        "libtokio",
+        "libtokio_util",
+        "libfutures",
+    ],
+    // Allows the library to be available inside APEX.
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    // Service bundle package is packed into /product apexes.
+    product_specific: true,
 }
