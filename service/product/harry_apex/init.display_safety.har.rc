@@ -12,6 +12,20 @@ service har_sdv_service /apex/com.google.display_safety.har/bin/har_sdv_service
     oneshot
     disabled
 
+service fake_vehicledata_publisher_service /apex/com.google.display_safety.har/bin/fake_vehicledata_publisher_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
+service vehicledata_publisher_service /apex/com.google.display_safety.har/bin/vehicledata_publisher_service
+    class main
+    user root
+    group root
+    oneshot
+    disabled
+
 service har_user_preferences_service /apex/com.google.display_safety.har/bin/har_user_preferences_service
     class main
     user root
@@ -34,6 +48,10 @@ on property:apex.all.ready=true
     exec u:r:su:s0 -- /system/bin/sh /apex/com.google.display_safety.har/etc/com.google.display_safety.har.init_data_folder_apex.sh
     # Start the SDV User preferences service
     start har_user_preferences_service
+    # Start the SDV Vehicle data service
+    start vehicledata_publisher_service
+    # Start the mock data sender service
+    start fake_vehicledata_publisher_service
     # start the HAR application
     start harry
 

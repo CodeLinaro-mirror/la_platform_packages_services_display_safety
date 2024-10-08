@@ -110,8 +110,8 @@ impl VehicleDataGrpcServer {
     /// Creates a new GRPC server.
     ///
     /// * `service`: The SDV service to use to dispatch messages to.
-    pub fn new(service: Arc<Mutex<HarryVehicleDataPublisher>>) -> Self {
-        Self { service }
+    pub fn new(service: HarryVehicleDataPublisher) -> Self {
+        Self { service: Arc::new(Mutex::new(service)) }
     }
 
     fn send_to_sdv(

@@ -9,6 +9,8 @@ apex {
 
     binaries: [
         "harry",
+        "fake_vehicledata_publisher_service",
+        "vehicledata_publisher_service",
         "har_user_preferences_service",
         "har_preferences_service",
         "har_sdv_service",
