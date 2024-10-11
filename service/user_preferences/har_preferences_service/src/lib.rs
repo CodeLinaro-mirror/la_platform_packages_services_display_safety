@@ -3,6 +3,7 @@
 //! HAR Preferences Service declares the user preferences supported using
 //! some of the SDV User preferences APIs.
 
+use std::time::Duration;
 use std::sync::Arc;
 use sdvgenerated_har_preferences_service::sdv_user_preferences_user_preferences_registry_service_interface::UserPreferencesRegistryService;
 use crate::user_controllable_preferences_impl::UserControllablePreferencesServiceImpl;
@@ -42,6 +43,12 @@ impl ServiceBundle for HarUserPreferencesServiceBundle {
 
     /// Called when the service bundle is started by the system.
     fn on_start(&mut self) {
+        info!("HarUserPreferencesServiceBundle starting.");
+        // Sleeping 5 seconds as a workaronud to allow the base preferences to start first.
+        // TODO(369515367): Remove this workaround and wait for the service using Lifecycle API calls,
+        // or use a better solution.
+        std::thread::sleep(Duration::from_secs(2));
+
         // Initialize the SDV service.
         let settings = default_settings();
         let preferences_impl = Arc::new(UserControllablePreferencesServiceImpl::new(settings));

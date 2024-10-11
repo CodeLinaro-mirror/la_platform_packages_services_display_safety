@@ -1,13 +1,12 @@
 // Copyright 2024 Google LLC
 
-use futures::executor::block_on;
+use crate::common::GrpcProxyServerToken;
 use futures_util::FutureExt;
 use futures_util::TryFutureExt;
 use grpcio::ChannelBuilder;
 use grpcio::EnvBuilder;
 use grpcio::Environment;
 use grpcio::ResourceQuota;
-use grpcio::Server;
 use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
 use har_grpc_services::driverui::*;
@@ -24,16 +23,6 @@ use std::time::Duration;
 pub struct CameraServiceGrpcProxy {
     server_address: String,
     client_address: String,
-}
-
-/// A token for a running server. Dropping this will stop the server.
-pub struct GrpcProxyServerToken(Server);
-
-impl GrpcProxyServerToken {
-    /// Shutdown the server
-    pub fn shutdown(mut self) {
-        let _ = block_on(self.0.shutdown());
-    }
 }
 
 impl CameraServiceGrpcProxy {

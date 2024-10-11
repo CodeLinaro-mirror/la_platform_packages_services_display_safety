@@ -26,7 +26,6 @@ rust_binary {
         "libgrpcio",
         "libfutures_util",
         "libfutures",
-        "libhar_sdv_rpc",
         "google.sdv.sd_common-aidl-V1-rust",
     ],
     vendor_available: true,
@@ -36,14 +35,21 @@ rust_binary {
 // Service bundle library for Vehicle Data Publisher.
 rust_ffi_shared {
     name: "libhar_preferences_service_bundle",
+    enabled: select(soong_config_variable("SDV", "SDV_PREBUILT"), {
+        "true": false,
+        default: true,
+    }),
+    defaults: ["libhar_sdv_preferences_service_bundle_non_binary_pdk_dependencies"],
     srcs: ["src/lib.rs"],
     crate_name: "har_preferences_service_bundle",
+    prefer_rlib: true,
     rustlibs: [
         // Contains service bundle interface definitions and helper macros.
         "libsdv_lifecycle_client_rust",
         // commstack library that provides context object reference.
         "libsdv_comms_rs",
         "libsdv_log_rust",
+        "libhar_sdv_service_bundle_common",
         "liblog_rust",
         "libprotobuf",
         "librand",
@@ -52,7 +58,6 @@ rust_ffi_shared {
         "libitertools",
         "librustutils",
         "libhar_grpc_services",
-        "libhar_sdv_rpc",
         "libuser_preferences_api",
         "libuser_preferences_utils",
         "libsdvmiddleware_rpc",

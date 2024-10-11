@@ -1,0 +1,2 @@
+# Property trigger to tell the safetymonitor process is ready to accept connections.
+product.harplatform.safetymonitor u:object_r:product_harplatform_props:s0 exact string

@@ -5,13 +5,6 @@ service harry /apex/com.google.display_safety.har/bin/harry
     oneshot
     disabled
 
-service har_sdv_service /apex/com.google.display_safety.har/bin/har_sdv_service
-    class main
-    user root
-    group root
-    oneshot
-    disabled
-
 # Executing HAR and the data publisher at the earliest possible time.
 on property:apex.all.ready=true
     # Start fake camera
@@ -20,5 +13,3 @@ on property:apex.all.ready=true
     exec u:r:su:s0 -- /system/bin/sh /apex/com.google.display_safety.har/etc/com.google.display_safety.har.init_data_folder_apex.sh
     # start the HAR application
     start harry
-    # Start the HAR-SDV service
-    start har_sdv_service

@@ -18,8 +18,6 @@ use sdvgenerated_har_user_preferences_server::user_preferences_server::UserPrefe
 use std::sync::Arc;
 use user_preferences_service_impl::UserPreferencesServiceImpl;
 
-const BASE_USER_PREFERENCES_SERVICE_STARTED_PROPERTY: &str = "vendor.harplatform.userprefs.started";
-
 /// Service bundle for the User Preferences Service.
 pub struct HarSdvUserPreferencesServiceBundle {
     _context: ContextRef,
@@ -58,19 +56,6 @@ impl ServiceBundle for HarSdvUserPreferencesServiceBundle {
     /// Called when the service bundle is started by the system.
     fn on_start(&mut self) {
         self.sdv_service.start().unwrap_or_else(|err| panic!("Service starting failed: {:?}", err));
-
-        // TODO: remove this!! Not needed with lifecycle.
-        if let Err(e) = rustutils::system_properties::write(
-            BASE_USER_PREFERENCES_SERVICE_STARTED_PROPERTY,
-            "true",
-        ) {
-            log::error!(
-                "Error setting system property {}: {:?}",
-                BASE_USER_PREFERENCES_SERVICE_STARTED_PROPERTY,
-                e
-            );
-        }
-
         info!("Service bundle started.");
     }
 

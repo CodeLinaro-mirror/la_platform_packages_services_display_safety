@@ -1,7 +1,7 @@
 // Copyright 2024 Google LLC
 
-use crate::HashMapTopicMapper;
-use crate::SdvToHarMapper;
+use crate::mapper::HashMapTopicMapper;
+use crate::mapper::SdvToHarMapper;
 use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
 use log::debug;
 use log::info;
@@ -13,7 +13,6 @@ use user_preferences_api::change_notifier::{OnSettingsChangeRequest, OnSettingsC
 use user_preferences_api::setting::Setting;
 use user_preferences_utils::print_settings;
 
-use crate::send_data_blocking;
 use grpcio::ClientDuplexSender;
 use har_grpc_services::vehicledata::VehicleData;
 use std::sync::Mutex;
@@ -23,6 +22,7 @@ use protobuf::MessageField;
 use user_preferences_api::user_preferences_management_service::SubscribeToSettingsChangeAndGetSettingsRequest;
 use sdvgenerated_har_preferences_client::sdv_user_preferences_user_preferences_management_service_interface::UserPreferencesManagementService;
 use user_preferences_api::setting::SettingAndConstraints;
+use crate::integrations::send_data_blocking;
 
 pub(crate) const SETTINGS_GROUP_NAME: &str = "HAR";
 pub(crate) const HAR_PREFERENCES_SERVICE_FQIN: &str = "HarPreferencesService";

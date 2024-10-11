@@ -8,7 +8,6 @@ apex {
     certificate: ":com.google.display_safety.har.certificate",
     binaries: [
         "harry_app_prebuilt",
-        "har_sdv_service",
         "har_preferences_admin",
     ],
     compile_multilib: "both",
@@ -44,7 +43,6 @@ apex {
     certificate: ":com.google.display_safety.har.certificate",
     binaries: [
         "harry_app_stub",
-        "har_sdv_service",
         "har_preferences_admin",
     ],
     compile_multilib: "both",

@@ -12,6 +12,7 @@ apex {
         "libhar_sdv_fake_vehicle_data_publisher_service_bundle",
         "libhar_sdv_user_preferences_service_bundle",
         "libhar_preferences_service_bundle",
+        "libhar_sdv_service_bundle",
     ],
     prebuilts: [
         // SDV service bundles manifest file.
@@ -26,6 +27,8 @@ apex {
         "HarSdvUserPreferencesServiceBundle-orch-config",
         // Orchestration config to start the HAR preferences bundle.
         "HarUserPreferencesServiceBundle-orch-config",
+        // Orchestration config to start the HAR-SDV bundle.
+        "HarSdvServiceBundle-orch-config",
     ],
     // Json manifest file describes metadata of the APEX package.
     // The 'name' filed from the json is used as mounting point.
@@ -100,6 +103,17 @@ prebuilt_etc {
     // The source name of the manifest file.
     src: "HarUserPreferencesServiceBundleOrchestration.textproto",
     filename: "HarUserPreferencesServiceBundleOrchestration.textproto",
+    sub_dir: "config/orchestration",
+    // Disable direct installation of the manifest to one of the partitions.
+    // The manifest will be used only inside of service bundles registry apexes.
+    installable: false,
+}
+
+prebuilt_etc {
+    name: "HarSdvServiceBundle-orch-config",
+    // The source name of the manifest file.
+    src: "HarSdvServiceBundleOrchestration.textproto",
+    filename: "HarSdvServiceBundleOrchestration.textproto",
     sub_dir: "config/orchestration",
     // Disable direct installation of the manifest to one of the partitions.
     // The manifest will be used only inside of service bundles registry apexes.

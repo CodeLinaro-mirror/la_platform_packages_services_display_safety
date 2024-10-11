@@ -1,7 +1,6 @@
 # Defines file types within the APEX.
 (/.*)?                                                  u:object_r:vendor_file:s0
 /bin/harry                                              u:object_r:vendor_harplatform_exec:s0
-/bin/har_sdv_service                                    u:object_r:vendor_harplatform_exec:s0
 /bin/har_preferences_admin                              u:object_r:vendor_harplatform_exec:s0
 /lib(64)?(/.*)?                                         u:object_r:vendor_harplatform_lib_file:s0
 /etc/com.google.display_safety.har.init_data_folder.sh  u:object_r:vendor_harplatform_exec:s0

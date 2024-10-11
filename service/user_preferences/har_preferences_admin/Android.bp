@@ -24,7 +24,6 @@ rust_binary {
         "libgrpcio",
         "libfutures_util",
         "libfutures",
-        "libhar_sdv_rpc",
         "google.sdv.sd_common-aidl-V1-rust",
     ],
     vendor_available: true,

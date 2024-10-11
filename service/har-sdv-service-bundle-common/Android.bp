@@ -1,0 +1,60 @@
+// Copyright 2024 Google LLC
+
+rust_library {
+    name: "libhar_sdv_service_bundle_common",
+    defaults: ["libhar_sdv_service_bundle_common_non_binary_pdk_dependencies"],
+    crate_name: "har_sdv_service_bundle_common",
+    srcs: [
+        "src/lib.rs",
+    ],
+
+    prefer_rlib: true,
+    rustlibs: [
+        "liblog_rust",
+        "google.sdv.identity-aidl-V1-rust",
+        "google.sdv.sd_common-aidl-V1-rust",
+        "libsdv_lifecycle_client_rust",
+    ],
+    apex_available: [
+        "//apex_available:platform",
+        "//apex_available:anyapex",
+    ],
+    product_specific: true,
+}
+
+// These two Soong module definitions provide the basis to enable or disable certain
+// dependencies whether we are compiling with the binary PDK or not.
+// In the case we compile with the binary PDK, we set the environment variable SDV_PREBUILT to true
+// (export SDV_PREBUILT=true), which is picked up by the build system in
+// device/google/sdv/sdv_base/soong_config.mk and then put into the variable with the same name
+// in the SDV namespace.
+//
+// The Soong variable SDV_PREBUILT is true, when we built with the binary PDK, else it is false.
+
+soong_config_module_type {
+    name: "sdv_sdv_prebuilt_rust_defaults",
+    module_type: "rust_defaults",
+    config_namespace: "SDV",
+    bool_variables: ["SDV_PREBUILT"],
+    properties: [
+        "enabled",
+        "rustlibs",
+    ],
+}
+
+sdv_sdv_prebuilt_rust_defaults {
+    name: "libhar_sdv_service_bundle_common_non_binary_pdk_dependencies",
+    // Add the lifecycle client for all cases where SDV_PREBUILT is false (i.e., all cases where we don't built the binary PDK)
+    rustlibs: [
+        // Contains service bundle interface definitions and helper macros.
+        "libsdv_lifecycle_client_rust",
+        "google.sdv.lifecycle-V1-rust",
+    ],
+    soong_config_variables: {
+        SDV_PREBUILT: {
+            enabled: false,
+            // Do not add the lifecycle client for all cases where SDV_PREBUILT is true (when we built with the binary PDK)
+            rustlibs: [],
+        },
+    },
+}

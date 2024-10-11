@@ -9,3 +9,4 @@ allow untrusted_service_bundle proc_net:file { getattr open read };
 allow untrusted_service_bundle self:tcp_socket { accept bind getattr getopt listen read setopt write };
 allow untrusted_service_bundle port:tcp_socket name_connect;
 allow untrusted_service_bundle self:tcp_socket { connect create };
+

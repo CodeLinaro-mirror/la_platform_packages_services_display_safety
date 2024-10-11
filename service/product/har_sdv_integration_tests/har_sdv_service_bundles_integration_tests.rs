@@ -36,7 +36,7 @@ mod tests {
 
     #[test]
     fn test_har_sdv_user_preferences_service_bundle_running() {
-        // fake_vehicle_data_publisher_service_bundle must be running after boot.
+        // har_sdv_user_preferences_service_bundle must be running after boot.
         assert_service_is_started(
             &get_har_sdv_user_preferences_service_bundle(),
             default_sdv_test_timeout(),
@@ -45,10 +45,16 @@ mod tests {
 
     #[test]
     fn test_har_preferences_service_bundle_running() {
-        // fake_vehicle_data_publisher_service_bundle must be running after boot.
+        // har_preferences_service_bundle must be running after boot.
         assert_service_is_started(
             &get_har_preferences_service_bundle(),
             default_sdv_test_timeout(),
         );
+    }
+
+    #[test]
+    fn test_har_sdv_service_bundle_running() {
+        // har_sdv_service_bundle must be running after boot.
+        assert_service_is_started(&get_har_sdv_service_bundle(), default_sdv_test_timeout());
     }
 }
