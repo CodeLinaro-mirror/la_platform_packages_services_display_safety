@@ -2,6 +2,10 @@
 
 apex {
     name: "com.sdv.google.display_safety.services_bundle.apex",
+    enabled: select(soong_config_variable("SDV", "SDV_PREBUILT"), {
+        "true": false,
+        default: true,
+    }),
     // The service bundle(s) to be included in the apex.
     native_shared_libs: [
         "libhar_sdv_vehicle_data_publisher_service_bundle",
@@ -31,7 +35,7 @@ apex {
     product_specific: true,
 }
 
-// SDV manifest file with the vehicle data sernder and fake demo sequence.
+// SDV manifest file with the vehicle data sender and fake demo sequence.
 prebuilt_etc {
     name: "com.sdv.google.display_safety.services_bundle.apex.service_bundles_manifest",
     // The source filename of the manifest file.

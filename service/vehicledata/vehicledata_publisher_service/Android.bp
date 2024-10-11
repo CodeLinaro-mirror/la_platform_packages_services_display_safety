@@ -56,11 +56,10 @@ rust_binary {
 // Service bundle library for Vehicle Data Publisher.
 rust_ffi_shared {
     name: "libhar_sdv_vehicle_data_publisher_service_bundle",
+    defaults: ["libhar_sdv_vehicle_data_publisher_service_bundle_non_binary_pdk_dependencies"],
     srcs: ["src/lib.rs"],
     crate_name: "har_sdv_vehicle_data_publisher_service_bundle",
     rustlibs: [
-        // Contains service bundle interface definitions and helper macros.
-        "libsdv_lifecycle_client_rust",
         // commstack library that provides context object reference.
         "libsdv_comms_rs",
         "libsdv_log_rust",
