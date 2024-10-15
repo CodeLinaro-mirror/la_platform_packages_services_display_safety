@@ -7,10 +7,6 @@ package {
 
 rust_library {
     name: "libhar_sdv_orch_tests_common",
-    enabled: select(soong_config_variable("SDV", "SDV_PREBUILT"), {
-        "true": false,
-        default: true,
-    }),
     srcs: [
         "common/lib.rs",
     ],
@@ -27,12 +23,6 @@ rust_library {
 
 rust_test {
     name: "har_sdv_service_bundles_integration_tests",
-    enabled: select(soong_config_variable("SDV", "SDV_PREBUILT"), {
-        // Don't execute these tests when we build with the binary PDK
-        // Therefore, we have the inversion below, we run with the binary PDK (variable is true) => false
-        "true": false,
-        default: true,
-    }),
     srcs: [
         "har_sdv_service_bundles_integration_tests.rs",
     ],

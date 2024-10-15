@@ -27,7 +27,6 @@ rust_binary {
 // Service bundle library for Vehicle Data Publisher.
 rust_ffi_shared {
     name: "libhar_sdv_fake_vehicle_data_publisher_service_bundle",
-    defaults: ["libhar_sdv_vehicle_data_publisher_service_bundle_non_binary_pdk_dependencies"],
     srcs: ["src/lib.rs"],
     crate_name: "har_sdv_fake_vehicle_data_publisher_service_bundle",
     rustlibs: [
