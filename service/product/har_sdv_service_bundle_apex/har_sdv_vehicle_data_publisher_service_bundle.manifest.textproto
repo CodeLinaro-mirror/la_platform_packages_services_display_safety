@@ -1,0 +1,30 @@
+# proto-file: //system/software_defined_vehicle/core_services/service_bundles_registry/proto/sdv_service_bundles_manifest.proto
+# proto-message: SdvServiceBundleManifestEntry
+
+# SDV service bundle publishing vehicle data
+sdv_service_bundle_metadata {
+  # Service bundle name.
+  name: "HarSdvVehicleDataPublisherServiceBundle"
+  # Service bundle integer version.
+  version_number: 1
+  # Service bundle version as a string.
+  version_name: "1.alpha"
+  # Service bundle library path.
+  native_library_path: "lib64/libhar_sdv_vehicle_data_publisher_service_bundle.so"
+
+  orchestration_config_path: "etc/config/orchestration/VehicleDataServiceBundleOrchestration.textproto"
+}
+
+# SDV service bundle producing fake data for HarSdvVehicleDataPublisherServiceBundle
+sdv_service_bundle_metadata {
+  # Service bundle name.
+  name: "HarSdvFakeVehicleDataPublisherServiceBundle"
+  # Service bundle integer version.
+  version_number: 1
+  # Service bundle version as a string.
+  version_name: "1.alpha"
+  # Service bundle library path.
+  native_library_path: "lib64/libhar_sdv_fake_vehicle_data_publisher_service_bundle.so"
+
+  orchestration_config_path: "etc/config/orchestration/FakeVehicleDataServiceBundleOrchestration.textproto"
+}

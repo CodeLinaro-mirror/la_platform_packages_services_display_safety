@@ -1,0 +1,52 @@
+// Copyright 2024 Google LLC
+
+package {
+    // TODO(371470249): Set Display Safety team.
+    default_team: "trendy_team_auto_engprod",
+}
+
+rust_library {
+    name: "libhar_sdv_orch_tests_common",
+    srcs: [
+        "common/lib.rs",
+    ],
+    crate_name: "har_sdv_orch_tests_common",
+    rustlibs: [
+        "google.sdv.lifecycle-V1-rust",
+        "liblog_rust",
+        // SDV Orchestrator uses ServiceFqin to communicate with Lifecycle manager API
+        "google.sdv.identity-aidl-V1-rust",
+        "libbinder_rs",
+        "librustutils",
+    ],
+}
+
+rust_test {
+    name: "har_sdv_service_bundles_integration_tests",
+    srcs: [
+        "har_sdv_service_bundles_integration_tests.rs",
+    ],
+    rustlibs: [
+        "liblog_rust",
+        "google.sdv.lifecycle-V1-rust",
+        // Orchestrator uses ServiceFqin to communicate with Lifecycle manager API
+        "google.sdv.identity-aidl-V1-rust",
+        "libsdv_orch_api",
+        "libsdv_vpm_api",
+        "libnamed_lock",
+        "libbinder_rs",
+        "librustutils",
+        "libhar_sdv_orch_tests_common",
+        "libtokio",
+        "libsdv_orch",
+    ],
+    test_options: {
+        unit_test: false,
+    },
+    auto_gen_config: true,
+    compile_multilib: "first",
+    system_ext_specific: true,
+    prefer_rlib: true,
+    // Requires root so the test can perform Binder calls to the lifecycle manager
+    require_root: true,
+}
