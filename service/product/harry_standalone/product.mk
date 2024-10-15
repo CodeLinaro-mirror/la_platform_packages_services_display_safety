@@ -15,8 +15,6 @@
 
 # This contains the setup required to run Harry on SDV media.
 # In this configuration Harry is the only app drawing on the display.
-# All binaries and packages are packaged as executables installed on the
-# system, without using APEXes.
 
 # Check if the home dir was defined.
 ifeq ($(DISPLAY_SAFETY_HOME),)
