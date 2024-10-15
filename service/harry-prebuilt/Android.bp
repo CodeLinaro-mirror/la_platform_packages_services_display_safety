@@ -128,9 +128,6 @@ prebuilt_etc {
     name: "harry_res_documents",
     srcs: [
         "data/SB6ME0eT2ku8rFT7Y3eBX8",
-        "data/GLJJrR1JI4HVEjL1qB40zq",
-        "data/SqyhHN0IUVYPP4qB3NyWW9",
-        "data/MdvJSKWuTjjLIXlNHZB2Au",
     ],
     defaults: ["harry_res_defaults"],
 }
