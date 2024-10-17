@@ -41,7 +41,6 @@ rust_test {
         "google.sdv.lifecycle-V1-rust",
         // Orchestrator uses ServiceFqin to communicate with Lifecycle manager API
         "google.sdv.identity-aidl-V1-rust",
-        "libsdv_orch_api",
         "libsdv_vpm_api",
         "libnamed_lock",
         "libbinder_rs",
