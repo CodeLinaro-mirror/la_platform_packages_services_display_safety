@@ -36,6 +36,7 @@ cc_prebuilt_binary {
         "libgbm",
         "liblog",
         "libEGL",
+        "libimpeller",
     ],
     vendor: true,
 }
@@ -63,6 +64,32 @@ cc_prebuilt_binary {
     },
     shared_libs: [
         "libhar_graphics",
+    ],
+}
+
+// The Impeller library is built by the Flutter team and fetched from
+// https://storage.googleapis.com/flutter_infra_release/flutter
+// See go/flutter-slsa-bcid-status for SLSA/BCID information.
+cc_prebuilt_library_shared {
+    name: "libimpeller",
+    vendor: true,
+
+    target: {
+        android_arm: {
+            srcs: ["arm/libimpeller.so"],
+        },
+        android_arm64: {
+            srcs: ["arm64/libimpeller.so"],
+        },
+        android_x86: {
+            srcs: ["x86/libimpeller.so"],
+        },
+        android_x86_64: {
+            srcs: ["x86_64/libimpeller.so"],
+        },
+    },
+    shared_libs: [
+        "liblog",
     ],
 }
 
