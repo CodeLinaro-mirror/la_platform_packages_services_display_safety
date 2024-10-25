@@ -34,7 +34,7 @@ impl ServiceBundle for HarSdvUserPreferencesServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarSdvUserPreferencesServiceBundle {
-        sdv_log::init_logger("har_sdv_user_preferences_bundle").unwrap();
+        let _ = sdv_log::init_logger("har_sdv_user_preferences_bundle");
         info!("Creating service bundle.");
         // Initialize the SDV service.
         let user_preferences_impl = Arc::new(UserPreferencesServiceImpl::new());

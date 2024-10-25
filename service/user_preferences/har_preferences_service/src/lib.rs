@@ -35,7 +35,7 @@ impl ServiceBundle for HarUserPreferencesServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarUserPreferencesServiceBundle {
-        sdv_log::init_logger("har_user_preferences_bundle").unwrap();
+        let _ = sdv_log::init_logger("har_user_preferences_bundle");
         info!("Creating service bundle.");
 
         HarUserPreferencesServiceBundle { _context, preferences_service: None }

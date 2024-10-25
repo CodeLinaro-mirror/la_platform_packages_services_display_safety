@@ -117,7 +117,7 @@ impl ServiceBundle for HarSdvServiceBundle {
 
     /// Called when the service bundle is started by the system.
     fn on_start(&mut self) {
-        sdv_log::init_logger("har_sdv_service_sb").unwrap();
+        let _ = sdv_log::init_logger("har_sdv_service_sb");
         // Make sure dependent services are running.
         wait_for_sdv_services_ready(Duration::from_secs(30)).expect("SDV services failed to start");
 

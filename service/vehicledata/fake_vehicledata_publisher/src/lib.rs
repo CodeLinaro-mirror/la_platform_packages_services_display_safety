@@ -50,7 +50,7 @@ impl ServiceBundle for HarSdvFakeVehicleDataPublisherServiceBundle {
 
     /// Called when the service bundle is started by the system.
     fn on_start(&mut self) {
-        sdv_log::init_logger("fake_vehicledata_publisher_sb").unwrap();
+        let _ = sdv_log::init_logger("fake_vehicledata_publisher_sb");
         let mut running_task = self.running_task.lock().unwrap();
         if running_task.is_some() {
             warn!("on_start: Task already running");

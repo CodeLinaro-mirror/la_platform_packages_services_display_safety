@@ -46,7 +46,7 @@ impl ServiceBundle for HarSdvVehicleDataPublisherServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarSdvVehicleDataPublisherServiceBundle {
-        sdv_log::init_logger("sdv_vehicledata_publisher_sb").unwrap();
+        let _ = sdv_log::init_logger("sdv_vehicledata_publisher_sb");
         info!("Creating service bundle.");
         // Initialize the SDV service.
         let sdv_service = Arc::new(Mutex::new(HarryVehicleDataPublisher::new(
