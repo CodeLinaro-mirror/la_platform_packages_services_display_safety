@@ -12,6 +12,7 @@ use crate::settings::SETTINGS_GROUP_NAME;
 use user_preferences_api::user_preferences_registry_service::RegisterSettingsRequest;
 use sdvgenerated_har_preferences_service::har_preferences_service::HarPreferencesService;
 use log::info;
+use log::warn;
 use crate::settings::default_settings;
 
 mod settings;
@@ -35,7 +36,8 @@ impl ServiceBundle for HarUserPreferencesServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarUserPreferencesServiceBundle {
-        let _ = sdv_log::init_logger("har_user_preferences_bundle");
+        sdv_log::init_logger("har_user_preferences_bundle")
+            .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
         info!("Creating service bundle.");
 
         HarUserPreferencesServiceBundle { _context, preferences_service: None }

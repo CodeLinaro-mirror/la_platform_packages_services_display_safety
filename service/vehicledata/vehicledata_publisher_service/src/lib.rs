@@ -19,6 +19,7 @@ use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
 use harry_vehicle_data_grpc::vehicledata_grpc_service_grpc::*;
 use log::info;
+use log::warn;
 use sdvgenerated::harry_vehicle_data_publisher::HarryVehicleDataPublisher;
 use sdvgenerated::harry_vehicle_data_publisher::HarryVehicleDataPublisherCallbacks;
 use std::sync::Arc;
@@ -46,7 +47,8 @@ impl ServiceBundle for HarSdvVehicleDataPublisherServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarSdvVehicleDataPublisherServiceBundle {
-        let _ = sdv_log::init_logger("sdv_vehicledata_publisher_sb");
+        sdv_log::init_logger("sdv_vehicledata_publisher_sb")
+            .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
         info!("Creating service bundle.");
         // Initialize the SDV service.
         let sdv_service = Arc::new(Mutex::new(HarryVehicleDataPublisher::new(

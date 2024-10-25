@@ -14,6 +14,7 @@ mod user_preferences_service_impl;
 mod vehicle_configuration;
 
 use log::info;
+use log::warn;
 use sdvgenerated_har_user_preferences_server::user_preferences_server::UserPreferencesServer;
 use std::sync::Arc;
 use user_preferences_service_impl::UserPreferencesServiceImpl;
@@ -34,7 +35,8 @@ impl ServiceBundle for HarSdvUserPreferencesServiceBundle {
     /// Context object is provided as a parameter that gives access to the
     /// communication stack APIs.
     fn new(_context: ContextRef) -> HarSdvUserPreferencesServiceBundle {
-        let _ = sdv_log::init_logger("har_sdv_user_preferences_bundle");
+        sdv_log::init_logger("har_sdv_user_preferences_bundle")
+            .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
         info!("Creating service bundle.");
         // Initialize the SDV service.
         let user_preferences_impl = Arc::new(UserPreferencesServiceImpl::new());

@@ -7,6 +7,7 @@ use crate::integrations::register_har_sdv_driverui_proxy;
 use crate::sdv_service_utils::wait_for_sdv_services_ready;
 
 use log::info;
+use log::warn;
 use std::time::Duration;
 
 use crate::integrations::create_topic_map;
@@ -117,7 +118,8 @@ impl ServiceBundle for HarSdvServiceBundle {
 
     /// Called when the service bundle is started by the system.
     fn on_start(&mut self) {
-        let _ = sdv_log::init_logger("har_sdv_service_sb");
+        sdv_log::init_logger("har_sdv_service_sb")
+            .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
         // Make sure dependent services are running.
         wait_for_sdv_services_ready(Duration::from_secs(30)).expect("SDV services failed to start");
 
