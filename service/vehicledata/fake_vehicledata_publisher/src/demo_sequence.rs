@@ -27,8 +27,10 @@ pub fn create_demo_sequence() -> Vec<Task> {
         // Seatbelt warning is on.  Seatbelt warning turns off after
         // a couple of seconds indicating driver put on seatbelt.
         .and_then(Task::set_telltale_alert(Telltale::SEATBELT_DRIVER, true))
+        .and_then(Task::set_telltale_alert(Telltale::LOW_TIRE_PRESSURE, true))
         .and_then(Task::delay(Duration::from_secs(4)))
         .and_then(Task::set_telltale_alert(Telltale::SEATBELT_DRIVER, false))
+        .and_then(Task::set_telltale_alert(Telltale::LOW_TIRE_PRESSURE, false))
         // Gear shifts to Reverse for about 5 seconds
         .and_then(Task::set_gear(Gear::R))
         .and_then(Task::change_speed(
