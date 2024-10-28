@@ -2,13 +2,13 @@
   "chimes": [
     {
       "id": "alert_mono",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/alert.mono.48000.wav",
+      "path": "/data/vendor/com.google.display_safety.har/assets/common/chimes/alert.mono.48000.wav",
       "lazy_load": false,
       "overrun_behavior": "ABORT"
     },
     {
       "id": "welcome_to_harry_mono",
-      "path": "/data/vendor/com.google.display_safety.har/chimes/welcome_to_harry.mono.48000.wav",
+      "path": "/data/vendor/com.google.display_safety.har/assets/common/chimes/welcome_to_harry.mono.48000.wav",
       "lazy_load": true,
       "overrun_behavior": "RESUME_WHEN_AVAILABLE"
     }

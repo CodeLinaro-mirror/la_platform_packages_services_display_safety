@@ -1,0 +1,17 @@
+{
+  "document_id": "SB6ME0eT2ku8rFT7Y3eBX8",
+  "displays": [
+    {
+      "id": 1,
+      "width": 1920,
+      "height": 720,
+      "root_node_id": "#HAR-stage"
+    },
+    {
+      "id": 2,
+      "width": 1920,
+      "height": 720,
+      "root_node_id": "#HAR-stage"
+    }
+  ]
+}

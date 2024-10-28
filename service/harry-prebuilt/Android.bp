@@ -95,102 +95,106 @@ cc_prebuilt_library_shared {
 
 // Defaults for resource file modules
 prebuilt_defaults {
-    name: "harry_res_defaults",
-    relative_install_path: "harry",
+    name: "harry_asset_defaults",
+    relative_install_path: "harry/assets",
     vendor: true,
 }
 
-// All resource file has to declare its own module.
+// TODO this needs to be turned into a genrule
 prebuilt_etc {
-    name: "harry_res_config",
-    src: "data/harry-config.json",
-    defaults: ["harry_res_defaults"],
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_config",
-    src: "data/harry-audio-device-config.json",
-    defaults: ["harry_res_defaults"],
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_chimes_config",
-    src: "data/harry-chimes-config.json",
-    defaults: ["harry_res_defaults"],
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_audio_chimes",
+    name: "harry_resource_archive",
     srcs: [
-        "data/chimes/welcome_to_harry.mono.48000.wav",
-        "data/chimes/alert.mono.48000.wav",
+        "data/assets/resources.tar",
     ],
-    defaults: ["harry_res_defaults"],
-    relative_install_path: "harry/chimes",
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets",
 }
 
 prebuilt_etc {
-    name: "harry_res_camera_config",
-    src: "data/harry-camera-config-android.json",
-    defaults: ["harry_res_defaults"],
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_emulated_camera_config",
-    src: "data/harry-camera-config-emulated.json",
-    defaults: ["harry_res_defaults"],
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_camera_emulation_source",
-    src: "data/camera/camera_emulation.mp4",
-    defaults: ["harry_res_defaults"],
-    relative_install_path: "harry/camera",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
-    name: "harry_res_documents",
+    name: "harry_asset_audio",
     srcs: [
-        "data/SB6ME0eT2ku8rFT7Y3eBX8",
+        "data/assets/common/chimes/welcome_to_harry.mono.48000.wav",
+        "data/assets/common/chimes/alert.mono.48000.wav",
     ],
-    defaults: ["harry_res_defaults"],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/chimes",
+}
+
+prebuilt_etc {
+    name: "harry_asset_camera",
+    srcs: [
+        "data/assets/common/camera/camera_emulation.mp4",
+    ],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/camera",
+}
+
+prebuilt_etc {
+    name: "harry_asset_common_configs",
+    srcs: [
+        "data/assets/common/config/harry-camera-config-emulated.json",
+        "data/assets/common/config/harry-config.json",
+    ],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/config",
+}
+
+prebuilt_etc {
+    name: "harry_asset_sdv_configs",
+    srcs: [
+        "data/assets/sdv/config/harry-camera-config-android.json",
+        "data/assets/sdv/config/harry-audio-device-config.json",
+        "data/assets/sdv/config/harry-chimes-config.json",
+    ],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/sdv/config",
+}
+
+prebuilt_etc {
+    name: "harry_asset_documents",
+    srcs: [
+        "data/assets/common/figma/SB6ME0eT2ku8rFT7Y3eBX8",
+    ],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/figma",
 }
 
 // Fonts
 prebuilt_etc {
-    name: "harry_res_fonts",
+    name: "harry_asset_fonts",
     srcs: [
-        "data/inter_black.otf",
-        "data/inter_bold.otf",
-        "data/inter_regular.otf",
-        "data/NotoSans-Black.ttf",
-        "data/NotoSans-Bold.ttf",
-        "data/NotoSans-ExtraBold.ttf",
-        "data/NotoSans-ExtraLight.ttf",
-        "data/NotoSans-Light.ttf",
-        "data/NotoSans-Medium.ttf",
-        "data/NotoSans-Regular.ttf",
-        "data/NotoSans-SemiBold.ttf",
-        "data/NotoSans-Thin.ttf",
-        "data/PTSansNarrow-Bold.ttf",
-        "data/PTSansNarrow-Regular.ttf",
+        "data/assets/common/localization/fonts/inter_black.otf",
+        "data/assets/common/localization/fonts/inter_bold.otf",
+        "data/assets/common/localization/fonts/inter_regular.otf",
+        "data/assets/common/localization/fonts/NotoSans-Black.ttf",
+        "data/assets/common/localization/fonts/NotoSans-Bold.ttf",
+        "data/assets/common/localization/fonts/NotoSans-ExtraBold.ttf",
+        "data/assets/common/localization/fonts/NotoSans-ExtraLight.ttf",
+        "data/assets/common/localization/fonts/NotoSans-Light.ttf",
+        "data/assets/common/localization/fonts/NotoSans-Medium.ttf",
+        "data/assets/common/localization/fonts/NotoSans-Regular.ttf",
+        "data/assets/common/localization/fonts/NotoSans-SemiBold.ttf",
+        "data/assets/common/localization/fonts/NotoSans-Thin.ttf",
+        "data/assets/common/localization/fonts/PTSansNarrow-Bold.ttf",
+        "data/assets/common/localization/fonts/PTSansNarrow-Regular.ttf",
+        "data/assets/common/localization/fonts/Roboto-Black.ttf",
+        "data/assets/common/localization/fonts/Roboto-Bold.ttf",
+        "data/assets/common/localization/fonts/Roboto-Light.ttf",
+        "data/assets/common/localization/fonts/Roboto-Medium.ttf",
+        "data/assets/common/localization/fonts/Roboto-Regular.ttf",
+        "data/assets/common/localization/fonts/Roboto-Thin.ttf",
     ],
-    defaults: ["harry_res_defaults"],
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/localization/fonts/",
 }
 
 prebuilt_etc {
-    name: "harry_res_locales",
+    name: "harry_asset_locales",
     srcs: [
-        "data/locales/default.protobuf",
-        "data/locales/fr.protobuf",
-        "data/locales/fr-CA.protobuf",
+        "data/assets/common/localization/locales/default.protobuf",
+        "data/assets/common/localization/locales/fr.protobuf",
+        "data/assets/common/localization/locales/fr-CA.protobuf",
     ],
-    defaults: ["harry_res_defaults"],
-    relative_install_path: "harry/locales",
+    defaults: ["harry_asset_defaults"],
+    relative_install_path: "harry/assets/common/localization/locales/",
 }
