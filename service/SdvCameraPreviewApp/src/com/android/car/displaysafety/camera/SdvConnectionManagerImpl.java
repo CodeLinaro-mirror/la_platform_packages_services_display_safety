@@ -22,10 +22,8 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import google.sdv.gateway.RawMessage;
 import google.sdv.gateway.client.SdvGatewayClient;
 import google.sdv.gateway.client.SdvGatewayRuntimeException;
-import google.sdv.gateway.client.TopicDataListener;
 import google.sdv.gateway.client.SdvGatewayClient;
 
 import io.grpc.ChannelCredentials;

@@ -48,7 +48,7 @@ sdvcamerapreviewapp_config_cc_defaults {
                 "libsdv_dt_core",
             ],
             static_libs: [
-                "libsdvgateway",
+                "libsdvgateway_old",
             ],
             srcs: ["JniMethods.cpp"],
         },

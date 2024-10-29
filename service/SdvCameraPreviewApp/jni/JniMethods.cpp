@@ -20,7 +20,6 @@
 #include "libsdv_dt.h"
 
 #include <aidl/google/sdv/gateway/PublicKey.h>
-#include <aidl/google/sdv/gateway/RawMessage.h>
 #include <aidl/google/sdv/gateway/SdvGatewayStatusCode.h>
 #include <android-base/logging.h>
 #include <log/log.h>
@@ -35,9 +34,9 @@
 namespace {
 
 using aidl::google::sdv::gateway::PublicKey;
-using aidl::google::sdv::gateway::RawMessage;
 using aidl::google::sdv::gateway::SdvGatewayStatusCode;
 using android::sdv::dt::SubscriptionNotificationType;
+using android::sdv::gateway::RawMessage;
 using android::sdv::gateway::SdvGatewayImpl;
 using android::sdv::gateway::SdvGatewayResult;
 

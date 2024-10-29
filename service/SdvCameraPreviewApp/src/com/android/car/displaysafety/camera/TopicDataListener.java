@@ -16,11 +16,10 @@
 
 package com.android.car.displaysafety.camera;
 
-import google.sdv.gateway.RawMessage;
 import java.util.List;
 
 /** Listener for receiving DT data updates for a topic. */
 // TODO: b/347569668 - Remove once the JNI implementation is removed.
 public interface TopicDataListener {
-    public void onMessagesAvailable(String topicName, List<RawMessage> messages);
+    public void onMessagesAvailable(String topicName, List<byte[]> messages);
 }
