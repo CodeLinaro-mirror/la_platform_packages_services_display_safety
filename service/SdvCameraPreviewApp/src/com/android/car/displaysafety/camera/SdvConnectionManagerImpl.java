@@ -16,91 +16,53 @@
 
 package com.android.car.displaysafety.camera;
 
+import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import google.sdv.gateway.client.SdvGatewayClient;
 import google.sdv.gateway.client.SdvGatewayRuntimeException;
-import google.sdv.gateway.client.SdvGatewayClient;
 
-import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;
-import io.grpc.InsecureChannelCredentials;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
 import io.grpc.StatusException;
-import io.grpc.TlsChannelCredentials;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Optional;
 
-public final class SdvConnectionManagerImpl implements SdvConnectionManager, TopicDataListener {
+public final class SdvConnectionManagerImpl implements SdvConnectionManager {
     private static final String TAG = SdvConnectionManagerImpl.class.getSimpleName();
+    private static final String GATEWAY_VERSION_UNKNOWN = "Unknown";
 
-    private final static class ChannelInfo {
-        public String host;
-        public int port;
-    }
-
-    private final HashMap<String, List<DataTunnelCallback>> mDataTunnelCallbacks = new HashMap<>();
-    private final Object mDataTunnelListenerLock = new Object();
-
-    private static void loadLibrary(String name) {
-        System.loadLibrary(name);
-    }
+    private final SdvGatewayClient mClient = new SdvGatewayClient();
 
     private SdvConnectionManagerImpl() {}
 
-    private ManagedChannel obtainSecureManagedChannelInternal(String connectionString)
-            throws IOException {
+    private ManagedChannel findRpcServerByName(String sdvName, String packageName,
+            String bundleName, String unitName, boolean useSecureChannel) {
+        if (useSecureChannel) {
+            // TODO: We need to support the secure channel.
+            Log.w(TAG, "A secure rpc communication is not supported yet; " +
+                    "insecure channel will be used instead.");
+        }
 
-        // TODO: implement this method with proper certificate.
+        try {
+            return mClient.findRpcServerByName(sdvName, packageName, bundleName, unitName,
+                    /* secureChannel= */ false, /* rootCerts= */ Optional.empty(),
+                            /* certChain= */ Optional.empty(), /* privateKey= */ Optional.empty());
+        } catch (SdvGatewayRuntimeException e) {
+            Log.e(TAG, packageName + "." + bundleName + "." + unitName +
+                " is not available, error: " + e.getSdvGatewayStatusCode() + ", msg: " +
+                        e.getMessage());
+        } catch (IOException | RemoteException e) {
+            Log.e(TAG, "Failed to find " + packageName + "." + bundleName + "." + unitName +
+                    "due to " + e);
+        }
+
         return null;
-    }
-
-    private ManagedChannel obtainInsecureManagedChannelInternal(String connectionString)
-            throws IOException {
-        ChannelInfo channelInfo = parseConnectionString(connectionString);
-        ManagedChannel channel = Grpc.newChannelBuilderForAddress(
-                channelInfo.host, channelInfo.port, InsecureChannelCredentials.create()).build();
-
-        return channel;
-    }
-
-    private ChannelInfo parseConnectionString(String connectionString) {
-        String[] connectionStringTokens = connectionString.split(":");
-        ChannelInfo channelInfo = new ChannelInfo();
-        channelInfo.host = connectionStringTokens[0];
-        channelInfo.port = Integer.parseInt(connectionStringTokens[1]);
-
-        return channelInfo;
-    }
-
-    private native String nativeGetVersion();
-
-    private native void nativeInitSdvComms(
-            byte[] identityKey, String packageName, String serviceName);
-
-    private native String nativeConnectToServer(
-            String serverPackageName, String serverName, String clientName);
-
-    private native void nativeCreateServer(String serverName, int port);
-
-    private native void nativeSubscribeToTopic(String topicname);
-
-    private native void nativeRegisterTopic(String topicname, long messageSize,
-            long messageCount);
-
-    private native void nativePublishToTopic(String topicname, byte[] message);
-
-    static {
-        System.loadLibrary("harsdvgateway_jni");
     }
 
     public static SdvConnectionManager Create(byte[] identityKey, String packageName,
@@ -112,102 +74,54 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager, Top
             return null;
         }
 
-        mgr.nativeInitSdvComms(identityKey, packageName, appName);
+        if (!mgr.initSdvComms(identityKey, packageName, appName)) {
+            Log.e(TAG, "Failed to initialize SDV Comm.");
+            return null;
+        }
 
-        // Attempt to connect to the target service.
-        String connectionString = mgr.nativeConnectToServer(servicePackageName, serviceName, appName);
-        Log.i(TAG, "Connected to the service: " + connectionString);
+        Log.i(TAG, "SdvConnectionManager instance is successfully created.");
         return (SdvConnectionManager) mgr;
     }
 
     @Override
-    public void createServer(String serverName, int port) {
-        nativeCreateServer(serverName, port);
-    }
-
-    @Override
-    public void registerTopic(String topicName, long messageSize, long messageCount) {
-        nativeRegisterTopic(topicName, messageSize, messageCount);
-    }
-
-    @Override
-    public void publishToTopic(String topicName, byte[] message) {
-        nativePublishToTopic(topicName, message);
-    }
-
-    @Override
-    public boolean registerDataTunnelCallback(@NonNull DataTunnelCallback cb, String topicName) {
-        if (cb == null) {
-            Log.e(TAG, "registerDataTunnelCallback(): null listener");
-            return false;
+    public boolean initSdvComms(byte[] identityKey, String packageName, String appName) {
+        try {
+            mClient.initComms(identityKey, packageName, appName);
+            return true;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to initialize SDV Comms due to binder transaction failures.");
+        } catch (SdvGatewayRuntimeException e) {
+            Log.e(TAG, "Failed to initialize SDV Comms, error = " + e.getSdvGatewayStatusCode() +
+                    ", msg = " + e.getMessage());
         }
 
-        boolean isNewTopicName;
-        synchronized (mDataTunnelListenerLock) {
-            List<DataTunnelCallback> subsCallbacks = mDataTunnelCallbacks.get(topicName);
-            isNewTopicName = subsCallbacks == null;
-            if (isNewTopicName) {
-                Log.i(TAG, "Subscribing to a new topic: " + topicName);
-                subsCallbacks = new ArrayList();
-            }
-
-            subsCallbacks.add(cb);
-            mDataTunnelCallbacks.put(topicName, subsCallbacks);
-
-            if (isNewTopicName) {
-                nativeSubscribeToTopic(topicName);
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    public void onMessagesAvailable(String topicName, List<byte[]> rawMessages) {
-        Log.d(TAG, "onMessagesAvailable data tunnel callback for topic: " + topicName);
-        synchronized (mDataTunnelListenerLock) {
-            List<DataTunnelCallback> subsCallback = mDataTunnelCallbacks.get(topicName);
-            if (subsCallback == null) {
-                Log.w(TAG, "Received an event for an unknown topic, " + topicName);
-                return;
-            }
-
-            // Forwarding an event to subscribers.
-            for (DataTunnelCallback callback : subsCallback) {
-                if (callback == null) {
-                    // Ignore invalid callback objects.
-                    continue;
-                }
-
-
-                for (byte[] data : rawMessages) {
-                    callback.onEvent(data);
-                }
-            }
-        }
+        return false;
     }
 
     @Override
     public String getVersionString() {
-        return nativeGetVersion();
+        try {
+            return mClient.getVersion();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to obtain a version information.");
+        }
+
+        return GATEWAY_VERSION_UNKNOWN;
     }
 
     @Override
     public ManagedChannel obtainSecureManagedChannel(
-            String serverPackageName, String serverName, String clientName)
-            throws IOException, StatusException {
-
-        String connectionString = nativeConnectToServer(serverPackageName, serverName, clientName);
-        Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
-        return obtainSecureManagedChannelInternal(connectionString);
+            String sdvName, String packageName, String bundleName, String unitName)
+            throws IOException, RemoteException, StatusException {
+        return findRpcServerByName(sdvName, packageName, bundleName, unitName,
+                /* useSecureChannel= */ true);
     }
 
     @Override
     public ManagedChannel obtainInsecureManagedChannel(
-            String serverPackageName, String serverName, String clientName)
-            throws IOException, StatusException {
-        String connectionString = nativeConnectToServer(serverPackageName, serverName, clientName);
-        Log.d(TAG, "Obtained connection string for " + serverName + " Server: " + connectionString);
-        return obtainInsecureManagedChannelInternal(connectionString);
+            String sdvName, String packageName, String bundleName, String unitName)
+            throws IOException, RemoteException, StatusException {
+        return findRpcServerByName(sdvName, packageName, bundleName, unitName,
+                /* useSecureChannel= */ false);
     }
 }

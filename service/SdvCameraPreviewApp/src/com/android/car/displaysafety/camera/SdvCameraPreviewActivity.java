@@ -83,6 +83,10 @@ public class SdvCameraPreviewActivity extends Activity
             "com.android.car.displaysafety.camera.SdvConnectionManagerImpl";
     /** A name of the factory method to instantiate SdvConnectionManager implementation. */
     private final static String CONNECTION_MANAGER_CREATOR_METHODNAME = "Create";
+    /** A name of a target SDV instance */
+    // TODO: We're temporarily using an empty string as a name of a target SDV instance. This may
+    //       need to be replaced with a proper value when relevant SDV services become effective.
+    private final static String TARGET_SDV_INSTANCE_NAME = "";
 
     /**
      * Defines internal states.
@@ -101,10 +105,11 @@ public class SdvCameraPreviewActivity extends Activity
         },
     };
 
-    private static final String IDENTITY_KEY = "SDVCAMERAPREVIEWAPP-AA05";
+    private static final String IDENTITY_KEY = "SDVCAMERAPREVIEWAPP-AA05\0\0\0\0\0\0\0\0";
     private static final String SDV_PACKAGE_NAME = "android.sdv.displaysafety";
-    private static final String SDV_SERVICE_NAME = "camera-service";
+    private static final String SDV_SERVICE_NAME = "CameraService";
     private static final String SDV_CLIENT_NAME = TAG;
+    private static final String SDV_INSTANCE_NAME = "default";
 
     private static String streamStateToString(int state) {
         switch (state) {
@@ -351,7 +356,7 @@ public class SdvCameraPreviewActivity extends Activity
         } catch (NoSuchMethodException e) {
             Log.e(TAG, "Create method does not exist in SdvConnectionManagerImpl class.");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to invoke Create()." + e);
+            Log.e(TAG, "Failed to invoke Create(): " + e.getCause());
         }
 
         if (mSdvConnectionManager == null) {
@@ -549,7 +554,7 @@ public class SdvCameraPreviewActivity extends Activity
 
         if (mSdvConnectionManager != null) {
             var unused = mGrpcTaskExecutor.submit(new GrpcTaskRunnable(mSdvConnectionManager,
-                      SDV_PACKAGE_NAME, SDV_SERVICE_NAME, SDV_CLIENT_NAME));
+                      SDV_PACKAGE_NAME, SDV_SERVICE_NAME, SDV_INSTANCE_NAME));
         }
     }
 
@@ -565,16 +570,16 @@ public class SdvCameraPreviewActivity extends Activity
         private final WeakReference<SdvConnectionManager> connManagerReference;
         private final String servicePackageName;
         private final String serviceName;
-        private final String clientName;
+        private final String unitName;
 
         private ManagedChannel channel;
 
         public GrpcTaskRunnable(@NonNull SdvConnectionManager connMgr, String servicePackageName,
-                String serviceName, String clientName) {
+                String serviceName, String unitName) {
             this.connManagerReference = new WeakReference<>(connMgr);
             this.servicePackageName = servicePackageName;
             this.serviceName = serviceName;
-            this.clientName = clientName;
+            this.unitName = unitName;
         }
 
         @Override
@@ -587,7 +592,11 @@ public class SdvCameraPreviewActivity extends Activity
                 }
 
                 channel = mgr.obtainInsecureManagedChannel(
-                        servicePackageName, serviceName, clientName);
+                        TARGET_SDV_INSTANCE_NAME, servicePackageName, serviceName, unitName);
+                if (channel == null) {
+                    Log.e(TAG, "Failed to initialize a communication channel.");
+                    return;
+                }
 
                 HarryGrpcServiceGrpc.HarryGrpcServiceBlockingStub stub =
                         HarryGrpcServiceGrpc.newBlockingStub(channel);

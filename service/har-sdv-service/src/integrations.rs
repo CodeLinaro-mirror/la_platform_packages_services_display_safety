@@ -197,7 +197,7 @@ pub(crate) fn register_camera_proxy() -> Result<(), String> {
     let camera_fqin = ServiceFqin {
         vm_name: "".to_string(),
         package_name: "android.sdv.displaysafety".to_string(),
-        service_name: "camera-service".to_string(),
+        service_name: "CameraService".to_string(),
         instance_name: "default".to_string(),
     };
 

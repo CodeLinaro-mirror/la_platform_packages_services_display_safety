@@ -18,7 +18,8 @@ package com.android.car.displaysafety.camera;
 
 import androidx.annotation.NonNull;
 
-import io.grpc.ChannelCredentials;
+import android.os.RemoteException;
+
 import io.grpc.ManagedChannel;
 import io.grpc.StatusException;
 
@@ -28,26 +29,20 @@ import java.io.IOException;
  * Abstracts SDV connection manager.
  */
 public interface SdvConnectionManager {
-
-    public interface DataTunnelCallback {
-        public void onEvent(byte[] content);
+    final static class ChannelInfo {
+        public String host;
+        public int port;
     }
 
-    public void createServer(String serverName, int port);
-
-    public void registerTopic(String topicName, long messageSize, long messageCount);
-
-    public void publishToTopic(String topicName, byte[] message);
-
-    public boolean registerDataTunnelCallback(@NonNull DataTunnelCallback cb, String topicName);
+    public boolean initSdvComms(byte[] identityKey, String packageName, String appName);
 
     public String getVersionString();
 
     public ManagedChannel obtainSecureManagedChannel(
-            String serverPackageName, String serverName, String clientName)
-            throws IOException, StatusException;
+            String sdvName, String packageName, String bundleName, String unitName)
+            throws IOException, RemoteException, StatusException;
 
     public ManagedChannel obtainInsecureManagedChannel(
-            String serverPackageName, String serverName, String clientName)
-            throws IOException, StatusException;
+            String sdvName, String packageName, String bundleName, String unitName)
+            throws IOException, RemoteException, StatusException;
 }
