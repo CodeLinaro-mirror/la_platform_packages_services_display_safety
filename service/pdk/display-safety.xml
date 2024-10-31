@@ -6,6 +6,10 @@
     fetch="https://github.com" />
 
   <remote
+    name="android"
+    fetch="https://android.googlesource.com" />
+
+  <remote
     name="aae-design-compose-partners"
     fetch="https://aae-design-compose-partners.googlesource.com" />
 
@@ -13,7 +17,7 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="45b7cdc8c2cdbd8e72e6ebc3b97438db65da4b3e" />
+    revision="e0abbf69b9bc0bf30c7c8bc99f8324d6b3cb7965" />
 
   <project
     name="bdero/impeller-cmake.git"
@@ -22,10 +26,10 @@
     revision="cb40c8be9f8caa3f78b104bc4aa02a3453ce45fb" />
 
   <project
-    name="tinyalsa/tinyalsa.git"
+    name="platform/external/tinyalsa_new"
     path="vendor/google/display_safety/service/pdk/display-safety/crates/reference/audio/tinyalsa-rs/tinyalsa"
-    remote="github"
-    revision="f78ed25aced2dfea743867b8205a787bfb091340" />
+    remote="android"
+    revision="6e3decb8ff7ad1ec42ef797af9a362b538f35186" />
 
   <project
     name="mity/acutest.git"
