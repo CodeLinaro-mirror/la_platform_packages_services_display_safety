@@ -1,8 +1,4 @@
 # Property trigger to start har_grpc_service after harry started the GRPC server.
 vendor.harplatform.grpc.started u:object_r:vendor_harplatform_props:s0 exact bool
-# Property trigger to tell the base user preferences service is ready to accept requests.
-vendor.harplatform.userprefs.started u:object_r:vendor_harplatform_props:s0 exact bool
-# Property trigger to tell the har preferences service is ready to accept requests.
-vendor.harplatform.harprefs.started u:object_r:vendor_harplatform_props:s0 exact bool
 # Property trigger to tell the safetymonitor process is ready to accept connections.
 vendor.harplatform.safetymonitor u:object_r:vendor_harplatform_props:s0 exact string

@@ -4,40 +4,20 @@
 
 # Publishes vehicle data on SDV data tunnel topics.
 service_instances {
-  config_alias: "HarSdvVehicleDataPublisherServiceBundle"
+  config_alias: "HarSdvVehicleDataPublisher"
   instance_name: "instance-1"
   service_name: "com.sdv.google.display_safety.vehicle_data.publisher"
-  package_name: "com.sdv.google.display_safety.service_bundle_apex"
+  package_name: "com.sdv.google.display_safety"
   vm_name: "vm-sdv"
 }
 
-# Produces a demo sequence of fake data and requests HarSdvVehicleDataPublisherServiceBundle
+# Produces a demo sequence of fake data and requests HarSdvVehicleDataPublisher
 # to publish them on SDV Data tunnel topics.
 service_instances {
   config_alias: "HarSdvFakeVehicleDataPublisherServiceBundle"
   instance_name: "instance-1"
   service_name: "com.sdv.google.display_safety.fake_vehicle_data.publisher"
-  package_name: "com.sdv.google.display_safety.service_bundle_apex"
-  vm_name: "vm-sdv"
-}
-
-# HAR-SDV User Preferences Service Bundle (base) implements the
-# generic key-value store for settings.
-service_instances {
-  config_alias: "HarSdvUserPreferencesServiceBundle"
-  instance_name: "instance-1"
-  service_name: "com.sdv.google.display_safety.user_preferences.base"
-  package_name: "com.sdv.google.display_safety.service_bundle_apex"
-  vm_name: "vm-sdv"
-}
-
-# HAR User Preferences service bundle handles the HAR-specific
-# user preferences.
-service_instances {
-  config_alias: "HarUserPreferencesServiceBundle"
-  instance_name: "instance-1"
-  service_name: "com.sdv.google.display_safety.har_user_preferences"
-  package_name: "com.sdv.google.display_safety.service_bundle_apex"
+  package_name: "com.sdv.google.display_safety"
   vm_name: "vm-sdv"
 }
 
@@ -46,6 +26,6 @@ service_instances {
   config_alias: "HarSdvServiceBundle"
   instance_name: "instance-1"
   service_name: "com.sdv.google.display_safety.har_sdv_service"
-  package_name: "com.sdv.google.display_safety.service_bundle_apex"
+  package_name: "com.sdv.google.display_safety"
   vm_name: "vm-sdv"
 }

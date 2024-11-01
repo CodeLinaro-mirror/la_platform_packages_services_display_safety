@@ -8,22 +8,17 @@ use crate::model::current_gear_request_to_message;
 use crate::model::telltale_status_request_to_message;
 use crate::model::tire_pressure_request_to_message;
 use crate::model::vehicle_speed_request_to_message;
-use crate::Error;
-use crate::Error::Internal;
-use crate::Error::Protocol;
-use crate::Error::Sdv;
-use futures::FutureExt;
-use futures::TryFutureExt;
+use crate::model::Error;
+use crate::HarryVehicleDataPublishers;
 use log::error;
+use log::info;
 use log::warn;
-use sdvgenerated::harry_vehicle_data_publisher::HarryVehicleDataPublisher;
 use std::sync::Arc;
-use std::sync::Mutex;
 
 /// Implements a GRPC server and publishes all incoming requests as topics to the SDV Data Tunnel.
 #[derive(Clone)]
 pub struct VehicleDataGrpcServer {
-    service: Arc<Mutex<HarryVehicleDataPublisher>>,
+    service: Arc<HarryVehicleDataPublishers>,
 }
 
 impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
@@ -33,18 +28,27 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         req: PublishVehicleSpeedRequest,
         sink: UnarySink<PublishVehicleDataResponse>,
     ) {
-        let status = match self.service.lock() {
-            Ok(mut service) => {
-                vehicle_speed_request_to_message(req).and_then(|(topic, message)| {
-                    service.vehicle_speed_publish(&topic, &message).map_err(|err| err.into())
-                })
-            }
-            Err(err) => {
-                error!("Error locking service mutex: {:?}", err);
-                Err(Error::Internal("Lock error".into()))
-            }
+        info!("publish_vehicle_speed {:?}", req);
+        let service = self.service.clone();
+        match vehicle_speed_request_to_message(req) {
+            Ok((status, message)) => ctx.spawn(async move {
+                service.vehicle_speed_publish(status, message).await;
+                Self::send_response(sink, Self::convert_result_to_status(Ok(())))
+                    .await
+                    .unwrap_or_else(|err| error!("Error sending GRPC response: {:?}", err));
+            }),
+            Err(err) => ctx.spawn(async move {
+                Self::send_response(
+                    sink,
+                    Self::convert_result_to_status(Err(format!(
+                        "Error converting GRPC message: {:?}",
+                        err
+                    ))),
+                )
+                .await
+                .unwrap_or_else(|err| error!("Error sending GRPC error response: {:?}", err));
+            }),
         };
-        self.send_to_sdv(ctx, sink, Self::convert_result_to_status(status));
     }
 
     fn publish_telltale_status(
@@ -53,18 +57,28 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         req: PublishTelltaleStatusRequest,
         sink: UnarySink<PublishVehicleDataResponse>,
     ) {
-        let status = match self.service.lock() {
-            Ok(mut service) => {
-                telltale_status_request_to_message(req).and_then(|(topic, message)| {
-                    service.tell_tale_status_publish(&topic, &message).map_err(|err| err.into())
-                })
-            }
-            Err(err) => {
-                error!("Error locking service mutex: {:?}", err);
-                Err(Error::Internal("Lock error".into()))
-            }
+        info!("publish_telltale_status {:?}", req);
+        let service = self.service.clone();
+
+        match telltale_status_request_to_message(req) {
+            Ok((status, message)) => ctx.spawn(async move {
+                service.tell_tale_status_publish(status, message).await;
+                Self::send_response(sink, Self::convert_result_to_status(Ok(())))
+                    .await
+                    .unwrap_or_else(|err| error!("Error sending GRPC response: {:?}", err));
+            }),
+            Err(err) => ctx.spawn(async move {
+                Self::send_response(
+                    sink,
+                    Self::convert_result_to_status(Err(format!(
+                        "Error converting GRPC message: {:?}",
+                        err
+                    ))),
+                )
+                .await
+                .unwrap_or_else(|err| error!("Error sending GRPC error response: {:?}", err));
+            }),
         };
-        self.send_to_sdv(ctx, sink, Self::convert_result_to_status(status));
     }
 
     fn publish_current_gear(
@@ -73,16 +87,28 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         req: PublishCurrentGearRequest,
         sink: UnarySink<PublishVehicleDataResponse>,
     ) {
-        let status = match self.service.lock() {
-            Ok(mut service) => current_gear_request_to_message(req).and_then(|(topic, message)| {
-                service.current_gear_publish(&topic, &message).map_err(|err| err.into())
+        info!("publish_current_gear {:?}", req);
+        let service = self.service.clone();
+
+        match current_gear_request_to_message(req) {
+            Ok(message) => ctx.spawn(async move {
+                service.current_gear_publish(message).await;
+                Self::send_response(sink, Self::convert_result_to_status(Ok(())))
+                    .await
+                    .unwrap_or_else(|err| error!("Error sending GRPC response: {:?}", err));
             }),
-            Err(err) => {
-                error!("Error locking service mutex: {:?}", err);
-                Err(Error::Internal("Lock error".into()))
-            }
+            Err(err) => ctx.spawn(async move {
+                Self::send_response(
+                    sink,
+                    Self::convert_result_to_status(Err(format!(
+                        "Error converting GRPC message: {:?}",
+                        err
+                    ))),
+                )
+                .await
+                .unwrap_or_else(|err| error!("Error sending GRPC error response: {:?}", err));
+            }),
         };
-        self.send_to_sdv(ctx, sink, Self::convert_result_to_status(status));
     }
 
     fn publish_tire_pressure(
@@ -91,18 +117,28 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         req: PublishTirePressureRequest,
         sink: UnarySink<PublishVehicleDataResponse>,
     ) {
-        let status = match self.service.lock() {
-            Ok(mut service) => {
-                tire_pressure_request_to_message(req).and_then(|(topic, message)| {
-                    service.tire_pressure_publish(&topic, &message).map_err(|err| err.into())
-                })
-            }
-            Err(err) => {
-                error!("Error locking service mutex: {:?}", err);
-                Err(Error::Internal("Lock error".into()))
-            }
+        info!("publish_tire_pressure {:?}", req);
+        let service = self.service.clone();
+
+        match tire_pressure_request_to_message(req) {
+            Ok((location, message)) => ctx.spawn(async move {
+                service.tire_pressure_publish(location, message).await;
+                Self::send_response(sink, Self::convert_result_to_status(Ok(())))
+                    .await
+                    .unwrap_or_else(|err| error!("Error sending GRPC response: {:?}", err));
+            }),
+            Err(err) => ctx.spawn(async move {
+                Self::send_response(
+                    sink,
+                    Self::convert_result_to_status(Err(format!(
+                        "Error converting GRPC message: {:?}",
+                        err
+                    ))),
+                )
+                .await
+                .unwrap_or_else(|err| error!("Error sending GRPC error response: {:?}", err));
+            }),
         };
-        self.send_to_sdv(ctx, sink, Self::convert_result_to_status(status));
     }
 }
 
@@ -110,33 +146,24 @@ impl VehicleDataGrpcServer {
     /// Creates a new GRPC server.
     ///
     /// * `service`: The SDV service to use to dispatch messages to.
-    pub fn new(service: Arc<Mutex<HarryVehicleDataPublisher>>) -> Self {
-        Self { service }
+    pub fn new(service: HarryVehicleDataPublishers) -> Self {
+        Self { service: Arc::new(service) }
     }
 
-    fn send_to_sdv(
-        &self,
-        ctx: RpcContext<'_>,
+    async fn send_response(
         sink: UnarySink<PublishVehicleDataResponse>,
         status: PublishVehicleDataResponseStatus,
-    ) {
+    ) -> Result<(), Error> {
         let response = PublishVehicleDataResponse { status: status.into(), ..Default::default() };
-        let future =
-            sink.success(response).map_err(move |e| error!("failed to reply: {:?}", e)).map(|_| ());
-        ctx.spawn(future);
+        sink.success(response)
+            .await
+            .map_err(move |e| Error::Internal(format!("failed to reply: {:?}", e)))
+            .map(|_| ())
     }
 
-    fn convert_result_to_status(status: Result<(), Error>) -> PublishVehicleDataResponseStatus {
+    fn convert_result_to_status(status: Result<(), String>) -> PublishVehicleDataResponseStatus {
         match status {
-            Err(Sdv(err)) => {
-                warn!("Error publishing data to SDV DT: {:?}", err);
-                PublishVehicleDataResponseStatus::STATUS_SDV_ERROR
-            }
-            Err(Protocol(err)) => {
-                warn!("Error parsing request: {:?}", err);
-                PublishVehicleDataResponseStatus::STATUS_PROTOCOL_ERROR
-            }
-            Err(Internal(err)) => {
+            Err(err) => {
                 warn!("Internal error: {:?}", err);
                 PublishVehicleDataResponseStatus::STATUS_NOT_DELIVERED
             }

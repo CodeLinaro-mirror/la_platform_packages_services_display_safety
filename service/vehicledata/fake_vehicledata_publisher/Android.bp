@@ -1,29 +1,5 @@
 // Copyright 2024 Google LLC
 
-// Deprecated: This package is no longer in-use on
-// APEX-based configurations.
-rust_binary {
-    name: "fake_vehicledata_publisher_service",
-    crate_name: "fake_vehicledata_publisher_service",
-    srcs: [
-        "src/main.rs",
-    ],
-    prefer_rlib: true,
-    rustlibs: [
-        "libsdv_log_rust",
-        "liblog_rust",
-        "liboem_harry_vehicle_messages_catalog",
-        "libharry_vehicle_data_grpc",
-        "libprotobuf",
-        "libgrpcio",
-        "librand",
-        "libtokio",
-        "libfutures",
-    ],
-    vendor_available: true,
-    product_available: true,
-}
-
 // Service bundle library for Vehicle Data Publisher.
 rust_ffi_shared {
     name: "libhar_sdv_fake_vehicle_data_publisher_service_bundle",
@@ -31,11 +7,8 @@ rust_ffi_shared {
     srcs: ["src/lib.rs"],
     crate_name: "har_sdv_fake_vehicle_data_publisher_service_bundle",
     rustlibs: [
-        // commstack library that provides context object reference.
-        "libsdv_comms_rs",
         "libsdv_log_rust",
         "liblog_rust",
-        "liboem_harry_vehicle_messages_catalog",
         "libharry_vehicle_data_grpc",
         "libprotobuf",
         "libgrpcio",

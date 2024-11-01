@@ -1,0 +1,71 @@
+// Copyright 2023 Google LLC
+
+syntax = "proto3";
+
+package com.sdv.google.display_safety;
+import "sdv/vsidl/v1/annotations.proto";
+
+// TODO: figure out how to create topic without an enum
+enum VehicleSpeedTopic {
+    VEHICLE_SPEED = 0;
+    MAX_SPEED = 1;
+    SPEEDLIMIT = 2;
+}
+
+message VehicleSpeed {
+    option (.sdv.vsidl.v1.publication) = {
+        instances_enum: "VehicleSpeedTopic"
+        message_count: 8
+        model: SINGLE_PUB
+    };
+    uint32 speed = 1;
+}
+
+// Alert type telltales
+enum Telltale {
+    OIL_PRESSURE = 0;
+    ENGINE_TEMP = 1;
+    CHECK_ENGINE = 2;
+    CHARGING_FAILURE = 3;
+    SEATBELT_DRIVER = 4;
+    SEATBELT_PASSENGER = 5;
+    LOW_TIRE_PRESSURE = 6;
+    AIRBAG = 7;
+    ABS = 8;
+    BRAKE = 9;
+    TRACTION = 10;
+    FOG_LIGHTS = 11;
+    PARK_LIGHTS = 12;
+    HIBEAM = 13;
+    LOWBEAM = 14;
+    TURN_SIGNAL_LEFT = 15;
+    TURN_SIGNAL_RIGHT = 16;
+    ADAS = 17;
+    MAX_SPEED_DISPLAYED = 18;
+    SPEED_LIMIT_DISPLAYED = 20;
+    EMERGENCY_LIGHT = 22;
+}
+
+message TellTaleStatus {
+    option (.sdv.vsidl.v1.publication) = {
+        instances_enum: "Telltale"
+        message_count: 8
+        model: SINGLE_PUB
+    };
+  bool alert = 1;
+}
+
+enum Gear {
+    P = 0;
+    R = 1;
+    N = 2;
+    D = 3;
+}
+
+message CurrentGear {
+    option (.sdv.vsidl.v1.publication) = {
+        message_count: 8
+        model: SINGLE_PUB
+    };
+    Gear gear = 1;
+}

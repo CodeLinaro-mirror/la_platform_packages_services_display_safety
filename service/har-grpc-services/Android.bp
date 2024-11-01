@@ -7,9 +7,6 @@ rust_protobuf {
         "src/proto/vehicledata.proto",
         "src/proto/driverui.proto",
     ],
-    protos: [
-        "src/proto/preferences.proto",
-    ],
 
     source_stem: "generated_har_grpc_services",
     vendor_available: true,

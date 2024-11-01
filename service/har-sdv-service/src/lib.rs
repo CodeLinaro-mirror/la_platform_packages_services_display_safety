@@ -2,97 +2,84 @@
 
 //! HAR-SDV-service connects to SDV Comms, Data tunnel and delivers events to HAR.
 
-use crate::integrations::register_camera_proxy;
-use crate::integrations::register_har_sdv_driverui_proxy;
-use crate::sdv_service_utils::wait_for_sdv_services_ready;
-
-use log::info;
-use log::warn;
-use std::time::Duration;
-
-use crate::integrations::create_topic_map;
-use crate::mapper::SdvToHarMapper;
-use grpcio::EnvBuilder;
-use std::sync::Arc;
-
 use crate::camera_grpc_proxy::CameraServiceGrpcProxy;
-use crate::common::GrpcProxyServerToken;
 use crate::common::CAMERA_RPC_CLIENT_ADDRESS;
+use crate::common::CAMERA_RPC_SERVER_HOST;
 use crate::common::CAMERA_RPC_SERVER_PORT;
-use crate::common::DRIVERUI_RPC_CLIENT_ADDRESS;
 use crate::common::DRIVERUI_RPC_SERVER_HOST;
 use crate::common::DRIVERUI_RPC_SERVER_PORT;
+use crate::common::HAR_VEHICLE_DATA_GRPC;
+use crate::common::PRODUCT_HAR_SAFETY_MONITOR_IP;
+use crate::common::QNX_VEHICLE_DATA_PORT;
 use crate::driverui_grpc_proxy::DriverUiGrpcProxy;
-use crate::integrations::proxy_user_preferences_to_harry;
-use crate::integrations::proxy_vehicledata_to_harry;
-use crate::integrations::proxy_vehicledata_to_qnx;
+use crate::integrations_v1::create_topic_map;
 use crate::mapper::HashMapTopicMapper;
-use crate::preferences::create_har_user_preferences_client;
-use grpcio::Environment;
+use crate::mapper::SdvToHarMapper;
+use crate::observe::start_monitoring_all_data;
+use async_trait::async_trait;
+use futures::SinkExt;
+use grpcio::ChannelBuilder;
+use grpcio::EnvBuilder;
+use grpcio::WriteFlags;
+use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
+use har_sdv_rpc::sdv_service_discovery::register_service;
+use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundle;
+use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundleLauncher;
+use har_sdv_service_bundle_common::get_har_sdv_camera_service_fqin;
+use har_sdv_service_bundle_common::get_har_sdv_driverui_service_fqin;
+use log::error;
+use log::info;
+use log::trace;
+use log::warn;
+use oem_harry_vehicle_messages_catalog_v1::vehicledata::Gear;
 use rustutils::system_properties;
-use sdvgenerated_har_preferences_client::har_preferences_client::HarPreferencesClient;
-use std::sync::Mutex;
-use std::thread::JoinHandle;
+use sdv::comms::id::ServiceFqin;
+use sdv::mw::Communicate;
+use sdv::status::SdvStatus;
+use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle::HarSdvServiceBundle as SdvVehicleDataClient;
+use std::fmt::Debug;
+use std::sync::Arc;
+use tokio::sync::mpsc;
+use tokio::time::timeout;
+use tokio::time::Duration;
+use tokio_util::sync::CancellationToken;
 
 mod camera_grpc_proxy;
 mod common;
 mod driverui_grpc_proxy;
-mod integrations;
+mod integrations_v1;
 mod mapper;
-mod preferences;
-mod sdv_service_utils;
+mod observe;
 
 /// Service bundle struct definition.
 pub struct HarSdvServiceBundle {
-    _context: ContextRef,
-    grpc_env: Arc<Environment>,
-    qnx_ip: Option<String>,
-    sdv_to_har_mapper: Arc<SdvToHarMapper<HashMapTopicMapper>>,
+    comms: Arc<dyn Communicate>,
     driverui_rpc_proxy: DriverUiGrpcProxy,
     camera_rpc_proxy: CameraServiceGrpcProxy,
-    running_services: Mutex<Option<RunningServices>>,
+    qnx_address: Option<String>,
 }
 
-// No direct usage of the members yet, but we use them during drop.
-#[allow(dead_code)]
-struct RunningServices {
-    driverui_service: GrpcProxyServerToken,
-    camera_service: GrpcProxyServerToken,
-    qnx_handle: Option<JoinHandle<()>>,
+/// A message enum sent to Harry's Vehicle data server
+#[derive(Debug, Clone)]
+pub enum HarMessage {
+    /// Tell Tale Status
+    TellTaleStatus(String, bool),
+    /// VehicleS peed
+    VehicleSpeed(String, i32),
+    /// Tire Pressure
+    TirePressure(String, u32),
+    /// Current Gear
+    CurrentGear(String, Gear),
 }
-
-const PRODUCT_HAR_SAFETY_MONITOR_IP: &str = "product.harplatform.safety_monitor";
 
 // Register the new service bundle.
-sdv_lifecycle_client::register_service_bundle!(HarSdvServiceBundle);
+sdv::lifecycle::register_service_bundle!(AsyncServiceBundle<HarSdvServiceBundle>);
 
-impl ServiceBundle for HarSdvServiceBundle {
-    /// Creates a new instance of the HarSdvServiceBundle.
-    /// Called when service bundle is created by the system.
-    ///
-    /// Context object is provided as a parameter that gives access to the
-    /// communication stack APIs.
-    fn new(_context: ContextRef) -> HarSdvServiceBundle {
-        info!("SDV Service registered: {:?}", register_har_sdv_driverui_proxy());
-        info!("SDV camera proxy service registered: {:?}", register_camera_proxy());
-
-        let env = Arc::new(EnvBuilder::new().build());
-        let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
-
-        // Run the proxy between HAR and DriverUI
-        let driverui_rpc_proxy = DriverUiGrpcProxy::new(
-            format!("{}:{}", DRIVERUI_RPC_SERVER_HOST, DRIVERUI_RPC_SERVER_PORT),
-            DRIVERUI_RPC_CLIENT_ADDRESS.to_string(),
-        );
-
-        // Run another proxy between HAR and IVI Camera Service.
-        let camera_rpc_proxy = CameraServiceGrpcProxy::new(
-            format!("{}:{}", DRIVERUI_RPC_SERVER_HOST, CAMERA_RPC_SERVER_PORT),
-            CAMERA_RPC_CLIENT_ADDRESS.to_string(),
-        );
-
-        let qnx_ip = match system_properties::read(PRODUCT_HAR_SAFETY_MONITOR_IP) {
-            Ok(Some(ip)) => Some(ip.to_string()),
+#[async_trait]
+impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
+    fn new(comms: Arc<dyn Communicate>) -> Self {
+        let qnx_address = match system_properties::read(PRODUCT_HAR_SAFETY_MONITOR_IP) {
+            Ok(Some(ip)) => Some(format!("{}:{}", ip, QNX_VEHICLE_DATA_PORT)),
             Ok(None) => {
                 info!(
                     "QNX IP is not set by '{:?}'. QNX Proxy not started.",
@@ -103,58 +90,192 @@ impl ServiceBundle for HarSdvServiceBundle {
             }
             Err(e) => panic!("Could not fetch Safety Monitor IP property. Err: {:?}", e),
         };
-
-        HarSdvServiceBundle {
-            _context,
-            qnx_ip,
-            sdv_to_har_mapper: mapper,
-            grpc_env: env,
-            driverui_rpc_proxy,
-            camera_rpc_proxy,
-            running_services: Mutex::new(None),
-        }
+        let driverui_rpc_proxy = DriverUiGrpcProxy::new(format!(
+            "{}:{}",
+            DRIVERUI_RPC_SERVER_HOST, DRIVERUI_RPC_SERVER_PORT
+        ));
+        let camera_rpc_proxy = CameraServiceGrpcProxy::new(format!(
+            "{}:{}",
+            CAMERA_RPC_SERVER_HOST, CAMERA_RPC_SERVER_PORT
+        ));
+        HarSdvServiceBundle { comms, driverui_rpc_proxy, camera_rpc_proxy, qnx_address }
     }
 
-    /// Called when the service bundle is started by the system.
-    fn on_start(&mut self) {
-        sdv_log::init_logger("har_sdv_service_sb")
+    async fn launch(self, cancellation_token: CancellationToken) -> Result<(), SdvStatus> {
+        sdv_log::init_logger("har_sdv_svc_v1")
             .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
-        // Make sure dependent services are running.
-        wait_for_sdv_services_ready(Duration::from_secs(30)).expect("SDV services failed to start");
 
-        let driverui_service = self.driverui_rpc_proxy.run(self.grpc_env.clone());
-        info!("Cluster app GRPC dispatcher running.");
+        info!("Launching.");
 
-        let camera_service = self.camera_rpc_proxy.run(self.grpc_env.clone());
-        info!("Camera service GRPC dispatcher running.");
-
-        // Start SDV Data tunnel services to QNX.
-        let qnx_handle = if let Some(qnx_ip) = self.qnx_ip.as_ref() {
-            Some(proxy_vehicledata_to_qnx(
-                qnx_ip,
-                self.grpc_env.clone(),
-                self.sdv_to_har_mapper.clone(),
-            ))
-        } else {
-            None
+        let mut subscriber_service = match SdvVehicleDataClient::new(self.comms.clone()).await {
+            Ok(service) => service,
+            Err(e) => panic!("{e}"),
         };
 
-        // Start SDV Data tunnel services to HAR.
-        let _handle_sdv =
-            proxy_vehicledata_to_harry(self.grpc_env.clone(), self.sdv_to_har_mapper.clone());
+        // Maps from SDV-relevant Strings to sendable HAR vehicle data messages.
+        let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
 
-        let mut running_services =
-            self.running_services.lock().expect("Cannot lock running services.");
-        running_services.replace(RunningServices { driverui_service, camera_service, qnx_handle });
+        // Creeate GRPC env.
+        let grpc_env = Arc::new(EnvBuilder::new().build());
+        let ch_to_har = ChannelBuilder::new(grpc_env.clone())
+            .initial_reconnect_backoff(Duration::from_millis(10))
+            .max_reconnect_backoff(Duration::from_millis(50))
+            .connect(HAR_VEHICLE_DATA_GRPC);
+
+        let ch_to_har_camera = ChannelBuilder::new(grpc_env.clone())
+            .initial_reconnect_backoff(Duration::from_millis(10))
+            .max_reconnect_backoff(Duration::from_millis(50))
+            .connect(CAMERA_RPC_CLIENT_ADDRESS);
+
+        let (har_tx, har_rx) = mpsc::channel(32);
+        // Create client to transfer vehicle data
+        let har_vehicle_data_client = VehicleDataServiceClient::new(ch_to_har.clone());
+        let mut har_vehicle_data_clients = vec![har_vehicle_data_client];
+        // Initialize the optional QNX Vehicle Data proxy. (only available on QNX-based systems.)
+        if let Some(qnx_address) = self.qnx_address.as_ref() {
+            let ch = ChannelBuilder::new(grpc_env.clone())
+                .initial_reconnect_backoff(Duration::from_millis(10))
+                .max_reconnect_backoff(Duration::from_millis(50))
+                .connect(qnx_address);
+
+            let vehicle_data_client = VehicleDataServiceClient::new(ch);
+            har_vehicle_data_clients.push(vehicle_data_client);
+        }
+
+        let _sdv_vehicle_data_to_har_task = tokio::spawn(transfer_vehicle_data(
+            har_vehicle_data_clients,
+            har_rx,
+            cancellation_token.clone(),
+            mapper,
+        ));
+
+        // The timeout for each bunch of observed units.
+        let lookup_timeout = Duration::from_secs(20);
+        let mut subscriptions = timeout(
+            lookup_timeout,
+            start_monitoring_all_data(&mut subscriber_service, har_tx, cancellation_token.clone()),
+        )
+        .await
+        .map_err(|err| {
+            info!("Starting to monitor variants failed. {:?}", err);
+            Err(sdv::status::SdvStatus::new(sdv::status::SdvStatusCode::Cancelled))
+        })??;
+        info!("Monitoring vehicle data started");
+
+        // Start other RPC services
+        let mut driverui_rpc_proxy_token =
+            self.driverui_rpc_proxy.run(grpc_env.clone(), ch_to_har_camera);
+        let camera_rpc_proxy_token = self.camera_rpc_proxy.run(grpc_env.clone(), ch_to_har).ok();
+
+        // Finally, register discoverable services. Register them late, so the dependant services
+        // are already up and running.
+        // The pubkey is arbitrary, auth is not implemented yet.
+        // TODO(378913750): Implement auth when required.
+        let publickey = *b"HARSDVGATEWAY-7890123456_______\0";
+        register_service(
+            publickey.clone(),
+            &get_har_sdv_driverui_service_fqin(),
+            "".as_bytes().to_vec(),
+            DRIVERUI_RPC_SERVER_PORT,
+        )
+        .expect("Cannot register DriverUI data proxy");
+        register_service(
+            publickey,
+            &get_har_sdv_camera_service_fqin(),
+            "".as_bytes().to_vec(),
+            CAMERA_RPC_SERVER_PORT,
+        )
+        .unwrap_or_else(|err| error!("Cannot register Camera data proxy: {:?}", err));
+        info!("DriverUI and Camera service registered in SDV Service Discovery.");
+        info!("HAR-SDV Service started.");
+
+        while let Some(res) = subscriptions.join_next().await {
+            if let Err(err) = res {
+                // One of the futures has completed with an error which indicates an abnormal behavior.
+                // Initiating a resubscription could be performed at such a case.
+                panic!("{err:?}");
+            } else {
+                info!("Task completed: {:?}", res);
+            }
+        }
+        info!("All observers completed.");
+        driverui_rpc_proxy_token.shutdown();
+        if let Some(mut camera_rpc_proxy_token) = camera_rpc_proxy_token {
+            camera_rpc_proxy_token.shutdown();
+        }
+        info!("RPC Services stopped.");
+        Ok(())
+    }
+}
+
+async fn transfer_vehicle_data(
+    vehicle_data_clients: Vec<VehicleDataServiceClient>,
+    mut har_rx: mpsc::Receiver<HarMessage>,
+    cancellation_token: CancellationToken,
+    mapper: Arc<SdvToHarMapper<HashMapTopicMapper>>,
+) {
+    let mut clients = Vec::new();
+    // Create the non-async GRPC clients.
+    for vehicle_data_client in vehicle_data_clients {
+        // Need to keep GRPC service references open, otherwise they will be canceled.
+        let client = tokio::task::spawn_blocking(move || {
+            match vehicle_data_client.receive_vehicle_data() {
+                Ok((vehicle_data_sender, vehicle_data_receiver)) => {
+                    info!("Created GRPC channel to HAR");
+                    (vehicle_data_sender, vehicle_data_receiver, vehicle_data_client)
+                }
+                Err(err) => {
+                    // TODO(378910627): Avoid panic or implement crash handling for these services.
+                    panic!("Failed to call Vehicle data api. Err: {:?}", err);
+                }
+            }
+        })
+        .await
+        .expect("Error starting GRPC to HAR.");
+        clients.push(client);
     }
 
-    /// Called when the service bundle is stopped by the system in preparation
-    /// for shutdown or suspend to RAM/Disc.
-    fn on_stop(&mut self) {
-        info!("Service bundle stopped.");
-        let mut running_services =
-            self.running_services.lock().expect("Cannot lock running services.");
-        drop(running_services.take());
-        // TODO: shut down user preferences and other threads properly.
+    info!("Waiting for messages to send to HAR");
+    loop {
+        tokio::select! {
+            message = har_rx.recv() => {
+                if let Some(message) = message {
+                    let vehicle_data_message = match message {
+                        HarMessage::TellTaleStatus(key, value) => {
+                            mapper.map_bool(key, value)
+                        },
+                        HarMessage::VehicleSpeed(key, value) => {
+                            mapper.map_i32(key, value)
+                        },
+                        HarMessage::TirePressure(key, value) => {
+                            mapper.map_u32(key, value)
+                        },
+                        HarMessage::CurrentGear(key, value) => {
+                            mapper.map_string(key, match value {
+                                Gear::P => "P",
+                                Gear::R => "R",
+                                Gear::N => "N",
+                                Gear::D => "D",
+                            }.to_string())
+                        },
+                    };
+                    trace!("Sending: {:?}", vehicle_data_message);
+                    for client in &mut clients {
+                        let (ref mut sender, _receiver, _vehicle_data_client) = client;
+                        if let Err(err) = sender.send((vehicle_data_message.clone(), WriteFlags::default())).await {
+                            warn!("Error sending message to HAR: {:?}", err);
+                        }
+                    }
+                } else {
+                    warn!("GRPC Message channel closed.");
+                    return;
+                }
+            },
+            () = cancellation_token.cancelled() => {
+                info!("GRPC to HAR canceled.");
+                return;
+            },
+        };
     }
+    // Clients and other references are dropped here, when returning.
 }

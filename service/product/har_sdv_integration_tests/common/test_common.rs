@@ -16,7 +16,7 @@ use std::thread;
 use std::time::Duration;
 use std::time::Instant;
 
-const SDV_SERVICE_BUNDLE_PACKAGE: &str = "com.sdv.google.display_safety.service_bundle_apex";
+const SDV_SERVICE_BUNDLE_PACKAGE: &str = "com.sdv.google.display_safety";
 const SDV_SERVICE_BUNDLE_VM: &str = "local-vm";
 const SDV_SERVICE_BUNDLE_INSTANCE: &str = "instance-1";
 const SDV_DEFAULT_TEST_TIMEOUT_SECONDS: u64 = 30;
@@ -26,7 +26,7 @@ pub fn get_vehicle_data_publisher_service_bundle() -> ServiceFqin {
     ServiceFqin {
         sdvVmName: SDV_SERVICE_BUNDLE_VM.to_owned(),
         sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
-        serviceBundleName: "HarSdvVehicleDataPublisherServiceBundle".to_owned(),
+        serviceBundleName: "HarSdvVehicleDataPublisher".to_owned(),
         serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
     }
 }
@@ -37,26 +37,6 @@ pub fn get_fake_vehicle_data_publisher_service_bundle() -> ServiceFqin {
         sdvVmName: "local-vm".to_owned(),
         sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
         serviceBundleName: "HarSdvFakeVehicleDataPublisherServiceBundle".to_owned(),
-        serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
-    }
-}
-
-/// Returns the HAR-SDV user preferences (base) service bundle fqin
-pub fn get_har_sdv_user_preferences_service_bundle() -> ServiceFqin {
-    ServiceFqin {
-        sdvVmName: "local-vm".to_owned(),
-        sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
-        serviceBundleName: "HarUserPreferencesServiceBundle".to_owned(),
-        serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
-    }
-}
-
-/// Returns the HAR user preferences service bundle fqin
-pub fn get_har_preferences_service_bundle() -> ServiceFqin {
-    ServiceFqin {
-        sdvVmName: "local-vm".to_owned(),
-        sdvPackageName: SDV_SERVICE_BUNDLE_PACKAGE.to_owned(),
-        serviceBundleName: "HarUserPreferencesServiceBundle".to_owned(),
         serviceInstanceName: SDV_SERVICE_BUNDLE_INSTANCE.to_owned(),
     }
 }

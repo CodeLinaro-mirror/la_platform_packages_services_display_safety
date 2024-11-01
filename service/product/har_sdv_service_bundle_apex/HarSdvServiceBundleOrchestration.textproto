@@ -4,7 +4,7 @@
 
 instance: "instance-1"
 service_bundle_name: "HarSdvServiceBundle"
-package_name: "com.sdv.google.display_safety.service_bundle_apex"
+package_name: "com.sdv.google.display_safety"
 
 state {
   instances_states {

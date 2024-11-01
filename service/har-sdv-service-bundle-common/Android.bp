@@ -14,10 +14,20 @@ rust_library {
         "google.sdv.identity-aidl-V1-rust",
         "google.sdv.sd_common-aidl-V1-rust",
         "libsdv_lifecycle_client_rust",
+        // Contains all SDV libraries accessed from user code
+        "libsdv_rs",
+        // Tokio coroutines.
+        "libtokio",
+        "libtokio_util",
+        // Rust foundations for asynchronous programming.
+        "libfutures",
     ],
     apex_available: [
         "//apex_available:platform",
         "//apex_available:anyapex",
+    ],
+    proc_macros: [
+        "libasync_trait",
     ],
     product_specific: true,
 }

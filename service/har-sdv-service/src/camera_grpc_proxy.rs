@@ -4,7 +4,6 @@ use crate::common::GrpcProxyServerToken;
 use futures_util::FutureExt;
 use futures_util::TryFutureExt;
 use grpcio::ChannelBuilder;
-use grpcio::EnvBuilder;
 use grpcio::Environment;
 use grpcio::ResourceQuota;
 use grpcio::ServerBuilder;
@@ -15,32 +14,31 @@ use har_grpc_services::driverui_grpc::HarryGrpcService;
 use har_grpc_services::driverui_grpc::HarryGrpcServiceClient;
 use log::{error, trace, warn};
 use std::sync::Arc;
-use std::time::Duration;
 
 /// A simple GRPC based proxy solution for the DriverUI GRPC service.
 /// Will start a GRPC server and connect to a Client using
 /// the same RPC definition and dispatch all requests
 pub struct CameraServiceGrpcProxy {
     server_address: String,
-    client_address: String,
 }
 
 impl CameraServiceGrpcProxy {
     /// Creates a new instance.
     /// * `server_address`: The address of the proxy server to start.
-    /// * `client_address`: The address of the remote server to proxy to.
-    pub fn new(server_address: String, client_address: String) -> Self {
-        Self { server_address, client_address }
+    pub fn new(server_address: String) -> Self {
+        Self { server_address }
     }
 
-    /// Starts the proxy server * `env`: The server runtime environment * returns the server token that can be used to stop the server.
-    pub fn run(&self, env: Arc<Environment>) -> GrpcProxyServerToken {
-        // Create client. Client needs a dedicated env otherwise it deadlocks.
-        let client_ch = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
-            .initial_reconnect_backoff(Duration::from_millis(10))
-            .max_reconnect_backoff(Duration::from_millis(50))
-            .connect(self.client_address.as_str());
-        let rpc_client = HarryGrpcServiceClient::new(client_ch);
+    /// Starts the proxy server
+    /// * `env`: The server runtime environment
+    /// * `channel_to_har`: The GRPC channel to HAR.
+    /// * returns the server token that can be used to stop the server.
+    pub fn run(
+        &self,
+        env: Arc<Environment>,
+        channel_to_har: ::grpcio::Channel,
+    ) -> Result<GrpcProxyServerToken, String> {
+        let rpc_client = HarryGrpcServiceClient::new(channel_to_har);
 
         // Create server
         let quota =
@@ -55,9 +53,9 @@ impl CameraServiceGrpcProxy {
             .unwrap();
         server
             .add_listening_port(self.server_address.as_str(), ServerCredentials::insecure())
-            .unwrap();
+            .map_err(|err| format!("Error adding listening port. {:?}", err))?;
         server.start();
-        GrpcProxyServerToken(server)
+        Ok(GrpcProxyServerToken(server))
     }
 }
 

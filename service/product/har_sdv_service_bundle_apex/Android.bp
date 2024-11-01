@@ -10,8 +10,6 @@ apex {
     native_shared_libs: [
         "libhar_sdv_vehicle_data_publisher_service_bundle",
         "libhar_sdv_fake_vehicle_data_publisher_service_bundle",
-        "libhar_sdv_user_preferences_service_bundle",
-        "libhar_preferences_service_bundle",
         "libhar_sdv_service_bundle",
     ],
     prebuilts: [
@@ -23,10 +21,6 @@ apex {
         "VehicleDataServiceBundleOrchestration-orch-config",
         // Orchestrator config for the fake data producer.
         "FakeVehicleDataServiceBundleOrchestration-orch-config",
-        // Orchestration config to start the base user preferences bundle.
-        "HarSdvUserPreferencesServiceBundle-orch-config",
-        // Orchestration config to start the HAR preferences bundle.
-        "HarUserPreferencesServiceBundle-orch-config",
         // Orchestration config to start the HAR-SDV bundle.
         "HarSdvServiceBundle-orch-config",
     ],
@@ -81,28 +75,6 @@ prebuilt_etc {
     // The source name of the manifest file.
     src: "FakeVehicleDataServiceBundleOrchestration.textproto",
     filename: "FakeVehicleDataServiceBundleOrchestration.textproto",
-    sub_dir: "config/orchestration",
-    // Disable direct installation of the manifest to one of the partitions.
-    // The manifest will be used only inside of service bundles registry apexes.
-    installable: false,
-}
-
-prebuilt_etc {
-    name: "HarSdvUserPreferencesServiceBundle-orch-config",
-    // The source name of the manifest file.
-    src: "HarSdvUserPreferencesServiceBundleOrchestration.textproto",
-    filename: "HarSdvUserPreferencesServiceBundleOrchestration.textproto",
-    sub_dir: "config/orchestration",
-    // Disable direct installation of the manifest to one of the partitions.
-    // The manifest will be used only inside of service bundles registry apexes.
-    installable: false,
-}
-
-prebuilt_etc {
-    name: "HarUserPreferencesServiceBundle-orch-config",
-    // The source name of the manifest file.
-    src: "HarUserPreferencesServiceBundleOrchestration.textproto",
-    filename: "HarUserPreferencesServiceBundleOrchestration.textproto",
     sub_dir: "config/orchestration",
     // Disable direct installation of the manifest to one of the partitions.
     // The manifest will be used only inside of service bundles registry apexes.

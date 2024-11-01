@@ -4,7 +4,7 @@
 # SDV service bundle publishing vehicle data
 sdv_service_bundle_metadata {
   # Service bundle name.
-  name: "HarSdvVehicleDataPublisherServiceBundle"
+  name: "HarSdvVehicleDataPublisher"
   # Service bundle integer version.
   version_number: 1
   # Service bundle version as a string.
@@ -15,7 +15,7 @@ sdv_service_bundle_metadata {
   orchestration_config_path: "etc/config/orchestration/VehicleDataServiceBundleOrchestration.textproto"
 }
 
-# SDV service bundle producing fake data for HarSdvVehicleDataPublisherServiceBundle
+# SDV service bundle producing fake data for HarSdvVehicleDataPublisher
 sdv_service_bundle_metadata {
   # Service bundle name.
   name: "HarSdvFakeVehicleDataPublisherServiceBundle"
@@ -27,48 +27,6 @@ sdv_service_bundle_metadata {
   native_library_path: "lib64/libhar_sdv_fake_vehicle_data_publisher_service_bundle.so"
 
   orchestration_config_path: "etc/config/orchestration/FakeVehicleDataServiceBundleOrchestration.textproto"
-}
-
-# SDV service bundle producing fake data for HarSdvVehicleDataPublisherServiceBundle
-sdv_service_bundle_metadata {
-  # Service bundle name.
-  name: "HarSdvFakeVehicleDataPublisherServiceBundle"
-  # Service bundle integer version.
-  version_number: 1
-  # Service bundle version as a string.
-  version_name: "1.alpha"
-  # Service bundle library path.
-  native_library_path: "lib64/libhar_sdv_fake_vehicle_data_publisher_service_bundle.so"
-
-  orchestration_config_path: "etc/config/orchestration/FakeVehicleDataServiceBundleOrchestration.textproto"
-}
-
-# SDV service bundle hosting the base User Preferences service
-sdv_service_bundle_metadata {
-  # Service bundle name.
-  name: "HarSdvUserPreferencesServiceBundle"
-  # Service bundle integer version.
-  version_number: 1
-  # Service bundle version as a string.
-  version_name: "1.alpha"
-  # Service bundle library path.
-  native_library_path: "lib64/libhar_sdv_user_preferences_service_bundle.so"
-
-  orchestration_config_path: "etc/config/orchestration/HarSdvUserPreferencesServiceBundleOrchestration.textproto"
-}
-
-# SDV service bundle hosting HAR User Preferences service
-sdv_service_bundle_metadata {
-  # Service bundle name.
-  name: "HarUserPreferencesServiceBundle"
-  # Service bundle integer version.
-  version_number: 1
-  # Service bundle version as a string.
-  version_name: "1.alpha"
-  # Service bundle library path.
-  native_library_path: "lib64/libhar_preferences_service_bundle.so"
-
-  orchestration_config_path: "etc/config/orchestration/HarUserPreferencesServiceBundleOrchestration.textproto"
 }
 
 # SDV service bundle hosting HAR-SDV integrations

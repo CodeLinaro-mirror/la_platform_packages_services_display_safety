@@ -1,0 +1,136 @@
+# Copyright 2024 Google LLC
+# proto-file: //system/software_defined_vehicle/core_services/vsidl/protos/sdv/vsidl/v1/syntax.proto
+# proto-message: VsidlEntry
+
+package: "com.sdv.google.display_safety"
+
+sdv_service_bundle {
+    name: "HarSdvVehicleDataPublisher"
+
+    publisher {
+        type: "TirePressure"
+        instance: "FRONT_LEFT"
+        instance: "FRONT_RIGHT"
+        instance: "REAR_LEFT"
+        instance: "REAR_RIGHT"
+        instance: "FIFTH_WHEEL"
+    }
+
+    unit_type {
+        type: "TirePressure"
+    }
+
+    publisher {
+        type: "VehicleSpeed"
+        instance: "VEHICLE_SPEED"
+        instance: "MAX_SPEED"
+        instance: "SPEEDLIMIT"
+    }
+
+    unit_type {
+        type: "VehicleSpeed"
+    }
+
+    publisher {
+        type: "TellTaleStatus"
+        instance: "OIL_PRESSURE"
+        instance: "ENGINE_TEMP"
+        instance: "CHECK_ENGINE"
+        instance: "CHARGING_FAILURE"
+        instance: "SEATBELT_DRIVER"
+        instance: "SEATBELT_PASSENGER"
+        instance: "LOW_TIRE_PRESSURE"
+        instance: "AIRBAG"
+        instance: "ABS"
+        instance: "BRAKE"
+        instance: "TRACTION"
+        instance: "FOG_LIGHTS"
+        instance: "PARK_LIGHTS"
+        instance: "HIBEAM"
+        instance: "LOWBEAM"
+        instance: "TURN_SIGNAL_LEFT"
+        instance: "TURN_SIGNAL_RIGHT"
+        instance: "ADAS"
+        instance: "MAX_SPEED_DISPLAYED"
+        instance: "SPEED_LIMIT_DISPLAYED"
+        instance: "EMERGENCY_LIGHT"
+    }
+
+    unit_type {
+        type: "TellTaleStatus"
+    }
+
+    publisher {
+        type: "CurrentGear"
+    }
+
+    unit_type {
+        type: "CurrentGear"
+    }
+}
+
+
+sdv_service_bundle {
+    name: "HarSdvServiceBundle"
+
+    subscriber {
+        type: "TirePressure"
+        instance: "FRONT_LEFT"
+        instance: "FRONT_RIGHT"
+        instance: "REAR_LEFT"
+        instance: "REAR_RIGHT"
+        instance: "FIFTH_WHEEL"
+    }
+
+    unit_type {
+        type: "TirePressure"
+    }
+
+    subscriber {
+        type: "VehicleSpeed"
+        instance: "VEHICLE_SPEED"
+        instance: "MAX_SPEED"
+        instance: "SPEEDLIMIT"
+    }
+
+    unit_type {
+        type: "VehicleSpeed"
+    }
+
+    subscriber {
+        type: "TellTaleStatus"
+        instance: "OIL_PRESSURE"
+        instance: "ENGINE_TEMP"
+        instance: "CHECK_ENGINE"
+        instance: "CHARGING_FAILURE"
+        instance: "SEATBELT_DRIVER"
+        instance: "SEATBELT_PASSENGER"
+        instance: "LOW_TIRE_PRESSURE"
+        instance: "AIRBAG"
+        instance: "ABS"
+        instance: "BRAKE"
+        instance: "TRACTION"
+        instance: "FOG_LIGHTS"
+        instance: "PARK_LIGHTS"
+        instance: "HIBEAM"
+        instance: "LOWBEAM"
+        instance: "TURN_SIGNAL_LEFT"
+        instance: "TURN_SIGNAL_RIGHT"
+        instance: "ADAS"
+        instance: "MAX_SPEED_DISPLAYED"
+        instance: "SPEED_LIMIT_DISPLAYED"
+        instance: "EMERGENCY_LIGHT"
+    }
+
+    unit_type {
+        type: "TellTaleStatus"
+    }
+
+    subscriber {
+        type: "CurrentGear"
+    }
+
+    unit_type {
+        type: "CurrentGear"
+    }
+}

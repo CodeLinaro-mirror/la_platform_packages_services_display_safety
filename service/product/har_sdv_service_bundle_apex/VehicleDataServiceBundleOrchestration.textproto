@@ -3,8 +3,8 @@
 # proto-message: ServiceBundleConfig
 
 instance: "instance-1"
-service_bundle_name: "HarSdvVehicleDataPublisherServiceBundle"
-package_name: "com.sdv.google.display_safety.service_bundle_apex"
+service_bundle_name: "HarSdvVehicleDataPublisher"
+package_name: "com.sdv.google.display_safety"
 
 state {
   instances_states {

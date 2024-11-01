@@ -5,11 +5,16 @@ use grpcio::Server;
 pub const DRIVERUI_RPC_SERVER_PORT: i32 = 7000;
 pub const DRIVERUI_RPC_SERVER_HOST: &str = "0.0.0.0";
 
+pub const CAMERA_RPC_SERVER_HOST: &str = "0.0.0.0";
 pub const CAMERA_RPC_SERVER_PORT: i32 = 8000;
 
 // Defines where the GRPC proxy connects to.
-pub const DRIVERUI_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:7001";
 pub const CAMERA_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:8001";
+// Harry's Vehicle Data server.
+pub const HAR_VEHICLE_DATA_GRPC: &str = "127.0.0.1:50051";
+
+pub const QNX_VEHICLE_DATA_PORT: &str = "50051";
+pub const PRODUCT_HAR_SAFETY_MONITOR_IP: &str = "product.harplatform.safety_monitor";
 
 /// A token for a running server. Dropping this will stop the server.
 pub struct GrpcProxyServerToken(pub Server);

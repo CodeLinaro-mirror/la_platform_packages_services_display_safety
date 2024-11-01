@@ -1,40 +1,5 @@
 // Copyright 2024 Google LLC
 
-rust_binary {
-    name: "har_sdv_service",
-    crate_name: "har_sdv_service",
-    srcs: [
-        "src/main.rs",
-    ],
-    lints: "none",
-    prefer_rlib: true,
-    rustlibs: [
-        "libtokio",
-        "liboem_harry_vehicle_messages_catalog",
-        "libprotobuf",
-        "libsdv_log_rust",
-        "liblog_rust",
-        "libsdvgenerated_harry_vehicle_data_subscriber",
-        "libsdv_middleware_pubsub",
-        "libhar_grpc_services",
-        "libuser_preferences_api",
-        "libsdvgenerated_har_preferences_client",
-        "libsdvmiddleware_rpc",
-        "libitertools",
-        "libuser_preferences_utils",
-        "libsdvmiddleware_rpc_grpc_transport",
-        "libsdvgenerated_rpc_sdv_user_preferences_view_change_notifier",
-        "libgrpcio",
-        "libfutures_util",
-        "libfutures",
-        "libhar_sdv_rpc",
-        "librustutils",
-        "google.sdv.sd_common-aidl-V1-rust",
-    ],
-    vendor_available: true,
-    product_available: true,
-}
-
 // Service bundle library for Vehicle Data Publisher.
 rust_ffi_shared {
     name: "libhar_sdv_service_bundle",
@@ -48,21 +13,11 @@ rust_ffi_shared {
     prefer_rlib: true,
     rustlibs: [
         "libtokio",
-        "liboem_harry_vehicle_messages_catalog",
         "libprotobuf",
         "libsdv_log_rust",
         "liblog_rust",
-        "libhar_sdv_rpc",
-        "libsdvgenerated_harry_vehicle_data_subscriber",
-        "libsdv_middleware_pubsub",
         "libhar_grpc_services",
-        "libuser_preferences_api",
-        "libsdvgenerated_har_preferences_client",
-        "libsdvmiddleware_rpc",
         "libitertools",
-        "libuser_preferences_utils",
-        "libsdvmiddleware_rpc_grpc_transport",
-        "libsdvgenerated_rpc_sdv_user_preferences_view_change_notifier",
         "libgrpcio",
         "libfutures_util",
         "libfutures",
@@ -70,20 +25,31 @@ rust_ffi_shared {
         "google.sdv.identity-aidl-V1-rust",
         "librustutils",
         "google.sdv.sd_common-aidl-V1-rust",
+        // Contains all SDV libraries accessed from user code
+        "libsdv_rs",
         // Contains service bundle interface definitions and helper macros.
         "libsdv_lifecycle_client_rust",
-        // commstack library that provides context object reference.
-        "libsdv_comms_rs",
         "libharry_vehicle_data_grpc",
         "librand",
         "libtokio_util",
         "libhar_sdv_service_bundle_common",
+        // catalog
+        "liboem_harry_vehicle_messages_catalog_v1",
+        // v1 comms
+        "libsdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle",
+        // Service discovery implementation
+        "libhar_sdv_rpc",
     ],
     // Allows the library to be available inside APEX.
     apex_available: [
         "//apex_available:platform",
         "//apex_available:anyapex",
     ],
+    proc_macros: [
+        "libasync_trait",
+    ],
+    // Helps with `ApexSupport: Could not load ...so: dlopen failed: cannot locate symbol "ASDV_..." referenced by ...`
+    ld_flags: ["-Wl,--no-as-needed"],
     // Service bundle package is packed into /product apexes.
     product_specific: true,
 }

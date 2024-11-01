@@ -1,0 +1,36 @@
+// Copyright 2023 Google LLC
+
+syntax = "proto3";
+
+// This is similar to SDV VSIDL Examples. See examples at:
+// system/software_defined_vehicle/core_services/samples/vsidl/stable/catalog/tire.proto
+
+package com.sdv.google.display_safety;
+import "sdv/vsidl/v1/annotations.proto";
+
+enum Location {
+  FRONT_LEFT = 0;
+  FRONT_RIGHT = 1;
+  REAR_LEFT = 2;
+  REAR_RIGHT = 3;
+  FIFTH_WHEEL = 4;
+}
+
+message TirePressure {
+  option (.sdv.vsidl.v1.publication) = {
+    instances_enum: "Location"
+    message_count: 8
+    model: SINGLE_PUB
+  };
+
+  uint32 pressure = 1;
+}
+
+message TireTemperature {
+  option (.sdv.vsidl.v1.publication) = {
+    model: SINGLE_PUB
+    message_count: 8
+  };
+
+  uint32 temperature = 1;
+}

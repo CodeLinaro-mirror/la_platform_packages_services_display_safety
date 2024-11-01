@@ -1,0 +1,24 @@
+// Copyright 2024 Google LLC
+// Device library that defines the sample vehicle messages catalog.
+
+// Generate code:
+// croot vendor/google/display_safety/service/vehicledata
+// vsidlc --catalog-path ./sdv_vehicledata_catalog_v1/ --output-path ./generated_v1/
+
+rust_protobuf {
+    name: "liboem_harry_vehicle_messages_catalog_v1",
+    crate_name: "oem_harry_vehicle_messages_catalog_v1",
+    protos: [
+        "*.proto",
+    ],
+    source_stem: "oem_harry_vehicle_messages_catalog_source",
+    proto_flags: [
+        "-I external/protobuf/src",
+    ],
+    rustlibs: [
+        "libvsidl_v1_proto_rs",
+    ],
+    host_supported: true,
+    vendor_available: true,
+    product_available: true,
+}
