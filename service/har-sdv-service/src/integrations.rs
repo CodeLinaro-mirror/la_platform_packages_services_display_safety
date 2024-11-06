@@ -180,7 +180,7 @@ pub(crate) fn register_har_sdv_driverui_proxy() -> Result<(), String> {
     let fqin = ServiceFqin {
         vm_name: "".to_string(),
         package_name: "android.sdv.displaysafety".to_string(),
-        service_name: "driverui-service".to_string(),
+        service_name: "DriverUIService".to_string(),
         instance_name: "default".to_string(),
     };
 
