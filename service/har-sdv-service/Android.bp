@@ -6,6 +6,7 @@ rust_binary {
     srcs: [
         "src/main.rs",
     ],
+    lints: "none",
     prefer_rlib: true,
     rustlibs: [
         "libtokio",
@@ -42,6 +43,7 @@ rust_ffi_shared {
         default: true,
     }),
     srcs: ["src/lib.rs"],
+    lints: "none",
     crate_name: "har_sdv_service_bundle",
     prefer_rlib: true,
     rustlibs: [

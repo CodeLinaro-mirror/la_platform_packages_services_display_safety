@@ -59,7 +59,6 @@ struct RunningServices {
     driverui_service: GrpcProxyServerToken,
     camera_service: GrpcProxyServerToken,
     qnx_handle: Option<JoinHandle<()>>,
-    user_prefs_client: HarPreferencesClient,
 }
 
 const PRODUCT_HAR_SAFETY_MONITOR_IP: &str = "product.harplatform.safety_monitor";
@@ -144,18 +143,9 @@ impl ServiceBundle for HarSdvServiceBundle {
         let _handle_sdv =
             proxy_vehicledata_to_harry(self.grpc_env.clone(), self.sdv_to_har_mapper.clone());
 
-        // Start SDV Data tunnel services for User Prefs to HAR.
-        let user_prefs_client =
-            proxy_user_preferences_to_harry(self.grpc_env.clone(), self.sdv_to_har_mapper.clone());
-
         let mut running_services =
             self.running_services.lock().expect("Cannot lock running services.");
-        running_services.replace(RunningServices {
-            driverui_service,
-            camera_service,
-            qnx_handle,
-            user_prefs_client,
-        });
+        running_services.replace(RunningServices { driverui_service, camera_service, qnx_handle });
     }
 
     /// Called when the service bundle is stopped by the system in preparation
