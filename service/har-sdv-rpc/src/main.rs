@@ -8,24 +8,24 @@
 use crate::sdv_service_discovery::find_service;
 use crate::sdv_service_discovery::register_service;
 use anyhow::Result;
-use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceFqin::ServiceFqin;
-use google_sdv_sd_common_aidl::aidl::google::sdv::sd_common::ServiceIdentity::PublicKey::PublicKey;
 use log::info;
+use sdv::comms::id::ServiceFqin;
 
 mod sdv_service_discovery;
 
 fn main() -> Result<()> {
-    let publickey = PublicKey { value: *b"HARSDVGATEWAY-7890123456_______\0" };
+    let publickey = *b"HARSDVGATEWAY-7890123456_______\0";
 
-    let fqin = ServiceFqin {
-        vm_name: "".to_string(),
-        package_name: "com.android.car.displaysafety".to_string(),
-        service_name: "driverui".to_string(),
-        instance_name: "default".to_string(),
-    };
+    let fqin = ServiceFqin::builder()
+        .sdv_vm_name("".to_owned())
+        .sdv_package_name("com.sdv.android.car.displaysafety".to_owned())
+        .service_bundle_name("DriverUIServiceFoo".to_owned())
+        .service_instance_name("default".to_owned())
+        .build()
+        .expect("Invalid FQIN");
 
     let listening_port = 11224;
-    register_service(&publickey, &fqin, "foo-bar-custom-data".as_bytes().to_vec(), listening_port)?;
+    register_service(publickey, &fqin, "foo-bar-custom-data".as_bytes().to_vec(), listening_port)?;
     info!("Service registered.");
 
     info!("Now trying to retrieve the registration");

@@ -16,10 +16,10 @@ rust_library {
     ],
     crate_name: "har_sdv_orch_tests_common",
     rustlibs: [
-        "google.sdv.lifecycle-V1-rust",
         "liblog_rust",
         // SDV Orchestrator uses ServiceFqin to communicate with Lifecycle manager API
         "google.sdv.identity-aidl-V1-rust",
+        "google.sdv.lifecycle-V1-rust",
         "libbinder_rs",
         "librustutils",
     ],

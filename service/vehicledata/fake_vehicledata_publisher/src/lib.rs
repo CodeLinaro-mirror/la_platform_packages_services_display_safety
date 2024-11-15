@@ -36,7 +36,7 @@ impl Cancelable {
 }
 
 // Register the new service bundle.
-sdv_lifecycle_client::register_service_bundle!(HarSdvFakeVehicleDataPublisherServiceBundle);
+sdv::lifecycle::register_service_bundle!(HarSdvFakeVehicleDataPublisherServiceBundle);
 
 impl ServiceBundle for HarSdvFakeVehicleDataPublisherServiceBundle {
     /// Creates a new instance of the HarSdvFakeVehicleDataPublisherServiceBundle.

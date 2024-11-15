@@ -149,7 +149,7 @@ impl HarryVehicleDataPublishers {
 }
 
 // Register the new service bundle.
-sdv_lifecycle_client::register_service_bundle!(AsyncServiceBundle<HarSdvVehicleDataPublisher>);
+sdv::lifecycle::register_service_bundle!(AsyncServiceBundle<HarSdvVehicleDataPublisher>);
 
 #[async_trait]
 impl AsyncServiceBundleLauncher for HarSdvVehicleDataPublisher {
