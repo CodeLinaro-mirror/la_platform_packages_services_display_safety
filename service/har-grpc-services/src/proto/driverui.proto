@@ -84,6 +84,16 @@ message DesignTokenUpdateRequest {
 // Response to DesignTokenUpdateRequest.
 message DesignTokenUpdateResponse {}
 
+// Request to change the current locale used in Harry.
+message LocaleUpdateRequest {
+
+  // RFC 4647 Styled Language tag.
+  string language_tag = 1;
+}
+
+// Response to LocaleUpdateRequest.
+message LocaleUpdateResponse {}
+
 message HarryRequest {
   oneof oneof {
     // Heartbeat.
@@ -97,6 +107,9 @@ message HarryRequest {
 
     // Request for update of used design token in Harry
     DesignTokenUpdateRequest design_token_update_request = 4;
+
+    // Request to change the current locale used in Harry.
+    LocaleUpdateRequest locale_update_request = 5;
   }
 }
 
@@ -113,6 +126,9 @@ message HarryResponse {
 
     // Response to DesignTokenUpdateRequest.
     DesignTokenUpdateResponse design_token_update_response = 4;
+
+    // Locale updated in Harry.
+    LocaleUpdateResponse locale_update_response = 5;
   }
 }
 
@@ -127,4 +143,7 @@ service HarryGrpcService {
 
   /// Request for Harry to change what design tokens are used.
   rpc DesignTokenUpdate(DesignTokenUpdateRequest) returns (DesignTokenUpdateResponse) {}
+
+  // Request to change the current locale used in Harry.
+  rpc LocaleUpdate(LocaleUpdateRequest) returns (LocaleUpdateResponse) {}
 }

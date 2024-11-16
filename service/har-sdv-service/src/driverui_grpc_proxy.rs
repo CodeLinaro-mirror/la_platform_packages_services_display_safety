@@ -147,4 +147,24 @@ impl HarryGrpcService for DriverUiServer {
             }
         }
     }
+
+    fn locale_update(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: LocaleUpdateRequest,
+        sink: ::grpcio::UnarySink<LocaleUpdateResponse>,
+    ) {
+        match self.rpc_client.locale_update(&req) {
+            Ok(response) => {
+                let future = sink
+                    .success(response)
+                    .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                    .map(|_| ());
+                ctx.spawn(future);
+            }
+            Err(err) => {
+                warn!("Error dispatching {:?}: {:?}", req, err);
+            }
+        }
+    }
 }
