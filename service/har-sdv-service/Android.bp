@@ -8,7 +8,6 @@ rust_ffi_shared {
         default: true,
     }),
     srcs: ["src/lib.rs"],
-    lints: "none",
     crate_name: "har_sdv_service_bundle",
     prefer_rlib: true,
     rustlibs: [
@@ -30,6 +29,7 @@ rust_ffi_shared {
         "liboem_harry_vehicle_messages_catalog_v1",
         // v1 comms based on SDV generated code
         "libsdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle",
+        "libcom_sdv_google_display_safety_driver_ui_service_rpc_rs",
         // HAR Service discovery implementation
         "libhar_sdv_rpc",
         // SDV libraries

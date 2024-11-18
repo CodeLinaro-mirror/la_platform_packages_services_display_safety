@@ -73,6 +73,12 @@ sdv_service_bundle {
 sdv_service_bundle {
     name: "HarSdvServiceBundle"
 
+    server { interface: "DriverUIService" }
+
+    unit_type {
+        type: "DriverUIService"
+    }
+
     subscriber {
         type: "TirePressure"
         instance: "FRONT_LEFT"

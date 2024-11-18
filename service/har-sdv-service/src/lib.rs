@@ -13,6 +13,7 @@ use crate::common::HAR_VEHICLE_DATA_GRPC;
 use crate::common::PRODUCT_HAR_SAFETY_MONITOR_IP;
 use crate::common::QNX_VEHICLE_DATA_PORT;
 use crate::driverui_grpc_proxy::DriverUiGrpcProxy;
+use crate::driverui_grpc_proxy::DriverUiSdvRpcProxy;
 use crate::integrations_v1::create_topic_map;
 use crate::mapper::HashMapTopicMapper;
 use crate::mapper::SdvToHarMapper;
@@ -34,7 +35,6 @@ use log::trace;
 use log::warn;
 use oem_harry_vehicle_messages_catalog_v1::vehicledata::Gear;
 use rustutils::system_properties;
-use sdv::comms::id::ServiceFqin;
 use sdv::mw::Communicate;
 use sdv::status::SdvStatus;
 use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle::HarSdvServiceBundle as SdvVehicleDataClient;
@@ -108,15 +108,7 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
 
         info!("Launching.");
 
-        let mut subscriber_service = match SdvVehicleDataClient::new(self.comms.clone()).await {
-            Ok(service) => service,
-            Err(e) => panic!("{e}"),
-        };
-
-        // Maps from SDV-relevant Strings to sendable HAR vehicle data messages.
-        let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
-
-        let ch_to_har = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
+        let ch_to_har_vehicle_data = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
             .initial_reconnect_backoff(Duration::from_millis(10))
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(HAR_VEHICLE_DATA_GRPC);
@@ -131,9 +123,20 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(HAR_DRIVERUI_RPC_CLIENT_ADDRESS);
 
+        // DriverUiSdvRpcProxy implements the SDV RPC server trait.
+        let driverui_sdv_rpc: Arc<
+            dyn com_sdv_google_display_safety_driver_ui_service_rpc::Interface,
+        > = Arc::new(DriverUiSdvRpcProxy::new(ch_to_har_driverui.clone()));
+
+        let mut subscriber_service =
+            match SdvVehicleDataClient::new(self.comms.clone(), (driverui_sdv_rpc,)).await {
+                Ok(service) => service,
+                Err(e) => panic!("{e}"),
+            };
+
         let (har_tx, har_rx) = mpsc::channel(32);
         // Create client to transfer vehicle data
-        let har_vehicle_data_client = VehicleDataServiceClient::new(ch_to_har.clone());
+        let har_vehicle_data_client = VehicleDataServiceClient::new(ch_to_har_vehicle_data);
         let mut har_vehicle_data_clients = vec![har_vehicle_data_client];
         // Initialize the optional QNX Vehicle Data proxy. (only available on QNX-based systems.)
         if let Some(qnx_address) = self.qnx_address.as_ref() {
@@ -145,6 +148,9 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
             let vehicle_data_client = VehicleDataServiceClient::new(ch);
             har_vehicle_data_clients.push(vehicle_data_client);
         }
+
+        // Maps from SDV-relevant Strings to sendable HAR vehicle data messages.
+        let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
 
         let _sdv_vehicle_data_to_har_task = tokio::spawn(transfer_vehicle_data(
             har_vehicle_data_clients,
@@ -178,7 +184,7 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
         // TODO(378913750): Implement auth when required.
         let publickey = *b"HARSDVGATEWAY-7890123456_______\0";
         register_service(
-            publickey.clone(),
+            publickey,
             &get_har_sdv_driverui_service_fqin(),
             "".as_bytes().to_vec(),
             DRIVERUI_RPC_SERVER_PORT,

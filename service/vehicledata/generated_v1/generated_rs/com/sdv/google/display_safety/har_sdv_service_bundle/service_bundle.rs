@@ -47,6 +47,12 @@ impl UnitType for oem_harry_vehicle_messages_catalog_v1::vehicledata::CurrentGea
     const TYPENAME: &'static str = "CurrentGear";
 }
 
+impl UnitType for dyn com_sdv_google_display_safety_driver_ui_service_rpc::Interface {
+    const PACKAGE: &'static str = "com.sdv.google.display_safety";
+    const SERVICE_BUNDLE: &'static str = "HarSdvServiceBundle";
+    const TYPENAME: &'static str = "DriverUIService";
+}
+
 /// Provides access to subscriptions available to the service bundle
 pub mod subscriber {
 
@@ -388,15 +394,50 @@ pub mod subscriber {
 /// Service bundle
 pub struct HarSdvServiceBundle {
     comms: std::sync::Arc<dyn sdv::mw::Communicate>,
+    servers: std::vec::Vec<std::sync::Arc<dyn sdv::mw::ServerTransport>>,
 }
 
 impl HarSdvServiceBundle {
     /// Creates a new instance of the service bundle
     pub async fn new(
         comms: std::sync::Arc<dyn sdv::mw::Communicate>,
+        servers: (
+            std::sync::Arc<dyn com_sdv_google_display_safety_driver_ui_service_rpc::Interface>,
+        ),
     ) -> sdv::status::SdvResult<Self> {
-        let service = Self { comms: comms.clone() };
+        let mut service = Self { comms: comms.clone(), servers: std::vec::Vec::new() };
+        service
+            .add_server::<dyn com_sdv_google_display_safety_driver_ui_service_rpc::Interface>(
+                com_sdv_google_display_safety_driver_ui_service_rpc::internal::DEFAULT_UNIT_NAME
+                    .to_string(),
+                com_sdv_google_display_safety_driver_ui_service_rpc::internal::get_method_map(
+                    servers.0.clone(),
+                ),
+            )
+            .await?;
         Ok(service)
+    }
+
+    async fn add_server<T: UnitType + ?Sized + 'static + Send + Sync>(
+        &mut self,
+        unit_name: String,
+        methods: std::collections::HashMap<String, sdv::comms::rpc::UnaryRpcMethod>,
+    ) -> sdv::status::SdvResult<()> {
+        let attributes = sdv::mw::ServerAttributes::builder()
+            .server_name(unit_name)
+            .type_name(
+                sdv::mw::TypeName::builder()
+                    .package_name(T::PACKAGE)
+                    .bundle_name(T::SERVICE_BUNDLE)
+                    .type_name(T::TYPENAME)
+                    .build()?,
+            )
+            .server_options(sdv::mw::ServerOptions::builder().timeout_in_sec(30).build()?)
+            .build()?;
+
+        let transport = self.comms.create_server_transport(&attributes, methods).await?;
+        self.servers.push(transport.into());
+        Ok(())
     }
 
     /// Creates a new subscriber

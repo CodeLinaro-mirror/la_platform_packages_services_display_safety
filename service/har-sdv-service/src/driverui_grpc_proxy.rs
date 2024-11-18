@@ -8,17 +8,24 @@ use grpcio::Environment;
 use grpcio::ResourceQuota;
 use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
+use har_grpc_services::driverui::document_switched_response::Status as DocumentSwitchedResponseStatus;
+use har_grpc_services::driverui::document_updated_response::Status as DocumentUpdatedResponseStatus;
+use har_grpc_services::driverui::heartbeat_request::Source;
+use har_grpc_services::driverui::heartbeat_response::Status as HeartbeatResponseStatus;
 use har_grpc_services::driverui::*;
 use har_grpc_services::driverui_grpc::create_harry_grpc_service;
 use har_grpc_services::driverui_grpc::HarryGrpcService;
 use har_grpc_services::driverui_grpc::HarryGrpcServiceClient;
 use log::info;
 use log::{error, trace, warn};
+use sdv::status::SdvStatus;
+use sdv::status::SdvStatusCode;
 use std::sync::Arc;
 
 /// A simple GRPC based proxy solution for the DriverUI GRPC service.
 /// Will start a GRPC server and connect to a Client using
 /// the same RPC definition and dispatch all requests
+// Deprecated
 pub struct DriverUiGrpcProxy {
     server_address: String,
 }
@@ -57,6 +64,169 @@ impl DriverUiGrpcProxy {
             .unwrap();
         server.start();
         GrpcProxyServerToken(server)
+    }
+}
+
+// DriverUI SDV-RPC to HAR's DriverUI GRPC Adapter.
+pub struct DriverUiSdvRpcProxy {
+    rpc_client: HarryGrpcServiceClient,
+}
+
+impl DriverUiSdvRpcProxy {
+    /// Creates a new instance.
+    /// - `channel_to_har`: The GRPC channel to the HAR app.
+    pub fn new(channel_to_har: ::grpcio::Channel) -> DriverUiSdvRpcProxy {
+        DriverUiSdvRpcProxy { rpc_client: HarryGrpcServiceClient::new(channel_to_har) }
+    }
+}
+
+#[allow(non_snake_case)]
+#[async_trait::async_trait]
+impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUiSdvRpcProxy {
+    async fn Heartbeat(
+        &self,
+        _caller_id: sdv::comms::id::ServiceFqin,
+        request: &oem_harry_vehicle_messages_catalog_v1::driverui::HeartbeatRequest,
+    ) -> sdv::status::SdvResult<oem_harry_vehicle_messages_catalog_v1::driverui::HeartbeatResponse>
+    {
+        trace!("Received heart beat request to send over to HAR: {:?}", &request);
+        match self.rpc_client.heartbeat(&HeartbeatRequest {
+            uptime: request.uptime,
+            source: match request.source.enum_value().map_err(|err| {
+                error!("Error converting heart beat request source: {:?}", err);
+                SdvStatus::new(SdvStatusCode::InvalidArgument)
+            })? {
+                oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_UNKNOWN => Source::SOURCE_UNKNOWN,
+                oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_ANDROID => Source::SOURCE_ANDROID,
+                oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_INSTRUMENT_CLUSTER => Source::SOURCE_INSTRUMENT_CLUSTER,
+            }.into(),
+            ..Default::default()
+        }) {
+            Ok(response) => {
+                trace!("Received heartbeat response {:?}", &response);
+                Ok(oem_harry_vehicle_messages_catalog_v1::driverui::HeartbeatResponse {
+                    status: match response.status.enum_value().map_err(|err| {
+                        error!("Error converting heart beat response status: {:?}", err);
+                        SdvStatus::new(SdvStatusCode::InvalidArgument)
+                    })? {
+                        HeartbeatResponseStatus::STATUS_UNKNOWN => oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_response::Status::STATUS_UNKNOWN,
+                        HeartbeatResponseStatus::STATUS_OK => oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_response::Status::STATUS_OK,
+                        HeartbeatResponseStatus::STATUS_PROCESSING_ERROR => oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_response::Status::STATUS_PROCESSING_ERROR,
+                    }.into(),
+                    ..Default::default()
+                })
+            }
+            Err(err) => {
+                warn!("Error dispatching Heartbeat {:?}: {:?}", request, err);
+                Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
+            }
+        }
+    }
+
+    async fn DocumentSwitched(
+        &self,
+        _caller_id: sdv::comms::id::ServiceFqin,
+        request: &oem_harry_vehicle_messages_catalog_v1::driverui::DocumentSwitchedRequest,
+    ) -> sdv::status::SdvResult<
+        oem_harry_vehicle_messages_catalog_v1::driverui::DocumentSwitchedResponse,
+    > {
+        match self.rpc_client.document_switched(&DocumentSwitchedRequest {
+            document_id: request.document_id.clone(),
+            ..Default::default()
+        }) {
+            Ok(response) => {
+                Ok(oem_harry_vehicle_messages_catalog_v1::driverui::DocumentSwitchedResponse {
+                    status: match response.status.enum_value().map_err(|err| {
+                        error!("Error converting document switch response status: {:?}", err);
+                        SdvStatus::new(SdvStatusCode::InvalidArgument)
+                    })? {
+                        DocumentSwitchedResponseStatus::STATUS_UNKNOWN => oem_harry_vehicle_messages_catalog_v1::driverui::document_switched_response::Status::STATUS_UNKNOWN,
+                        DocumentSwitchedResponseStatus::STATUS_OK => oem_harry_vehicle_messages_catalog_v1::driverui::document_switched_response::Status::STATUS_OK,
+                        DocumentSwitchedResponseStatus::STATUS_PROCESSING_ERROR => oem_harry_vehicle_messages_catalog_v1::driverui::document_switched_response::Status::STATUS_PROCESSING_ERROR,
+                    }.into(),
+                    ..Default::default()
+                })
+            }
+            Err(err) => {
+                warn!("Error dispatching DocumentSwitched {:?}: {:?}", request, err);
+                Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
+            }
+        }
+    }
+    async fn DocumentUpdated(
+        &self,
+        _caller_id: sdv::comms::id::ServiceFqin,
+        request: &oem_harry_vehicle_messages_catalog_v1::driverui::DocumentUpdatedRequest,
+    ) -> sdv::status::SdvResult<
+        oem_harry_vehicle_messages_catalog_v1::driverui::DocumentUpdatedResponse,
+    > {
+        match self.rpc_client.document_updated(&DocumentUpdatedRequest {
+            document_id: request.document_id.clone(),
+            serialized_document: request.serialized_document.clone(),
+            ..Default::default()
+        }) {
+            Ok(response) => {
+                Ok(oem_harry_vehicle_messages_catalog_v1::driverui::DocumentUpdatedResponse {
+                    status: match response.status.enum_value().map_err(|err| {
+                        error!("Error converting document updated response status: {:?}", err);
+                        SdvStatus::new(SdvStatusCode::InvalidArgument)
+                    })? {
+                        DocumentUpdatedResponseStatus::STATUS_UNKNOWN => oem_harry_vehicle_messages_catalog_v1::driverui::document_updated_response::Status::STATUS_UNKNOWN,
+                        DocumentUpdatedResponseStatus::STATUS_OK => oem_harry_vehicle_messages_catalog_v1::driverui::document_updated_response::Status::STATUS_OK,
+                        DocumentUpdatedResponseStatus::STATUS_PROCESSING_ERROR => oem_harry_vehicle_messages_catalog_v1::driverui::document_updated_response::Status::STATUS_PROCESSING_ERROR,
+                    }.into(),
+                    ..Default::default()
+                })
+            }
+            Err(err) => {
+                warn!("Error dispatching DocumentUpdated {:?}: {:?}", request, err);
+                Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
+            }
+        }
+    }
+    async fn DesignTokenUpdate(
+        &self,
+        _caller_id: sdv::comms::id::ServiceFqin,
+        request: &oem_harry_vehicle_messages_catalog_v1::driverui::DesignTokenUpdateRequest,
+    ) -> sdv::status::SdvResult<
+        oem_harry_vehicle_messages_catalog_v1::driverui::DesignTokenUpdateResponse,
+    > {
+        match self.rpc_client.design_token_update(&DesignTokenUpdateRequest {
+            theme: request.theme.clone(),
+            variable_mode: request.variable_mode.clone(),
+            ..Default::default()
+        }) {
+            Ok(_response) => {
+                Ok(oem_harry_vehicle_messages_catalog_v1::driverui::DesignTokenUpdateResponse {
+                    ..Default::default()
+                })
+            }
+            Err(err) => {
+                warn!("Error dispatching DesignTokenUpdate {:?}: {:?}", request, err);
+                Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
+            }
+        }
+    }
+    async fn LocaleUpdate(
+        &self,
+        _caller_id: sdv::comms::id::ServiceFqin,
+        request: &oem_harry_vehicle_messages_catalog_v1::driverui::LocaleUpdateRequest,
+    ) -> sdv::status::SdvResult<oem_harry_vehicle_messages_catalog_v1::driverui::LocaleUpdateResponse>
+    {
+        match self.rpc_client.locale_update(&LocaleUpdateRequest {
+            language_tag: request.language_tag.clone(),
+            ..Default::default()
+        }) {
+            Ok(_response) => {
+                Ok(oem_harry_vehicle_messages_catalog_v1::driverui::LocaleUpdateResponse {
+                    ..Default::default()
+                })
+            }
+            Err(err) => {
+                warn!("Error dispatching LocaleUpdate {:?}: {:?}", request, err);
+                Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
+            }
+        }
     }
 }
 

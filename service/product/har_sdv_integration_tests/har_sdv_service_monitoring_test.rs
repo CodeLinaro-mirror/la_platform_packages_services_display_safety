@@ -9,10 +9,10 @@ mod tests {
     use oem_harry_vehicle_messages_catalog_v1::vehicledata::TellTaleStatus;
     use oem_harry_vehicle_messages_catalog_v1::vehicledata::VehicleSpeed;
     use protobuf::Message;
+    use sdv::comms::id::ServiceFqin;
+    use sdv::comms::ContextRef;
     use sdv::mw::SdvComms;
     use sdv::mw::SubscribeOptions;
-    use sdv_comms::id::ServiceFqin;
-    use sdv_comms::ContextRef;
     use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle::subscriber::Metadata;
     use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle::subscriber::Variant;
     use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle::HarSdvServiceBundle as SdvVehicleDataClient;
@@ -22,6 +22,13 @@ mod tests {
     use std::sync::Arc;
     use tokio::time::timeout;
     use tokio::time::Duration;
+
+    // Stub, no-op RPC implementation.
+    struct StubDriverUiRpc;
+
+    #[allow(non_snake_case)]
+    #[async_trait::async_trait]
+    impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for StubDriverUiRpc {}
 
     #[tokio::test]
     pub async fn test_vehicle_data_publisher_service_bundle_running() {
@@ -35,10 +42,15 @@ mod tests {
 
         let context = ContextRef::create(fqin);
         let comms = Arc::new(SdvComms { context });
-        let mut subscriber_service = match SdvVehicleDataClient::new(comms).await {
-            Ok(service) => service,
-            Err(e) => panic!("Error connecting to SDV: {e:?}"),
-        };
+
+        // DriverUiSdvRpcProxy implements the SDV RPC server trait.
+        let driverui_sdv_rpc: Arc<StubDriverUiRpc> = Arc::new(StubDriverUiRpc {});
+
+        let mut subscriber_service =
+            match SdvVehicleDataClient::new(comms, (driverui_sdv_rpc,)).await {
+                Ok(service) => service,
+                Err(e) => panic!("Error connecting to SDV: {e:?}"),
+            };
 
         // call retry_monitor_all with a timeout
         let lookup_timeout = Duration::from_secs(20);
