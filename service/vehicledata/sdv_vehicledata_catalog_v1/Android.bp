@@ -22,3 +22,49 @@ rust_protobuf {
     vendor_available: true,
     product_available: true,
 }
+
+java_genrule {
+    name: "harsdv-grpc-java-stub-lite",
+    tools: [
+        "aprotoc",
+        "protoc-gen-grpc-java-plugin",
+        "soong_zip",
+    ],
+    cmd: "mkdir -p $(genDir)/gen && " +
+        "$(location aprotoc) --java_opt=annotate_code=false " +
+        " -Iexternal/protobuf/src " +
+        " -Ivendor/google/display_safety/service/vehicledata/sdv_vehicledata_catalog_v1 " +
+        " --plugin=protoc-gen-grpc-java=$(location protoc-gen-grpc-java-plugin) " +
+        " --grpc-java_out=lite:$(genDir)/gen $(in) && " +
+        " $(location soong_zip) -o $(out) -C $(genDir)/gen -D $(genDir)/gen",
+    srcs: [
+        "driverui.proto",
+        ":libprotobuf-internal-protos",
+    ],
+    out: ["libharsdv-grpc-proto.srcjar"],
+}
+
+java_library {
+    name: "harsdv-grpc-java-proto-lite",
+    proto: {
+        type: "lite",
+        include_dirs: [
+            "external/protobuf/src",
+            "external/protobuf/java",
+            "vendor/google/display_safety/service/vehicledata/sdv_vehicledata_catalog_v1",
+        ],
+    },
+    srcs: [
+        "driverui.proto",
+        ":harsdv-grpc-java-stub-lite",
+        ":libprotobuf-internal-protos",
+    ],
+    libs: ["javax_annotation-api_1.3.2"],
+    static_libs: [
+        "libprotobuf-java-lite",
+        "grpc-java-core-android",
+        "grpc-java-okhttp-client-lite",
+        "guava",
+    ],
+    sdk_version: "current",
+}

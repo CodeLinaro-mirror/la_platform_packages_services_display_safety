@@ -47,11 +47,13 @@ import androidx.annotation.NonNull;
 
 import com.android.car.internal.evs.CarEvsGLSurfaceView;
 import com.android.car.internal.evs.GLES20CarEvsBufferRenderer;
-import com.google.displaysafety.harry.HarryGrpcServiceGrpc;
+import com.google.displaysafety.harry.DriverUIServiceGrpc;
 import com.google.displaysafety.harry.HeartbeatResponse;
 import com.google.displaysafety.harry.HeartbeatRequest;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -103,13 +105,14 @@ public class SdvCameraPreviewActivity extends Activity
             -1.0f, -1.0f, 0.0f,
              1.0f, -1.0f, 0.0f,
         },
+        // DriverUiSdvRpcProxy implements the SDV RPC server trait.
     };
 
     private static final String IDENTITY_KEY = "SDVCAMERAPREVIEWAPP-AA05\0\0\0\0\0\0\0\0";
     private static final String SDV_PACKAGE_NAME = "com.sdv.google.display_safety";
-    private static final String SDV_SERVICE_NAME = "CameraService";
+    private static final String SDV_SERVICE_NAME = "HarSdvServiceBundle";
     private static final String SDV_CLIENT_NAME = TAG;
-    private static final String SDV_INSTANCE_NAME = "default";
+    private static final String SDV_INSTANCE_NAME = "com-sdv-google-display-safety-driver-ui-service";
 
     private static String streamStateToString(int state) {
         switch (state) {
@@ -585,6 +588,14 @@ public class SdvCameraPreviewActivity extends Activity
         @Override
         public void run() {
             try {
+                Metadata metadata = new Metadata();
+                // Currently RPC side expects the caller FQIN (ie this app FQIN) to be present as metadata in
+                // the requests as a way to identify/verify the caller.
+                // TODO(b/378680897): Avoid hardcoding VM name when calling to hvac and car seat services.
+                String appFqin = "instance2:com.android.car.displaysafety.camera.SdvCameraPreviewApp/default";
+                metadata.put(Metadata.Key.of("x-sdv-fqin", Metadata.ASCII_STRING_MARSHALLER), appFqin);
+
+
                 SdvConnectionManager mgr = connManagerReference.get();
                 if (mgr == null) {
                     Log.d(TAG, "SDV connection manager is invalid.");
@@ -598,8 +609,9 @@ public class SdvCameraPreviewActivity extends Activity
                     return;
                 }
 
-                HarryGrpcServiceGrpc.HarryGrpcServiceBlockingStub stub =
-                        HarryGrpcServiceGrpc.newBlockingStub(channel);
+                DriverUIServiceGrpc.DriverUIServiceBlockingStub stub =
+                        DriverUIServiceGrpc.newBlockingStub(channel)
+                        .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
                 HeartbeatRequest msg = HeartbeatRequest.newBuilder()
                         .setUptime(android.os.SystemClock.uptimeMillis())
                         .setSource(HeartbeatRequest.Source.SOURCE_CAMERA_SERVICE)

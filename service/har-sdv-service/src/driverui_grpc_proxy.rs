@@ -99,6 +99,7 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
                 oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_UNKNOWN => Source::SOURCE_UNKNOWN,
                 oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_ANDROID => Source::SOURCE_ANDROID,
                 oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_INSTRUMENT_CLUSTER => Source::SOURCE_INSTRUMENT_CLUSTER,
+                oem_harry_vehicle_messages_catalog_v1::driverui::heartbeat_request::Source::SOURCE_CAMERA_SERVICE => Source::SOURCE_CAMERA_SERVICE,
             }.into(),
             ..Default::default()
         }) {
