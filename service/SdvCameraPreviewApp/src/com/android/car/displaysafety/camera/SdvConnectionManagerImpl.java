@@ -41,7 +41,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
 
     private SdvConnectionManagerImpl() {}
 
-    private ManagedChannel findRpcServerByName(String sdvName, String packageName,
+    private ManagedChannel connectToRpcServerByName(String sdvName, String packageName,
             String bundleName, String unitName, boolean useSecureChannel) {
         if (useSecureChannel) {
             // TODO: We need to support the secure channel.
@@ -50,7 +50,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
         }
 
         try {
-            return mClient.findRpcServerByName(sdvName, packageName, bundleName, unitName,
+            return mClient.connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
                     /* secureChannel= */ false, /* rootCerts= */ Optional.empty(),
                             /* certChain= */ Optional.empty(), /* privateKey= */ Optional.empty());
         } catch (SdvGatewayRuntimeException e) {
@@ -113,7 +113,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
     public ManagedChannel obtainSecureManagedChannel(
             String sdvName, String packageName, String bundleName, String unitName)
             throws IOException, RemoteException, StatusException {
-        return findRpcServerByName(sdvName, packageName, bundleName, unitName,
+        return connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
                 /* useSecureChannel= */ true);
     }
 
@@ -121,7 +121,7 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
     public ManagedChannel obtainInsecureManagedChannel(
             String sdvName, String packageName, String bundleName, String unitName)
             throws IOException, RemoteException, StatusException {
-        return findRpcServerByName(sdvName, packageName, bundleName, unitName,
+        return connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
                 /* useSecureChannel= */ false);
     }
 }
