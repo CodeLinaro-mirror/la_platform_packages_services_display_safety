@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 Google LLC -->
+
+<overlay>
+    <item target="integer/har_client_type" value="@integer/har_client_type" />
+</overlay>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 Google LLC -->
+
+<!--
+  Overlay resources for DriverUI
+  See also: packages/apps/Car/DriverUI/src/main/res/values/config.xml
+-->
+<resources>
+    <!-- Set SDV Gateway as client type -->
+    <integer name="har_client_type" translatable="false">3</integer>
+</resources>

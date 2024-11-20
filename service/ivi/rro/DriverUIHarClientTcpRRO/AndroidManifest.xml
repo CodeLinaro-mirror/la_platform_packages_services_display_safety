@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 Google LLC -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.android.car.driverui.harclient.tcp.rro">
+    <application android:hasCode="false"/>
+    <overlay android:priority="20"
+             android:targetPackage="com.android.car.driverui"
+             android:targetName="DriverUI"
+             android:resourcesMap="@xml/overlays"
+             android:isStatic="false" />
+</manifest>
