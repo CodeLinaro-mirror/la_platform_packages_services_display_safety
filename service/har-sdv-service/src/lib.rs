@@ -8,6 +8,7 @@ use crate::common::CAMERA_RPC_SERVER_HOST;
 use crate::common::CAMERA_RPC_SERVER_PORT;
 use crate::common::DRIVERUI_RPC_SERVER_HOST;
 use crate::common::DRIVERUI_RPC_SERVER_PORT;
+use crate::common::HAR_DRIVERUI_RPC_CLIENT_ADDRESS;
 use crate::common::HAR_VEHICLE_DATA_GRPC;
 use crate::common::PRODUCT_HAR_SAFETY_MONITOR_IP;
 use crate::common::QNX_VEHICLE_DATA_PORT;
@@ -127,6 +128,11 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(CAMERA_RPC_CLIENT_ADDRESS);
 
+        let ch_to_har_driverui = ChannelBuilder::new(grpc_env.clone())
+            .initial_reconnect_backoff(Duration::from_millis(10))
+            .max_reconnect_backoff(Duration::from_millis(50))
+            .connect(HAR_DRIVERUI_RPC_CLIENT_ADDRESS);
+
         let (har_tx, har_rx) = mpsc::channel(32);
         // Create client to transfer vehicle data
         let har_vehicle_data_client = VehicleDataServiceClient::new(ch_to_har.clone());
@@ -164,8 +170,9 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
 
         // Start other RPC services
         let mut driverui_rpc_proxy_token =
-            self.driverui_rpc_proxy.run(grpc_env.clone(), ch_to_har_camera);
-        let camera_rpc_proxy_token = self.camera_rpc_proxy.run(grpc_env.clone(), ch_to_har).ok();
+            self.driverui_rpc_proxy.run(grpc_env.clone(), ch_to_har_driverui);
+        let camera_rpc_proxy_token =
+            self.camera_rpc_proxy.run(grpc_env.clone(), ch_to_har_camera).ok();
 
         // Finally, register discoverable services. Register them late, so the dependant services
         // are already up and running.

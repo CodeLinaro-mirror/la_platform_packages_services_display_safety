@@ -10,6 +10,7 @@ pub const CAMERA_RPC_SERVER_PORT: i32 = 8000;
 
 // Defines where the GRPC proxy connects to.
 pub const CAMERA_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:8001";
+pub const HAR_DRIVERUI_RPC_CLIENT_ADDRESS: &str = "127.0.0.1:7001";
 // Harry's Vehicle Data server.
 pub const HAR_VEHICLE_DATA_GRPC: &str = "127.0.0.1:50051";
 
