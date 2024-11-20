@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<!-- Copyright 2024 Google LLC -->
+
+<display-settings>
+    <!-- Use physical port number instead of local id -->
+    <config identifier="1" />
+
+    <!-- Display settings for cluster -->
+    <display
+        name="port:1"
+        forcedDensity="160"
+        dontMoveToTop="true" />
+</display-settings>
