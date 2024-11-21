@@ -116,19 +116,17 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
         // Maps from SDV-relevant Strings to sendable HAR vehicle data messages.
         let mapper = Arc::new(SdvToHarMapper::new(create_topic_map()));
 
-        // Creeate GRPC env.
-        let grpc_env = Arc::new(EnvBuilder::new().build());
-        let ch_to_har = ChannelBuilder::new(grpc_env.clone())
+        let ch_to_har = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
             .initial_reconnect_backoff(Duration::from_millis(10))
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(HAR_VEHICLE_DATA_GRPC);
 
-        let ch_to_har_camera = ChannelBuilder::new(grpc_env.clone())
+        let ch_to_har_camera = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
             .initial_reconnect_backoff(Duration::from_millis(10))
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(CAMERA_RPC_CLIENT_ADDRESS);
 
-        let ch_to_har_driverui = ChannelBuilder::new(grpc_env.clone())
+        let ch_to_har_driverui = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
             .initial_reconnect_backoff(Duration::from_millis(10))
             .max_reconnect_backoff(Duration::from_millis(50))
             .connect(HAR_DRIVERUI_RPC_CLIENT_ADDRESS);
@@ -139,7 +137,7 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
         let mut har_vehicle_data_clients = vec![har_vehicle_data_client];
         // Initialize the optional QNX Vehicle Data proxy. (only available on QNX-based systems.)
         if let Some(qnx_address) = self.qnx_address.as_ref() {
-            let ch = ChannelBuilder::new(grpc_env.clone())
+            let ch = ChannelBuilder::new(Arc::new(EnvBuilder::new().build()))
                 .initial_reconnect_backoff(Duration::from_millis(10))
                 .max_reconnect_backoff(Duration::from_millis(50))
                 .connect(qnx_address);
@@ -170,9 +168,9 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
 
         // Start other RPC services
         let mut driverui_rpc_proxy_token =
-            self.driverui_rpc_proxy.run(grpc_env.clone(), ch_to_har_driverui);
+            self.driverui_rpc_proxy.run(Arc::new(EnvBuilder::new().build()), ch_to_har_driverui);
         let camera_rpc_proxy_token =
-            self.camera_rpc_proxy.run(grpc_env.clone(), ch_to_har_camera).ok();
+            self.camera_rpc_proxy.run(Arc::new(EnvBuilder::new().build()), ch_to_har_camera).ok();
 
         // Finally, register discoverable services. Register them late, so the dependant services
         // are already up and running.

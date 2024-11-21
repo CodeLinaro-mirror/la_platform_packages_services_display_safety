@@ -12,6 +12,7 @@ use har_grpc_services::driverui::*;
 use har_grpc_services::driverui_grpc::create_harry_grpc_service;
 use har_grpc_services::driverui_grpc::HarryGrpcService;
 use har_grpc_services::driverui_grpc::HarryGrpcServiceClient;
+use log::info;
 use log::{error, trace, warn};
 use std::sync::Arc;
 
@@ -71,7 +72,7 @@ impl HarryGrpcService for DriverUiServer {
         req: HeartbeatRequest,
         sink: ::grpcio::UnarySink<HeartbeatResponse>,
     ) {
-        trace!("Received heart beat request to send over to HAR: {:?}", &req);
+        info!("Received heart beat request to send over to HAR: {:?}", &req);
         match self.rpc_client.heartbeat(&req) {
             Ok(response) => {
                 trace!("Received heartbeat response {:?}", &response);
@@ -92,6 +93,7 @@ impl HarryGrpcService for DriverUiServer {
         req: DocumentSwitchedRequest,
         sink: ::grpcio::UnarySink<DocumentSwitchedResponse>,
     ) {
+        info!("Received document_switched: {:?}", &req);
         match self.rpc_client.document_switched(&req) {
             Ok(response) => {
                 let future = sink
@@ -111,6 +113,7 @@ impl HarryGrpcService for DriverUiServer {
         req: DocumentUpdatedRequest,
         sink: ::grpcio::UnarySink<DocumentUpdatedResponse>,
     ) {
+        info!("Received document_updated");
         match self.rpc_client.document_updated(&req) {
             Ok(response) => {
                 let future = sink
@@ -131,6 +134,7 @@ impl HarryGrpcService for DriverUiServer {
         req: DesignTokenUpdateRequest,
         sink: ::grpcio::UnarySink<DesignTokenUpdateResponse>,
     ) {
+        info!("Received design_token_update: {:?}", &req);
         match self.rpc_client.design_token_update(&req) {
             Ok(response) => {
                 let future = sink
@@ -151,6 +155,7 @@ impl HarryGrpcService for DriverUiServer {
         req: LocaleUpdateRequest,
         sink: ::grpcio::UnarySink<LocaleUpdateResponse>,
     ) {
+        info!("Received locale_update: {:?}", &req);
         match self.rpc_client.locale_update(&req) {
             Ok(response) => {
                 let future = sink
