@@ -8,6 +8,8 @@
     <!-- Display settings for cluster -->
     <display
         name="port:1"
+        forcedWidth="1920"
+        forcedHeight="720"
         forcedDensity="160"
         dontMoveToTop="true" />
 </display-settings>
