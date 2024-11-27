@@ -5,11 +5,18 @@
     <!-- Use physical port number instead of local id -->
     <config identifier="1" />
 
+    <!-- Display settings for main display -->
+    <display
+        name="port:0"
+        ignoreOrientationRequest="true" />
+
     <!-- Display settings for cluster -->
     <display
         name="port:1"
         forcedWidth="1920"
         forcedHeight="720"
         forcedDensity="160"
-        dontMoveToTop="true" />
+        dontMoveToTop="true"
+        ignoreOrientationRequest="true" />
+
 </display-settings>
