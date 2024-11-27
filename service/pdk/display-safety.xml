@@ -17,7 +17,7 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="e0abbf69b9bc0bf30c7c8bc99f8324d6b3cb7965" />
+    revision="e1db7dc6be16c91bee5f8f3476fd5cea18ff04db" />
 
   <project
     name="bdero/impeller-cmake.git"
