@@ -12,9 +12,6 @@ PRODUCT_COPY_FILES += \
 #PRODUCT_COPY_FILES += \
 #    vendor/google/display_safety/service/ivi/files/product/overlay/config/config.xml:$(TARGET_COPY_OUT_PRODUCT)/overlay/config/config.xml
 
-# Displaycompat
-$(call inherit-product-if-exists, vendor/auto/embedded/products/displaycompat/product.mk)
-
 # Include DriverUI app and enable it using RROs
 $(call inherit-product, packages/services/Car/car_product/driverui/driverui_app_and_rros.mk)
 
