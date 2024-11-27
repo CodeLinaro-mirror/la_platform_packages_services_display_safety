@@ -20,6 +20,18 @@ use grpcio::Server;
 use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
 use grpcio::WriteFlags;
+use har_grpc_services::driverui::DesignTokenUpdateRequest;
+use har_grpc_services::driverui::DesignTokenUpdateResponse;
+use har_grpc_services::driverui::DocumentSwitchedRequest;
+use har_grpc_services::driverui::DocumentSwitchedResponse;
+use har_grpc_services::driverui::DocumentUpdatedRequest;
+use har_grpc_services::driverui::DocumentUpdatedResponse;
+use har_grpc_services::driverui::HeartbeatRequest;
+use har_grpc_services::driverui::HeartbeatResponse;
+use har_grpc_services::driverui::LocaleUpdateRequest;
+use har_grpc_services::driverui::LocaleUpdateResponse;
+use har_grpc_services::driverui_grpc::create_harry_grpc_service;
+use har_grpc_services::driverui_grpc::HarryGrpcService;
 use har_grpc_services::vehicledata::VehicleData;
 use har_grpc_services::vehicledata::VehicleDataStreamResponse;
 use har_grpc_services::vehicledata_grpc::create_vehicle_data_service;
@@ -28,8 +40,8 @@ use log::error;
 use log::info;
 use log::warn;
 use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
+use tokio::time::sleep;
+use tokio::time::Duration;
 
 mod test_log;
 
@@ -49,21 +61,34 @@ impl StubHarryServerBuilder {
 
     /// Starts the server
     /// - `env`: The runtime environment.
-    pub fn start_server(&self, env: Arc<Environment>) -> Result<HarryStubServerToken, String> {
-        let service = create_vehicle_data_service(StubHarryServer {});
+    pub fn start_server(
+        &self,
+        env: Arc<Environment>,
+        ports: &[u32],
+    ) -> Result<HarryStubServerToken, String> {
+        let vehicle_data_service = create_vehicle_data_service(StubHarryServer {});
+        let driverui_service = create_harry_grpc_service(StubHarryServer {});
 
         // Create server
         let quota = ResourceQuota::new(Some("StubHarryServerQuota")).resize_memory(1024 * 1024);
         let server_ch_builder = ChannelBuilder::new(env.clone()).set_resource_quota(quota);
 
         let mut server = ServerBuilder::new(env.clone())
-            .register_service(service)
+            .register_service(vehicle_data_service)
+            .register_service(driverui_service)
             .channel_args(server_ch_builder.build_args())
             .build()
             .map_err(|e| format!("Error creating server: {:?}", e))?;
-        server
-            .add_listening_port(self.server_address.as_str(), ServerCredentials::insecure())
-            .map_err(|e| format!("Error setting up listening port: {:?}", e))?;
+        for port in ports {
+            info!("Listening on {}:{}", self.server_address, port);
+            server
+                .add_listening_port(
+                    format!("{}:{}", self.server_address, port),
+                    ServerCredentials::insecure(),
+                )
+                .map_err(|e| format!("Error setting up listening port: {:?}", e))?;
+        }
+
         server.start();
         Ok(HarryStubServerToken(server))
     }
@@ -104,6 +129,77 @@ impl VehicleDataService for StubHarryServer {
     }
 }
 
+impl HarryGrpcService for StubHarryServer {
+    fn heartbeat(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: HeartbeatRequest,
+        sink: ::grpcio::UnarySink<HeartbeatResponse>,
+    ) {
+        TestLog::on_driverui_heartbeat_processed(&req);
+
+        ctx.spawn(
+            sink.success(HeartbeatResponse::default())
+                .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                .map(|_| ()),
+        );
+    }
+    fn document_switched(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: DocumentSwitchedRequest,
+        sink: ::grpcio::UnarySink<DocumentSwitchedResponse>,
+    ) {
+        TestLog::on_driverui_documentswitched_processed(&req);
+        ctx.spawn(
+            sink.success(DocumentSwitchedResponse::default())
+                .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                .map(|_| ()),
+        );
+    }
+    fn document_updated(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: DocumentUpdatedRequest,
+        sink: ::grpcio::UnarySink<DocumentUpdatedResponse>,
+    ) {
+        TestLog::on_driverui_documentupdated_processed(&req);
+        ctx.spawn(
+            sink.success(DocumentUpdatedResponse::default())
+                .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                .map(|_| ()),
+        );
+    }
+
+    fn design_token_update(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: DesignTokenUpdateRequest,
+        sink: ::grpcio::UnarySink<DesignTokenUpdateResponse>,
+    ) {
+        TestLog::on_driverui_designtokenupdate_processed(&req);
+        ctx.spawn(
+            sink.success(DesignTokenUpdateResponse::default())
+                .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                .map(|_| ()),
+        );
+    }
+
+    fn locale_update(
+        &mut self,
+        ctx: ::grpcio::RpcContext,
+        req: LocaleUpdateRequest,
+        sink: ::grpcio::UnarySink<LocaleUpdateResponse>,
+    ) {
+        TestLog::on_driverui_localeupdate_processed(&req);
+        ctx.spawn(
+            sink.success(LocaleUpdateResponse::default())
+                .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e))
+                .map(|_| ()),
+        );
+    }
+}
+
 /// A token for a running server. Dropping this will stop the server.
 pub struct HarryStubServerToken(Server);
 
@@ -119,11 +215,13 @@ impl HarryStubServerToken {
 async fn main() -> Result<(), String> {
     sdv_log::init_logger("harry-app").unwrap();
     info!("Harry-app stub started.");
-    let address = "127.0.0.1:50051";
+    let address = "0.0.0.0";
+    let ports = [50051, 7001, 8001];
+
     let env = Arc::new(EnvBuilder::new().build());
 
     let server_builder = StubHarryServerBuilder::new(address.to_string());
-    let _server = server_builder.start_server(env.clone())?;
+    let _server = server_builder.start_server(env, &ports)?;
 
     info!("Server started on {:?}", address);
 
@@ -135,6 +233,6 @@ async fn main() -> Result<(), String> {
 
     // Loop forever, we never want to intentionally exit this process.
     loop {
-        thread::sleep(Duration::from_secs(1));
+        sleep(Duration::from_secs(10)).await;
     }
 }

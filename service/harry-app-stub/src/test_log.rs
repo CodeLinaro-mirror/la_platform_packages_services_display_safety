@@ -1,5 +1,11 @@
 // Copyright 2024 Google LLC
 
+use har_grpc_services::driverui::heartbeat_request::Source;
+use har_grpc_services::driverui::DesignTokenUpdateRequest;
+use har_grpc_services::driverui::DocumentSwitchedRequest;
+use har_grpc_services::driverui::DocumentUpdatedRequest;
+use har_grpc_services::driverui::HeartbeatRequest;
+use har_grpc_services::driverui::LocaleUpdateRequest;
 use har_grpc_services::vehicledata::vehicle_data;
 use har_grpc_services::vehicledata::vehicle_data::Data::*;
 use har_grpc_services::vehicledata::VehicleData;
@@ -25,6 +31,57 @@ impl TestLog {
         if let Some(value) = vehicle_data.data.as_ref() {
             Self::info(&vehicle_data.name, &vehicle_data_to_debug(value), "processed");
         }
+    }
+
+    /// Prints a log after processing a heart beat message.
+    pub fn on_driverui_heartbeat_processed(req: &HeartbeatRequest) {
+        Self::info(
+            &"DriverUI:heartbeat::source".to_string(),
+            &match req.source.enum_value().unwrap_or(Source::SOURCE_UNKNOWN) {
+                Source::SOURCE_UNKNOWN => "UNKNOWN",
+                Source::SOURCE_ANDROID => "ANDROID",
+                Source::SOURCE_INSTRUMENT_CLUSTER => "INSTRUMENT_CLUSTER",
+                Source::SOURCE_CAMERA_SERVICE => "CAMERA_SERVICE",
+            }
+            .to_string(),
+            &format!("processed, uptime={}", req.uptime),
+        );
+    }
+
+    /// Prints a log after processing a document switched message.
+    pub fn on_driverui_documentswitched_processed(req: &DocumentSwitchedRequest) {
+        Self::info(
+            &"DriverUI:documentswitched".to_string(),
+            &req.document_id.to_string(),
+            "processed",
+        );
+    }
+
+    /// Prints a log after processing a document updated message.
+    pub fn on_driverui_documentupdated_processed(req: &DocumentUpdatedRequest) {
+        Self::info(
+            &"DriverUI:documentupdated".to_string(),
+            &req.document_id.to_string(),
+            "processed",
+        );
+    }
+
+    /// Prints a log after processing a design token update message.
+    pub fn on_driverui_designtokenupdate_processed(req: &DesignTokenUpdateRequest) {
+        Self::info(
+            &"DriverUI:designtokenupdate".to_string(),
+            &format!("theme={}, variable_mode={}", req.theme, req.variable_mode),
+            "processed",
+        );
+    }
+
+    /// Prints a log after processing a locale update message.
+    pub fn on_driverui_localeupdate_processed(req: &LocaleUpdateRequest) {
+        Self::info(
+            &"DriverUI:localeupdate".to_string(),
+            &req.language_tag.to_string(),
+            "processed",
+        );
     }
 }
 
