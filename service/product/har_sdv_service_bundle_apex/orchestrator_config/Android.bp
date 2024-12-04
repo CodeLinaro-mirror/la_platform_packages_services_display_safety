@@ -1,9 +1,0 @@
-// Copyright 2024 Google LLC
-
-// This module defines the base SDV Orchestration configuration.
-// This requires the services packaged as SDV Service Bundles.
-prebuilt_etc {
-    name: "har_sdv_orch_config.textproto",
-    sub_dir: "orch",
-    src: "config/har_sdv_orch.config.textproto",
-}
