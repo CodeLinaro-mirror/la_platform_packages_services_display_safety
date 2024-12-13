@@ -5,5 +5,6 @@
 
 PRODUCT_PACKAGES += \
     DriverUIHarClientGrpcRRO \
+    DriverUIHarClientLocalGrpcRRO \
     DriverUIHarClientTcpRRO \
     DriverUIHarClientSdvRRO \

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 Google LLC -->
+
+<overlay>
+    <item target="integer/har_client_type" value="@integer/har_client_type" />
+    <item target="string/har_ip" value="@string/har_ip" />
+    <item target="integer/har_port" value="@integer/har_port" />
+</overlay>

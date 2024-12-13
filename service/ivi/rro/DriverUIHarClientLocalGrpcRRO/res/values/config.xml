@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2024 Google LLC -->
+
+<!--
+  Overlay resources for DriverUI
+  See also: packages/apps/Car/DriverUI/src/main/res/values/config.xml
+
+  Example usage:
+  # Uses the HAR-SDV service GRPC server without SDV Service Discovery.
+  adb -s <sdv media serial> forward tcp:7000 tcp:7000
+  adb -s <ivi serial> reverse tcp:7000 tcp:7000
+-->
+<resources>
+    <!-- Set GRPC as client type -->
+    <integer name="har_client_type" translatable="false">0</integer>
+    <!-- Using 127.0.0.1 that can be forwarded easily. -->
+    <string name="har_ip" translatable="false">127.0.0.1</string>
+    <!-- HAR-SDV RPC Proxy to HAR -->
+    <integer name="har_port" translatable="false">7000</integer>
+</resources>
