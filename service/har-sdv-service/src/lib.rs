@@ -24,12 +24,8 @@ use grpcio::ChannelBuilder;
 use grpcio::EnvBuilder;
 use grpcio::WriteFlags;
 use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
-use har_sdv_rpc::sdv_service_discovery::register_service;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundle;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundleLauncher;
-use har_sdv_service_bundle_common::get_har_sdv_camera_service_fqin;
-use har_sdv_service_bundle_common::get_har_sdv_driverui_service_fqin;
-use log::error;
 use log::info;
 use log::trace;
 use log::warn;
@@ -178,26 +174,6 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
         let camera_rpc_proxy_token =
             self.camera_rpc_proxy.run(Arc::new(EnvBuilder::new().build()), ch_to_har_camera).ok();
 
-        // Finally, register discoverable services. Register them late, so the dependant services
-        // are already up and running.
-        // The pubkey is arbitrary, auth is not implemented yet.
-        // TODO(378913750): Implement auth when required.
-        let publickey = *b"HARSDVGATEWAY-7890123456_______\0";
-        register_service(
-            publickey,
-            &get_har_sdv_driverui_service_fqin(),
-            "".as_bytes().to_vec(),
-            DRIVERUI_RPC_SERVER_PORT,
-        )
-        .expect("Cannot register DriverUI data proxy");
-        register_service(
-            publickey,
-            &get_har_sdv_camera_service_fqin(),
-            "".as_bytes().to_vec(),
-            CAMERA_RPC_SERVER_PORT,
-        )
-        .unwrap_or_else(|err| error!("Cannot register Camera data proxy: {:?}", err));
-        info!("DriverUI and Camera service registered in SDV Service Discovery.");
         info!("HAR-SDV Service started.");
 
         while let Some(res) = subscriptions.join_next().await {
