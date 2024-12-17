@@ -1,8 +1,7 @@
 // Copyright 2024 Google LLC
 
 package {
-    // TODO(371470249): Set Display Safety team.
-    default_team: "trendy_team_auto_engprod",
+    default_team: "trendy_team_aaos_display_safety_triage",
 }
 
 rust_library {
