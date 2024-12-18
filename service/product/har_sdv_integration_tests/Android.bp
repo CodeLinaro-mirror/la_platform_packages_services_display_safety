@@ -48,6 +48,9 @@ rust_test {
         "libtokio",
         "libsdv_orch",
     ],
+    test_suites: [
+        "automotive-sdv-tests",
+    ],
     test_options: {
         unit_test: false,
     },
@@ -76,6 +79,9 @@ rust_test {
         // v1 comms based on SDV generated code
         "libsdv_mw_rs_com_sdv_google_display_safety_har_sdv_service_bundle",
         "libcom_sdv_google_display_safety_driver_ui_service_rpc_rs",
+    ],
+    test_suites: [
+        "automotive-sdv-tests",
     ],
     test_options: {
         unit_test: false,
