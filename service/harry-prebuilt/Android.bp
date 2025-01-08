@@ -30,6 +30,9 @@ cc_prebuilt_binary {
         x86_64: {
             srcs: ["x86_64/harry"],
         },
+        riscv64: {
+            srcs: [":harry_binary_placeholder"],
+        },
     },
     shared_libs: [
         "libGLESv2",
@@ -86,6 +89,9 @@ cc_prebuilt_library_shared {
         },
         android_x86_64: {
             srcs: ["x86_64/libimpeller.so"],
+        },
+        android_riscv64: {
+            srcs: [":harry_binary_placeholder"],
         },
     },
     shared_libs: [
