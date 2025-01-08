@@ -1,6 +1,6 @@
 {
-  "sdv_display_safety_tests_presubmit": [],
-  "sdv_display_safety_tests_postsubmit": [
+  "sdv_display_safety_tests_postsubmit": [],
+  "sdv_display_safety_tests_presubmit": [
     {
       "name": "har_sdv_service_bundles_integration_tests"
     },
