@@ -602,7 +602,7 @@ public class SdvCameraPreviewActivity extends Activity
                     return;
                 }
 
-                channel = mgr.obtainInsecureManagedChannel(
+                channel = mgr.obtainManagedChannel(
                         TARGET_SDV_INSTANCE_NAME, servicePackageName, serviceName, unitName);
                 if (channel == null) {
                     Log.e(TAG, "Failed to initialize a communication channel.");

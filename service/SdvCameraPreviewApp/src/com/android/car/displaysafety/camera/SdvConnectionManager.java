@@ -23,8 +23,6 @@ import android.os.RemoteException;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusException;
 
-import java.io.IOException;
-
 /**
  * Abstracts SDV connection manager.
  */
@@ -38,11 +36,7 @@ public interface SdvConnectionManager {
 
     public String getVersionString();
 
-    public ManagedChannel obtainSecureManagedChannel(
+    public ManagedChannel obtainManagedChannel(
             String sdvName, String packageName, String bundleName, String unitName)
-            throws IOException, RemoteException, StatusException;
-
-    public ManagedChannel obtainInsecureManagedChannel(
-            String sdvName, String packageName, String bundleName, String unitName)
-            throws IOException, RemoteException, StatusException;
+            throws StatusException;
 }

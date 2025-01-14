@@ -41,30 +41,6 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
 
     private SdvConnectionManagerImpl() {}
 
-    private ManagedChannel connectToRpcServerByName(String sdvName, String packageName,
-            String bundleName, String unitName, boolean useSecureChannel) {
-        if (useSecureChannel) {
-            // TODO: We need to support the secure channel.
-            Log.w(TAG, "A secure rpc communication is not supported yet; " +
-                    "insecure channel will be used instead.");
-        }
-
-        try {
-            return mClient.connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
-                    /* secureChannel= */ false, /* rootCerts= */ Optional.empty(),
-                            /* certChain= */ Optional.empty(), /* privateKey= */ Optional.empty());
-        } catch (SdvGatewayRuntimeException e) {
-            Log.e(TAG, packageName + "." + bundleName + "." + unitName +
-                " is not available, error: " + e.getSdvGatewayStatusCode() + ", msg: " +
-                        e.getMessage());
-        } catch (IOException | RemoteException e) {
-            Log.e(TAG, "Failed to find " + packageName + "." + bundleName + "." + unitName +
-                    "due to " + e);
-        }
-
-        return null;
-    }
-
     public static SdvConnectionManager Create(byte[] identityKey, String packageName,
             String appName, String servicePackageName, String serviceName) {
 
@@ -110,18 +86,20 @@ public final class SdvConnectionManagerImpl implements SdvConnectionManager {
     }
 
     @Override
-    public ManagedChannel obtainSecureManagedChannel(
+    public ManagedChannel obtainManagedChannel(
             String sdvName, String packageName, String bundleName, String unitName)
-            throws IOException, RemoteException, StatusException {
-        return connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
-                /* useSecureChannel= */ true);
-    }
+            throws StatusException {
+        try {
+            return mClient.connectToRpcServerByName(sdvName, packageName, bundleName, unitName);
+        } catch (SdvGatewayRuntimeException e) {
+            Log.e(TAG, packageName + "." + bundleName + "." + unitName +
+                " is not available, error: " + e.getSdvGatewayStatusCode() + ", msg: " +
+                        e.getMessage());
+        } catch (IOException | RemoteException e) {
+            Log.e(TAG, "Failed to find " + packageName + "." + bundleName + "." + unitName +
+                    "due to " + e);
+        }
 
-    @Override
-    public ManagedChannel obtainInsecureManagedChannel(
-            String sdvName, String packageName, String bundleName, String unitName)
-            throws IOException, RemoteException, StatusException {
-        return connectToRpcServerByName(sdvName, packageName, bundleName, unitName,
-                /* useSecureChannel= */ false);
+        return null;
     }
 }
