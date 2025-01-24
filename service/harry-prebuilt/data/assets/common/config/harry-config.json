@@ -3,6 +3,12 @@
   "displays": [
     {
       "id": 1,
+      "display_params": {
+        "path": "/dev/dri/card0",
+        "interface_id": "1",
+        "use_exact_size": "false",
+        "use_preferred_mode": "false"
+      },
       "width": 1920,
       "height": 720,
       "root_node_id": "#HAR-stage"
