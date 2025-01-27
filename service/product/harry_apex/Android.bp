@@ -11,6 +11,10 @@ apex {
     ],
     compile_multilib: "both",
     updatable: false,
+    // We want this apex file available in the list of artifacts on go/ab
+    dist: {
+        targets: ["droid"],
+    },
     platform_apis: false,
     vendor: true,
     // The SELinux security contexts (or labels) assigned the executable and other files within the
