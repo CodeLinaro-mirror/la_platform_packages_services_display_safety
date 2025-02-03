@@ -10,7 +10,8 @@ apex {
         "harry_app_prebuilt",
     ],
     compile_multilib: "both",
-    updatable: false,
+    updatable: true,
+    min_sdk_version: "34",
     // We want this apex file available in the list of artifacts on go/ab
     dist: {
         targets: ["droid"],
