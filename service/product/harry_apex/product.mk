@@ -17,6 +17,9 @@
 # The used SDV services are also packaged as part of the HAR APEX or
 # in separate SDV Service Bundle(s).
 
+# Enable APEX updates for this product.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
+
 # Add product specific sepolicies
 BOARD_VENDOR_SEPOLICY_DIRS += \
     vendor/google/display_safety/service/product/harry_apex/sepolicy \
