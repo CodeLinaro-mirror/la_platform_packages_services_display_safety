@@ -1,6 +1,19 @@
-// Copyright 2023 Google LLC
+/*
+ * Copyright 2025 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 syntax = "proto3";
-
 option java_multiple_files = true;
 option java_package = "com.google.displaysafety.harry";
 option java_outer_classname = "HarryProto";
@@ -11,7 +24,6 @@ package displaysafety.harry;
 message HeartbeatRequest {
   // system uptime in millis
   uint64 uptime = 1;
-
   // Heartbeat source
   enum Source {
     SOURCE_UNKNOWN = 0;
@@ -21,7 +33,6 @@ message HeartbeatRequest {
   }
   Source source = 2;
 }
-
 // Response to HeartbeatRequest.
 message HeartbeatResponse {
   enum Status {
@@ -32,12 +43,10 @@ message HeartbeatResponse {
   }
   Status status = 1;
 }
-
 // Document switched in DriverUI.
 message DocumentSwitchedRequest {
   string document_id = 1;
 }
-
 // Response to DocumentSwitchedRequest.
 message DocumentSwitchedResponse {
   enum Status {
@@ -48,18 +57,15 @@ message DocumentSwitchedResponse {
   }
   Status status = 1;
 }
-
 // Document updated in DriverUI.
 message DocumentUpdatedRequest {
   string document_id = 1;
-
   // The serialized document.
   //
   // This is in the same format that is serialized to disk by the
   // Automotive Design for Compose SDK.
   bytes serialized_document = 2;
 }
-
 // Response to DocumentUpdatedRequest.
 message DocumentUpdatedResponse {
   enum Status {
@@ -70,80 +76,54 @@ message DocumentUpdatedResponse {
   }
   Status status = 1;
 }
-
 // Request for Harry to change used design tokens.
 message DesignTokenUpdateRequest {
-
   // Theme (or Collection) name to use.
   string theme = 1;
-
   // Variable Mode (e.g. Light / Dark Mode)
   string variable_mode = 2;
 }
-
 // Response to DesignTokenUpdateRequest.
 message DesignTokenUpdateResponse {}
-
 // Request to change the current locale used in Harry.
 message LocaleUpdateRequest {
-
   // RFC 4647 Styled Language tag.
   string language_tag = 1;
 }
-
 // Response to LocaleUpdateRequest.
 message LocaleUpdateResponse {}
-
 message HarryRequest {
   oneof oneof {
     // Heartbeat.
     HeartbeatRequest heartbeat_request = 1;
-
     // Document switched in DriverUI.
     DocumentSwitchedRequest document_switched_request = 2;
-
     // Document updated in DriverUI.
     DocumentUpdatedRequest document_updated_request = 3;
-
     // Request for update of used design token in Harry
     DesignTokenUpdateRequest design_token_update_request = 4;
-
     // Request to change the current locale used in Harry.
     LocaleUpdateRequest locale_update_request = 5;
   }
 }
-
 message HarryResponse {
   oneof oneof {
     // Heartbeat.
     HeartbeatResponse heartbeat_response = 1;
-
     // Document switched in DriverUI.
     DocumentSwitchedResponse document_switched_response = 2;
-
     // Document updated in DriverUI.
     DocumentUpdatedResponse document_updated_response = 3;
-
-    // Response to DesignTokenUpdateRequest.
     DesignTokenUpdateResponse design_token_update_response = 4;
-
-    // Locale updated in Harry.
     LocaleUpdateResponse locale_update_response = 5;
   }
 }
-
-service HarryService {
-  rpc Handle(HarryRequest) returns (HarryResponse) {}
-}
-
-service HarryGrpcService {
+service DriverUIService {
   rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
   rpc DocumentSwitched(DocumentSwitchedRequest) returns (DocumentSwitchedResponse) {}
   rpc DocumentUpdated(DocumentUpdatedRequest) returns (DocumentUpdatedResponse) {}
-
   /// Request for Harry to change what design tokens are used.
   rpc DesignTokenUpdate(DesignTokenUpdateRequest) returns (DesignTokenUpdateResponse) {}
-
   // Request to change the current locale used in Harry.
   rpc LocaleUpdate(LocaleUpdateRequest) returns (LocaleUpdateResponse) {}
 }

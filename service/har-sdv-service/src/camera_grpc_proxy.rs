@@ -9,9 +9,9 @@ use grpcio::ResourceQuota;
 use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
 use har_grpc_services::driverui::*;
-use har_grpc_services::driverui_grpc::create_harry_grpc_service;
-use har_grpc_services::driverui_grpc::HarryGrpcService;
-use har_grpc_services::driverui_grpc::HarryGrpcServiceClient;
+use har_grpc_services::driverui_grpc::create_driver_ui_service;
+use har_grpc_services::driverui_grpc::DriverUiService;
+use har_grpc_services::driverui_grpc::DriverUiServiceClient;
 use log::{error, trace, warn};
 use std::sync::Arc;
 
@@ -38,14 +38,14 @@ impl CameraServiceGrpcProxy {
         env: Arc<Environment>,
         channel_to_har: ::grpcio::Channel,
     ) -> Result<GrpcProxyServerToken, String> {
-        let rpc_client = HarryGrpcServiceClient::new(channel_to_har);
+        let rpc_client = DriverUiServiceClient::new(channel_to_har);
 
         // Create server
         let quota =
             ResourceQuota::new(Some("CameraServiceGrpcProxyQuota")).resize_memory(1024 * 1024);
         let server_ch_builder = ChannelBuilder::new(env.clone()).set_resource_quota(quota);
 
-        let service = create_harry_grpc_service(CameraServiceServer { rpc_client });
+        let service = create_driver_ui_service(CameraServiceServer { rpc_client });
         let mut server = ServerBuilder::new(env.clone())
             .register_service(service)
             .channel_args(server_ch_builder.build_args())
@@ -61,10 +61,10 @@ impl CameraServiceGrpcProxy {
 
 #[derive(Clone)]
 struct CameraServiceServer {
-    rpc_client: HarryGrpcServiceClient,
+    rpc_client: DriverUiServiceClient,
 }
 
-impl HarryGrpcService for CameraServiceServer {
+impl DriverUiService for CameraServiceServer {
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,

@@ -30,8 +30,8 @@ use har_grpc_services::driverui::HeartbeatRequest;
 use har_grpc_services::driverui::HeartbeatResponse;
 use har_grpc_services::driverui::LocaleUpdateRequest;
 use har_grpc_services::driverui::LocaleUpdateResponse;
-use har_grpc_services::driverui_grpc::create_harry_grpc_service;
-use har_grpc_services::driverui_grpc::HarryGrpcService;
+use har_grpc_services::driverui_grpc::create_driver_ui_service;
+use har_grpc_services::driverui_grpc::DriverUiService;
 use har_grpc_services::vehicledata::VehicleData;
 use har_grpc_services::vehicledata::VehicleDataStreamResponse;
 use har_grpc_services::vehicledata_grpc::create_vehicle_data_service;
@@ -67,7 +67,7 @@ impl StubHarryServerBuilder {
         ports: &[u32],
     ) -> Result<HarryStubServerToken, String> {
         let vehicle_data_service = create_vehicle_data_service(StubHarryServer {});
-        let driverui_service = create_harry_grpc_service(StubHarryServer {});
+        let driverui_service = create_driver_ui_service(StubHarryServer {});
 
         // Create server
         let quota = ResourceQuota::new(Some("StubHarryServerQuota")).resize_memory(1024 * 1024);
@@ -129,7 +129,7 @@ impl VehicleDataService for StubHarryServer {
     }
 }
 
-impl HarryGrpcService for StubHarryServer {
+impl DriverUiService for StubHarryServer {
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,

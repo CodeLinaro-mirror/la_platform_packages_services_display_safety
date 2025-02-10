@@ -13,9 +13,9 @@ use har_grpc_services::driverui::document_updated_response::Status as DocumentUp
 use har_grpc_services::driverui::heartbeat_request::Source;
 use har_grpc_services::driverui::heartbeat_response::Status as HeartbeatResponseStatus;
 use har_grpc_services::driverui::*;
-use har_grpc_services::driverui_grpc::create_harry_grpc_service;
-use har_grpc_services::driverui_grpc::HarryGrpcService;
-use har_grpc_services::driverui_grpc::HarryGrpcServiceClient;
+use har_grpc_services::driverui_grpc::create_driver_ui_service;
+use har_grpc_services::driverui_grpc::DriverUiService;
+use har_grpc_services::driverui_grpc::DriverUiServiceClient;
 use log::info;
 use log::{error, trace, warn};
 use sdv::status::SdvStatus;
@@ -47,13 +47,13 @@ impl DriverUiGrpcProxy {
         channel_to_har: ::grpcio::Channel,
     ) -> GrpcProxyServerToken {
         // Create client. Client needs a dedicated env otherwise it deadlocks.
-        let rpc_client = HarryGrpcServiceClient::new(channel_to_har);
+        let rpc_client = DriverUiServiceClient::new(channel_to_har);
 
         // Create server
         let quota = ResourceQuota::new(Some("DriverUiGrpcProxyQuota")).resize_memory(1024 * 1024);
         let server_ch_builder = ChannelBuilder::new(env.clone()).set_resource_quota(quota);
 
-        let service = create_harry_grpc_service(DriverUiServer { rpc_client });
+        let service = create_driver_ui_service(DriverUiServer { rpc_client });
         let mut server = ServerBuilder::new(env.clone())
             .register_service(service)
             .channel_args(server_ch_builder.build_args())
@@ -69,14 +69,14 @@ impl DriverUiGrpcProxy {
 
 // DriverUI SDV-RPC to HAR's DriverUI GRPC Adapter.
 pub struct DriverUiSdvRpcProxy {
-    rpc_client: HarryGrpcServiceClient,
+    rpc_client: DriverUiServiceClient,
 }
 
 impl DriverUiSdvRpcProxy {
     /// Creates a new instance.
     /// - `channel_to_har`: The GRPC channel to the HAR app.
     pub fn new(channel_to_har: ::grpcio::Channel) -> DriverUiSdvRpcProxy {
-        DriverUiSdvRpcProxy { rpc_client: HarryGrpcServiceClient::new(channel_to_har) }
+        DriverUiSdvRpcProxy { rpc_client: DriverUiServiceClient::new(channel_to_har) }
     }
 }
 
@@ -233,10 +233,10 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
 
 #[derive(Clone)]
 struct DriverUiServer {
-    rpc_client: HarryGrpcServiceClient,
+    rpc_client: DriverUiServiceClient,
 }
 
-impl HarryGrpcService for DriverUiServer {
+impl DriverUiService for DriverUiServer {
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,
