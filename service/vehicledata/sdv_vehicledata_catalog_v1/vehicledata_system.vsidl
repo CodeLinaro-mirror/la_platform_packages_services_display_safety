@@ -63,10 +63,6 @@ sdv_service_bundle {
     publisher {
         type: "CurrentGear"
     }
-
-    unit_type {
-        type: "CurrentGear"
-    }
 }
 
 
@@ -88,19 +84,11 @@ sdv_service_bundle {
         instance: "FIFTH_WHEEL"
     }
 
-    unit_type {
-        type: "TirePressure"
-    }
-
     subscriber {
         type: "VehicleSpeed"
         instance: "VEHICLE_SPEED"
         instance: "MAX_SPEED"
         instance: "SPEEDLIMIT"
-    }
-
-    unit_type {
-        type: "VehicleSpeed"
     }
 
     subscriber {
@@ -126,10 +114,6 @@ sdv_service_bundle {
         instance: "MAX_SPEED_DISPLAYED"
         instance: "SPEED_LIMIT_DISPLAYED"
         instance: "EMERGENCY_LIGHT"
-    }
-
-    unit_type {
-        type: "TellTaleStatus"
     }
 
     subscriber {
