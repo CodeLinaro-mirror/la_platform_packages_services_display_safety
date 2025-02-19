@@ -52,8 +52,6 @@ import com.google.displaysafety.harry.HeartbeatResponse;
 import com.google.displaysafety.harry.HeartbeatRequest;
 
 import io.grpc.ManagedChannel;
-import io.grpc.Metadata;
-import io.grpc.stub.MetadataUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -588,14 +586,6 @@ public class SdvCameraPreviewActivity extends Activity
         @Override
         public void run() {
             try {
-                Metadata metadata = new Metadata();
-                // Currently RPC side expects the caller FQIN (ie this app FQIN) to be present as metadata in
-                // the requests as a way to identify/verify the caller.
-                // TODO(b/378680897): Avoid hardcoding VM name when calling to hvac and car seat services.
-                String appFqin = "instance2:com.android.car.displaysafety.camera.SdvCameraPreviewApp/default";
-                metadata.put(Metadata.Key.of("x-sdv-fqin", Metadata.ASCII_STRING_MARSHALLER), appFqin);
-
-
                 SdvConnectionManager mgr = connManagerReference.get();
                 if (mgr == null) {
                     Log.d(TAG, "SDV connection manager is invalid.");
@@ -610,8 +600,7 @@ public class SdvCameraPreviewActivity extends Activity
                 }
 
                 DriverUIServiceGrpc.DriverUIServiceBlockingStub stub =
-                        DriverUIServiceGrpc.newBlockingStub(channel)
-                        .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+                        DriverUIServiceGrpc.newBlockingStub(channel);
                 HeartbeatRequest msg = HeartbeatRequest.newBuilder()
                         .setUptime(android.os.SystemClock.uptimeMillis())
                         .setSource(HeartbeatRequest.Source.SOURCE_CAMERA_SERVICE)
