@@ -46,7 +46,6 @@ sdvcamerapreviewapp_config_java_defaults {
                 "src/com/android/car/displaysafety/camera/SdvConnectionManagerImpl.java",
             ],
             static_libs: [
-                "google.sdv.gateway-aidl-V1-java",
                 "libsdvgatewayclient-java",
                 "sdv-grpc-java-proto-lite",
             ],
