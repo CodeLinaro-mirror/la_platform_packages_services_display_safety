@@ -1,0 +1,187 @@
+# Copyright 2024 Google LLC
+# proto-file: //system/software_defined_vehicle/core_services/service_authz/proto/sdv/authz/policy/acl_policy.proto
+# proto-message: AclPolicy
+
+# ACL policies for HarSdvVehicleDataPublisher.
+
+# ACLs for publishers.
+acls {
+    name: "VehicleDataPublisher"
+    include: "com.sdv.google.display_safety.*"
+}
+
+unit_types {
+  name: "HarSdvServiceBundle"
+  acl_names: "VehicleDataPublisher"
+}
+
+unit_types {
+  name: "VehicleSpeed"
+  acl_names: "VehicleDataPublisher"
+}
+
+unit_types {
+  name: "TirePressure"
+  acl_names: "VehicleDataPublisher"
+}
+
+unit_types {
+  name: "TellTaleStatus"
+  acl_names: "VehicleDataPublisher"
+}
+
+unit_types {
+  name: "CurrentGear"
+  acl_names: "VehicleDataPublisher"
+}
+
+# ACLs for clients.
+acls {
+    name: "VehicleDataClients"
+    include: "*"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-current-gear-unique"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-oil-pressure"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-engine-temp"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-check-engine"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-charging-failure"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-seatbelt-driver"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-seatbelt-passenger"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-low-tire-pressure"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-airbag"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-abs"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-brake"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-traction"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-fog-lights"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-park-lights"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-hibeam"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-lowbeam"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-turn-signal-left"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-turn-signal-right"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-adas"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-max-speed-displayed"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-speed-limit-displayed"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tell-tale-status-emergency-light"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tire-pressure-front-left"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tire-pressure-front-right"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tire-pressure-rear-left"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tire-pressure-rear-right"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-tire-pressure-fifth-wheel"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-vehicle-speed-vehicle-speed"
+  acl_names: "VehicleDataClients"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-vehicle-speed-max-speed"
+  acl_names: "VehicleDataClients"
+}

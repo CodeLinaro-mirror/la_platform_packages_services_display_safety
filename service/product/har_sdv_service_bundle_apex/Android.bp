@@ -23,6 +23,10 @@ apex {
         "FakeVehicleDataServiceBundleOrchestration-orch-config",
         // Orchestration config to start the HAR-SDV bundle.
         "HarSdvServiceBundle-orch-config",
+        // ACL policy of har_sdv_service service bundle.
+        "com.google.display_safety.har.har_sdv_service.acl_policy",
+        // har_sdv_vehicle_data_publisher
+        "com.google.display_safety.har.har_sdv_vehicle_data_publisher.acl_policy",
     ],
     // Json manifest file describes metadata of the APEX package.
     // The 'name' filed from the json is used as mounting point.
@@ -90,4 +94,32 @@ prebuilt_etc {
     // Disable direct installation of the manifest to one of the partitions.
     // The manifest will be used only inside of service bundles registry apexes.
     installable: false,
+}
+
+// File with the ACL policy of har_sdv_service service bundle is stored in the apex.
+prebuilt_etc {
+    name: "com.google.display_safety.har.har_sdv_service.acl_policy",
+    // The source name of the manifest file.
+    src: "acl_configs/har_sdv_service/acl.textproto",
+    sub_dir: "har_sdv_service",
+    filename: "acl.textproto",
+    // Disable direct installation of the manifest to one of the partitions.
+    // The manifest will be used only inside of service bundles registry apexes.
+    installable: false,
+    // Reduce prebuilt visibility to avoid adding it in another APEX.
+    visibility: ["//visibility:private"],
+}
+
+// File with the ACL policy of har_sdv_vehicle_data_publisher service bundle is stored in the apex.
+prebuilt_etc {
+    name: "com.google.display_safety.har.har_sdv_vehicle_data_publisher.acl_policy",
+    // The source name of the manifest file.
+    src: "acl_configs/har_sdv_vehicle_data_publisher/acl.textproto",
+    sub_dir: "har_sdv_vehicle_data_publisher",
+    filename: "acl.textproto",
+    // Disable direct installation of the manifest to one of the partitions.
+    // The manifest will be used only inside of service bundles registry apexes.
+    installable: false,
+    // Reduce prebuilt visibility to avoid adding it in another APEX.
+    visibility: ["//visibility:private"],
 }

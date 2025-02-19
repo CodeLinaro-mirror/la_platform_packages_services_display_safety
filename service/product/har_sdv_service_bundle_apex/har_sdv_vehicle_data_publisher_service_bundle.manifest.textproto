@@ -13,6 +13,7 @@ sdv_service_bundle_metadata {
   native_library_path: "lib64/libhar_sdv_vehicle_data_publisher_service_bundle.so"
 
   orchestration_config_path: "etc/config/orchestration/VehicleDataServiceBundleOrchestration.textproto"
+  access_control_list_policy_path: "etc/har_sdv_vehicle_data_publisher/acl.textproto"
 }
 
 # SDV service bundle producing fake data for HarSdvVehicleDataPublisher
@@ -41,4 +42,5 @@ sdv_service_bundle_metadata {
   native_library_path: "lib64/libhar_sdv_service_bundle.so"
 
   orchestration_config_path: "etc/config/orchestration/HarSdvServiceBundleOrchestration.textproto"
+  access_control_list_policy_path: "etc/har_sdv_service/acl.textproto"
 }
