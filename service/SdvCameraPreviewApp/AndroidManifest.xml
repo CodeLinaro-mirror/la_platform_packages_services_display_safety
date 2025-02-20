@@ -27,7 +27,11 @@
     <!-- for registerReceiverForAllUsers() -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
+    <!-- for SDV Gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.MANAGE_ETHERNET_NETWORKS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application android:label="@string/app_name"
             android:icon="@mipmap/ic_launcher"
