@@ -185,3 +185,8 @@ service_units {
   name: "com-sdv-google-display-safety-vehicle-speed-max-speed"
   acl_names: "VehicleDataClients"
 }
+
+service_units {
+  name: "com-sdv-google-display-safety-vehicle-speed-speedlimit"
+  acl_names: "VehicleDataClients"
+}
