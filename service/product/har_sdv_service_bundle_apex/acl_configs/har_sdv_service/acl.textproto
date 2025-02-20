@@ -38,3 +38,14 @@ unit_types {
   name: "DriverUIService"
   acl_names: "HarSdvService"
 }
+
+# ACLs for clients.
+acls {
+    name: "HarSdvClients"
+    include: "*"
+}
+
+service_units {
+  name: "com-sdv-google-display-safety-driver-ui-service"
+  acl_names: "HarSdvClients"
+}
