@@ -17,13 +17,7 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="a94fb78f0c6425a248a578395d668740b6040664" />
-
-  <project
-    name="bdero/impeller-cmake.git"
-    path="vendor/google/display_safety/service/pdk/display-safety/crates/framework/graphics/impeller-rs/impeller-cmake"
-    remote="github"
-    revision="cb40c8be9f8caa3f78b104bc4aa02a3453ce45fb" />
+    revision="89ff011d0f23dcbf33a77048c5befb2d22a029ea" />
 
   <project
     name="platform/external/tinyalsa_new"
@@ -48,11 +42,5 @@
     path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/grpc"
     remote="github"
     revision="d02c17e2465ced3d95b600255db2c31706ce20be" />
-
-  <project
-    name="third-party/ring"
-    path="vendor/google/display_safety/service/pdk/display-safety/submodules/third-party/ring"
-    remote="aae-design-compose-partners"
-    revision="baceba6d9ad550074637a13acb7b74eec6f567cd" />
 
 </manifest>
