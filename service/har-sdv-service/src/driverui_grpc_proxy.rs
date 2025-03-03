@@ -22,6 +22,9 @@ use sdv::status::SdvStatus;
 use sdv::status::SdvStatusCode;
 use std::sync::Arc;
 
+// TODO(b/396229429): Remove this when MW Streaming is supported.
+const MAX_MESSAGE_SIZE_BYTES: usize = 100_000_000;
+
 /// A simple GRPC based proxy solution for the DriverUI GRPC service.
 /// Will start a GRPC server and connect to a Client using
 /// the same RPC definition and dispatch all requests
@@ -228,6 +231,15 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
                 Err(SdvStatus::with_message(SdvStatusCode::Internal, format!("{:?}", err)))
             }
         }
+    }
+
+    fn init_server_options(&self) -> sdv::mw::ServerOptions {
+        // Increasing RPC message limit to allow document updates.
+        sdv::mw::ServerOptions::builder()
+            .max_request_size(Some(MAX_MESSAGE_SIZE_BYTES))
+            .timeout_in_sec(30)
+            .build()
+            .expect("Cannot build server options")
     }
 }
 
