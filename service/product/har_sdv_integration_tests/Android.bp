@@ -60,6 +60,8 @@ rust_test {
     prefer_rlib: true,
     // Requires root so the test can perform Binder calls to the lifecycle manager
     require_root: true,
+    // TODO(b/400972603): Implement ACLs for this test.
+    test_config_template: ":sdv_authz_enforcement_flag_disabled_config_template",
 }
 
 rust_test {
@@ -90,9 +92,10 @@ rust_test {
         "libasync_trait",
     ],
     auto_gen_config: true,
-    product_specific: true,
     prefer_rlib: true,
     ld_flags: ["-Wl,--no-as-needed"],
     // Requires root so the test can perform Binder calls to the lifecycle manager
     require_root: true,
+    // TODO(b/400972603): Implement ACLs for this test.
+    test_config_template: ":sdv_authz_enforcement_flag_disabled_config_template",
 }
