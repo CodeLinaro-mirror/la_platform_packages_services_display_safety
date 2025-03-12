@@ -13,6 +13,7 @@ rust_binary {
         "libsdv_log_rust",
         "liblog_rust",
         "libhar_grpc_services",
+        "libhar_tracing_common",
         "libprotobuf",
         "libgrpcio",
         "librand",
@@ -21,4 +22,7 @@ rust_binary {
         "librustutils",
     ],
     vendor: true,
+    defaults: [
+        "sdv_tracing@rust_defaults",
+    ],
 }

@@ -14,6 +14,7 @@ use har_grpc_services::driverui_grpc::DriverUiService;
 use har_grpc_services::driverui_grpc::DriverUiServiceClient;
 use log::{error, trace, warn};
 use std::sync::Arc;
+use tracing::instrument;
 
 /// A simple GRPC based proxy solution for the DriverUI GRPC service.
 /// Will start a GRPC server and connect to a Client using
@@ -65,6 +66,7 @@ struct CameraServiceServer {
 }
 
 impl DriverUiService for CameraServiceServer {
+    #[instrument(skip_all, name = "heartbeat_camera")]
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,

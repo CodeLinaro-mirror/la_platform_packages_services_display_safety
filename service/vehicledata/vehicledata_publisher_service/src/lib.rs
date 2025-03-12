@@ -18,6 +18,7 @@ use grpcio::ServerBuilder;
 use grpcio::ServerCredentials;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundle;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundleLauncher;
+use har_tracing_common::har_tracing::HarTracing;
 use harry_vehicle_data_grpc::vehicle_tire::Location;
 use harry_vehicle_data_grpc::vehicledata::Telltale;
 use harry_vehicle_data_grpc::vehicledata::VehicleSpeedTopic;
@@ -32,6 +33,7 @@ use sdv::mw::Publisher;
 use sdv::status::SdvStatus;
 use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_vehicle_data_publisher::publisher::Variant;
 use sdv_mw_rs_com_sdv_google_display_safety_har_sdv_vehicle_data_publisher::HarSdvVehicleDataPublisher as PublisherService;
+use tracing::instrument;
 
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -88,6 +90,7 @@ pub struct HarryVehicleDataPublishers {
 
 impl HarryVehicleDataPublishers {
     /// Publish a vehicle speed update.
+    #[instrument(skip_all)]
     pub async fn vehicle_speed_publish(&self, speed_type: VehicleSpeedTopic, speed: VehicleSpeed) {
         let publisher = match speed_type {
             VehicleSpeedTopic::VEHICLE_SPEED => &self.vehicle_speed_publisher,
@@ -98,6 +101,7 @@ impl HarryVehicleDataPublishers {
     }
 
     /// Publish a vehicle telltale update
+    #[instrument(skip_all)]
     pub async fn tell_tale_status_publish(&self, telltale: Telltale, status: TellTaleStatus) {
         let publisher = match telltale {
             Telltale::OIL_PRESSURE => &self.oil_pressure_publisher,
@@ -126,11 +130,13 @@ impl HarryVehicleDataPublishers {
     }
 
     /// Publish a gear update.
+    #[instrument(skip_all)]
     pub async fn current_gear_publish(&self, gear: CurrentGear) {
         Self::publish_locked(self.gear_publisher.clone(), gear).await;
     }
 
     /// Publish a tire pressure update
+    #[instrument(skip_all)]
     pub async fn tire_pressure_publish(&self, location: Location, pressure: TirePressure) {
         let publisher = match location {
             Location::FRONT_LEFT => &self.front_left_publisher,
@@ -142,6 +148,7 @@ impl HarryVehicleDataPublishers {
         Self::publish_locked(publisher.clone(), pressure).await;
     }
 
+    #[instrument(skip_all)]
     async fn publish_locked<T: protobuf::Message>(publisher: Arc<Mutex<Publisher<T>>>, message: T) {
         let publisher = publisher.lock().await;
         publisher.publish(&message).expect("Cannot publish message");
@@ -151,6 +158,8 @@ impl HarryVehicleDataPublishers {
 // Register the new service bundle.
 sdv::lifecycle::register_service_bundle!(AsyncServiceBundle<HarSdvVehicleDataPublisher>);
 
+impl HarTracing for HarSdvVehicleDataPublisher {}
+
 #[async_trait]
 impl AsyncServiceBundleLauncher for HarSdvVehicleDataPublisher {
     fn new(comms: Arc<dyn Communicate>) -> Self {
@@ -158,6 +167,7 @@ impl AsyncServiceBundleLauncher for HarSdvVehicleDataPublisher {
     }
 
     async fn launch(self, cancellation_token: CancellationToken) -> Result<(), SdvStatus> {
+        let _ = self.init_har_tracing();
         info!("HAR-SDV Vehicle data publisher starting.");
         let mut publisher_service = PublisherService::new(self.comms.clone())
             .await
@@ -368,6 +378,7 @@ impl AsyncServiceBundleLauncher for HarSdvVehicleDataPublisher {
 /// * `server_address`: The server address.
 /// * `sdv_service`: To SDV service to use.
 /// * returns the server
+#[instrument(skip_all)]
 fn create_grpc_server(server_address: String, sdv_service: HarryVehicleDataPublishers) -> Server {
     let env = Arc::new(EnvBuilder::new().build());
 

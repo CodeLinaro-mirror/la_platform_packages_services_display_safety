@@ -41,6 +41,7 @@ rust_ffi_shared {
         "librand",
         "libfutures",
         "libharry_vehicle_data_grpc",
+        "libhar_tracing_common",
         "libgrpcio",
         "libthiserror",
         // Contains all SDV libraries accessed from user code
@@ -54,6 +55,9 @@ rust_ffi_shared {
         "liboem_harry_vehicle_messages_catalog_v1",
         // generated code
         "libsdv_mw_rs_com_sdv_google_display_safety_har_sdv_vehicle_data_publisher",
+    ],
+    defaults: [
+        "sdv_tracing@rust_defaults",
     ],
     // Allows the library to be available inside APEX.
     apex_available: [

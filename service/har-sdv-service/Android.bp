@@ -25,6 +25,7 @@ rust_ffi_shared {
         "libhar_sdv_service_bundle_common",
         "libhar_grpc_services",
         "libharry_vehicle_data_grpc",
+        "libhar_tracing_common",
         // catalog
         "liboem_harry_vehicle_messages_catalog_v1",
         // v1 comms based on SDV generated code
@@ -33,6 +34,9 @@ rust_ffi_shared {
         // SDV libraries
         "libsdv_log_rust",
         "libsdv_rs",
+    ],
+    defaults: [
+        "sdv_tracing@rust_defaults",
     ],
     // Allows the library to be available inside APEX.
     apex_available: [

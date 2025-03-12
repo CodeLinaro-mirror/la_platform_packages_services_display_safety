@@ -21,6 +21,7 @@ use log::{error, trace, warn};
 use sdv::status::SdvStatus;
 use sdv::status::SdvStatusCode;
 use std::sync::Arc;
+use tracing::instrument;
 
 // TODO(b/396229429): Remove this when MW Streaming is supported.
 const MAX_MESSAGE_SIZE_BYTES: usize = 100_000_000;
@@ -86,6 +87,7 @@ impl DriverUiSdvRpcProxy {
 #[allow(non_snake_case)]
 #[async_trait::async_trait]
 impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUiSdvRpcProxy {
+    #[instrument(skip_all, name = "heartbeat_driverui")]
     async fn Heartbeat(
         &self,
         _caller_id: sdv::comms::id::ServiceFqin,
@@ -127,6 +129,7 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
         }
     }
 
+    #[instrument(skip_all)]
     async fn DocumentSwitched(
         &self,
         _caller_id: sdv::comms::id::ServiceFqin,
@@ -157,6 +160,8 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
             }
         }
     }
+
+    #[instrument(skip_all)]
     async fn DocumentUpdated(
         &self,
         _caller_id: sdv::comms::id::ServiceFqin,
@@ -188,6 +193,8 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
             }
         }
     }
+
+    #[instrument(skip_all)]
     async fn DesignTokenUpdate(
         &self,
         _caller_id: sdv::comms::id::ServiceFqin,
@@ -211,6 +218,8 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
             }
         }
     }
+
+    #[instrument(skip_all)]
     async fn LocaleUpdate(
         &self,
         _caller_id: sdv::comms::id::ServiceFqin,
@@ -233,6 +242,7 @@ impl com_sdv_google_display_safety_driver_ui_service_rpc::Interface for DriverUi
         }
     }
 
+    #[instrument(skip_all)]
     fn init_server_options(&self) -> sdv::mw::ServerOptions {
         // Increasing RPC message limit to allow document updates.
         sdv::mw::ServerOptions::builder()
@@ -249,6 +259,7 @@ struct DriverUiServer {
 }
 
 impl DriverUiService for DriverUiServer {
+    #[instrument(skip_all)]
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -270,6 +281,7 @@ impl DriverUiService for DriverUiServer {
             }
         }
     }
+    #[instrument(skip_all)]
     fn document_switched(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -290,6 +302,7 @@ impl DriverUiService for DriverUiServer {
             }
         }
     }
+    #[instrument(skip_all)]
     fn document_updated(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -310,7 +323,7 @@ impl DriverUiService for DriverUiServer {
             }
         }
     }
-
+    #[instrument(skip_all)]
     fn design_token_update(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -331,7 +344,7 @@ impl DriverUiService for DriverUiServer {
             }
         }
     }
-
+    #[instrument(skip_all)]
     fn locale_update(
         &mut self,
         ctx: ::grpcio::RpcContext,

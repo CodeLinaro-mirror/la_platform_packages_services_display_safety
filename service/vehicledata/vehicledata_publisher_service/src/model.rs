@@ -14,6 +14,7 @@ use oem_harry_vehicle_messages_catalog_v1::vehicledata::VehicleSpeed;
 use thiserror::Error;
 
 use oem_harry_vehicle_messages_catalog_v1::vehicledata::TellTaleStatus;
+use tracing::instrument;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -24,6 +25,7 @@ pub enum Error {
 }
 
 /// Converts the GRPC PublishCurrentGearRequest to an SDV Data tunnel message.
+#[instrument(skip_all)]
 pub fn current_gear_request_to_message(
     req: PublishCurrentGearRequest,
 ) -> Result<CurrentGear, Error> {
@@ -45,6 +47,7 @@ pub fn current_gear_request_to_message(
 }
 
 /// Converts the GRPC PublishVehicleSpeedRequest to an SDV Data tunnel message.
+#[instrument(skip_all)]
 pub fn vehicle_speed_request_to_message(
     req: PublishVehicleSpeedRequest,
 ) -> Result<(VehicleSpeedTopic, VehicleSpeed), Error> {
@@ -59,6 +62,7 @@ pub fn vehicle_speed_request_to_message(
 }
 
 /// Converts the GRPC PublishTelltaleStatusRequest to an SDV Data tunnel message.
+#[instrument(skip_all)]
 pub fn telltale_status_request_to_message(
     req: PublishTelltaleStatusRequest,
 ) -> Result<(Telltale, TellTaleStatus), Error> {
@@ -73,6 +77,7 @@ pub fn telltale_status_request_to_message(
 }
 
 /// Converts the GRPC PublishTirePressureRequest to an SDV Data tunnel message.
+#[instrument(skip_all)]
 pub fn tire_pressure_request_to_message(
     req: PublishTirePressureRequest,
 ) -> Result<(Location, TirePressure), Error> {

@@ -14,6 +14,7 @@ use log::error;
 use log::info;
 use log::warn;
 use std::sync::Arc;
+use tracing::instrument;
 
 /// Implements a GRPC server and publishes all incoming requests as topics to the SDV Data Tunnel.
 #[derive(Clone)]
@@ -22,6 +23,7 @@ pub struct VehicleDataGrpcServer {
 }
 
 impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
+    #[instrument(skip_all)]
     fn publish_vehicle_speed(
         &mut self,
         ctx: RpcContext<'_>,
@@ -51,6 +53,7 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         };
     }
 
+    #[instrument(skip_all)]
     fn publish_telltale_status(
         &mut self,
         ctx: RpcContext<'_>,
@@ -81,6 +84,7 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         };
     }
 
+    #[instrument(skip_all)]
     fn publish_current_gear(
         &mut self,
         ctx: RpcContext<'_>,
@@ -111,6 +115,7 @@ impl SdvVehicleDataGrpc for VehicleDataGrpcServer {
         };
     }
 
+    #[instrument(skip_all)]
     fn publish_tire_pressure(
         &mut self,
         ctx: RpcContext<'_>,
@@ -150,6 +155,7 @@ impl VehicleDataGrpcServer {
         Self { service: Arc::new(service) }
     }
 
+    #[instrument(skip_all)]
     async fn send_response(
         sink: UnarySink<PublishVehicleDataResponse>,
         status: PublishVehicleDataResponseStatus,
@@ -161,6 +167,7 @@ impl VehicleDataGrpcServer {
             .map(|_| ())
     }
 
+    #[instrument(skip_all)]
     fn convert_result_to_status(status: Result<(), String>) -> PublishVehicleDataResponseStatus {
         match status {
             Err(err) => {

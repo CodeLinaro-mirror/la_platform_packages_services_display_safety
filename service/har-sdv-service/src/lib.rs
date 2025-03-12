@@ -26,6 +26,7 @@ use grpcio::WriteFlags;
 use har_grpc_services::vehicledata_grpc::VehicleDataServiceClient;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundle;
 use har_sdv_service_bundle_common::async_service_bundle::AsyncServiceBundleLauncher;
+use har_tracing_common::har_tracing::HarTracing;
 use log::info;
 use log::trace;
 use log::warn;
@@ -40,6 +41,7 @@ use tokio::sync::mpsc;
 use tokio::time::timeout;
 use tokio::time::Duration;
 use tokio_util::sync::CancellationToken;
+use tracing::instrument;
 
 mod camera_grpc_proxy;
 mod common;
@@ -72,6 +74,8 @@ pub enum HarMessage {
 // Register the new service bundle.
 sdv::lifecycle::register_service_bundle!(AsyncServiceBundle<HarSdvServiceBundle>);
 
+impl HarTracing for HarSdvServiceBundle {}
+
 #[async_trait]
 impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
     fn new(comms: Arc<dyn Communicate>) -> Self {
@@ -99,6 +103,7 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
     }
 
     async fn launch(self, cancellation_token: CancellationToken) -> Result<(), SdvStatus> {
+        let _ = self.init_har_tracing();
         sdv_log::init_logger("har_sdv_svc_v1")
             .unwrap_or_else(|err| warn!("Error during logger initialization: {:?}", err));
 
@@ -195,6 +200,7 @@ impl AsyncServiceBundleLauncher for HarSdvServiceBundle {
     }
 }
 
+#[instrument(skip_all)]
 async fn transfer_vehicle_data(
     vehicle_data_clients: Vec<VehicleDataServiceClient>,
     mut har_rx: mpsc::Receiver<HarMessage>,

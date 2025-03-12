@@ -36,12 +36,14 @@ use har_grpc_services::vehicledata::VehicleData;
 use har_grpc_services::vehicledata::VehicleDataStreamResponse;
 use har_grpc_services::vehicledata_grpc::create_vehicle_data_service;
 use har_grpc_services::vehicledata_grpc::VehicleDataService;
+use har_tracing_common::har_tracing::HarTracing;
 use log::error;
 use log::info;
 use log::warn;
 use std::sync::Arc;
 use tokio::time::sleep;
 use tokio::time::Duration;
+use tracing::instrument;
 
 mod test_log;
 
@@ -52,6 +54,7 @@ const HARRY_GRPC_STARTED_PROPERTY: &str = "vendor.harplatform.grpc.started";
 struct StubHarryServerBuilder {
     server_address: String,
 }
+impl HarTracing for StubHarryServerBuilder {}
 
 impl StubHarryServerBuilder {
     /// Creates a new stub server instance.
@@ -61,6 +64,7 @@ impl StubHarryServerBuilder {
 
     /// Starts the server
     /// - `env`: The runtime environment.
+    #[instrument(skip_all)]
     pub fn start_server(
         &self,
         env: Arc<Environment>,
@@ -98,6 +102,7 @@ impl StubHarryServerBuilder {
 struct StubHarryServer {}
 
 impl VehicleDataService for StubHarryServer {
+    #[instrument(skip_all)]
     fn receive_vehicle_data(
         &mut self,
         ctx: RpcContext,
@@ -130,6 +135,7 @@ impl VehicleDataService for StubHarryServer {
 }
 
 impl DriverUiService for StubHarryServer {
+    #[instrument(skip_all)]
     fn heartbeat(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -144,6 +150,8 @@ impl DriverUiService for StubHarryServer {
                 .map(|_| ()),
         );
     }
+
+    #[instrument(skip_all)]
     fn document_switched(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -157,6 +165,8 @@ impl DriverUiService for StubHarryServer {
                 .map(|_| ()),
         );
     }
+
+    #[instrument(skip_all)]
     fn document_updated(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -171,6 +181,7 @@ impl DriverUiService for StubHarryServer {
         );
     }
 
+    #[instrument(skip_all)]
     fn design_token_update(
         &mut self,
         ctx: ::grpcio::RpcContext,
@@ -185,6 +196,7 @@ impl DriverUiService for StubHarryServer {
         );
     }
 
+    #[instrument(skip_all)]
     fn locale_update(
         &mut self,
         ctx: ::grpcio::RpcContext,

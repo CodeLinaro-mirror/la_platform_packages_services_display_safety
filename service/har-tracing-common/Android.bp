@@ -1,0 +1,21 @@
+// Copyright 2024 Google LLC
+
+rust_library {
+    name: "libhar_tracing_common",
+    crate_name: "har_tracing_common",
+    srcs: [
+        "src/lib.rs",
+    ],
+    prefer_rlib: true,
+    rustlibs: [
+        "liblog_rust",
+        "libsdv_log_rust",
+    ],
+    apex_available: [
+    ],
+    defaults: [
+        "sdv_tracing@rust_defaults",
+    ],
+    product_available: true,
+    vendor_available: true,
+}
