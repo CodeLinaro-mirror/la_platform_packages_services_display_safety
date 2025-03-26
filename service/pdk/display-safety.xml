@@ -17,7 +17,7 @@
     name="display-safety"
     path="vendor/google/display_safety/service/pdk/display-safety"
     remote="aae-design-compose-partners"
-    revision="89ff011d0f23dcbf33a77048c5befb2d22a029ea" />
+    revision="3cbc41b04200f4e113420e3d17e0ca53e9ba53e8" />
 
   <project
     name="platform/external/tinyalsa_new"
